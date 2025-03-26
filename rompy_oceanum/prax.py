@@ -28,6 +28,47 @@ class PraxResult(BaseModel):
     status: str
     client: Any = Field(exclude=True)
 
+    def deploy_if_needed(self, template_path: str) -> bool:
+        """
+        Deploy the pipeline if it doesn't already exist.
+
+        Args:
+            template_path: Path to the YAML template file for the pipeline
+
+        Returns:
+            True if deployment was performed, False if the pipeline already exists
+        """
+        if self.client is None:
+            raise ValueError("No client configured for this PraxResult")
+
+        # Check if the pipeline exists
+        exists = self.client.check_pipeline_exists(
+            pipeline_name=self.pipeline_name,
+            user=self.user,
+            org=self.org,
+            project=self.project,
+            stage=self.stage,
+        )
+
+        # If the pipeline doesn't exist, deploy it
+        if not exists:
+            logger.info(
+                f"Pipeline {self.pipeline_name} does not exist, deploying from {template_path}"
+            )
+            self.client.deploy_pipeline(
+                template_path=template_path,
+                user=self.user,
+                org=self.org,
+                project=self.project,
+                stage=self.stage,
+            )
+            return True
+
+        logger.info(
+            f"Pipeline {self.pipeline_name} already exists, skipping deployment"
+        )
+        return False
+
     def get_status(self) -> Dict[str, Any]:
         """Get the current status of the pipeline run."""
         if self.client is None:
@@ -117,6 +158,140 @@ class PraxResult(BaseModel):
 
 class PraxClient:
     """Client for interacting with Oceanum's Prax API."""
+
+    def check_pipeline_exists(
+        self, pipeline_name: str, user: str, org: str, project: str, stage: str
+    ) -> bool:
+        """
+        Check if a pipeline with the given name exists.
+
+        Args:
+            pipeline_name: Name of the pipeline to check
+            user: Username
+            org: Organization name
+            project: Project name
+            stage: Stage name
+
+        Returns:
+            True if the pipeline exists, False otherwise
+        """
+        # Try to get the pipeline configuration to see if it exists
+        url = f"{self.base_url}/api/pipelines/{pipeline_name}"
+
+        params = {
+            "user": user,
+            "org": org,
+            "project": project,
+            "stage": stage,
+        }
+
+        logger.debug(f"Checking if pipeline exists: {url} with params {params}")
+
+        try:
+            response = requests.get(
+                url, params=params, headers=self._get_headers(), timeout=30
+            )
+
+            # If we get a 200 response, the pipeline exists
+            if response.status_code == 200:
+                logger.info(f"Pipeline {pipeline_name} exists")
+                return True
+
+            # If we get a 404, it doesn't exist
+            if response.status_code == 404:
+                logger.info(f"Pipeline {pipeline_name} does not exist")
+                return False
+
+            # For other status codes, raise an error
+            response.raise_for_status()
+
+        except requests.exceptions.RequestException as e:
+            logger.warning(f"Error checking if pipeline exists: {str(e)}")
+            # If we're not sure, we'll assume it doesn't exist
+            return False
+
+    def deploy_pipeline(
+        self, template_path: str, user: str, org: str, project: str, stage: str
+    ) -> Dict[str, Any]:
+        """
+        Deploy a pipeline from a YAML template file.
+
+        Args:
+            template_path: Path to the YAML template file
+            user: Username
+            org: Organization name
+            project: Project name
+            stage: Stage name
+
+        Returns:
+            Response from the API containing the deployment status
+        """
+        if not os.path.exists(template_path):
+            raise ValueError(f"Template file not found: {template_path}")
+
+        # Read the template file
+        try:
+            with open(template_path, "r") as f:
+                template_content = f.read()
+        except Exception as e:
+            raise ValueError(f"Error reading template file: {str(e)}")
+
+        # Deploy the pipeline using the Prax API
+        url = f"{self.base_url}/api/pipelines/deploy"
+
+        params = {
+            "user": user,
+            "org": org,
+            "project": project,
+            "stage": stage,
+        }
+
+        # Prepare the payload with the template content
+        payload = {
+            "yaml_content": template_content,
+        }
+
+        logger.debug(f"Deploying pipeline from template {template_path}")
+
+        try:
+            response = requests.post(
+                url,
+                params=params,
+                json=payload,
+                headers=self._get_headers(),
+                timeout=60,  # Longer timeout for deployment
+            )
+
+            response.raise_for_status()
+            result = response.json()
+
+            logger.info(f"Successfully deployed pipeline from {template_path}")
+            return result
+
+        except requests.exceptions.RequestException as e:
+            error_msg = f"Error deploying pipeline: {str(e)}"
+            logger.error(error_msg)
+
+            # Provide more detailed error information if available
+            if hasattr(e, "response") and e.response is not None:
+                try:
+                    error_detail = e.response.json()
+                    logger.error(f"API error response: {error_detail}")
+                except:
+                    pass
+
+            # In development mode, return a simulated response
+            if os.environ.get("ROMPY_DEV_MODE") == "1":
+                logger.warning(
+                    "Development mode enabled - returning simulated deployment response"
+                )
+                return {
+                    "status": "success",
+                    "message": "Pipeline deployed successfully (simulated)",
+                }
+
+            # In production, raise the error
+            raise
 
     def __init__(
         self, base_url: str = "https://prax.oceanum.io", token: Optional[str] = None
@@ -209,10 +384,12 @@ class PraxClient:
                 logger.info(f"Found run ID in last_run.name: {run_id}")
         else:
             run_id = None
-            
+
         # If we couldn't find it in the expected location, use fallback methods
         if not run_id:
-            logger.warning("Could not find run_id in last_run.name, trying alternative locations")
+            logger.warning(
+                "Could not find run_id in last_run.name, trying alternative locations"
+            )
             # Check for common fields
             run_id = (
                 result_data.get("id")
@@ -220,19 +397,25 @@ class PraxClient:
                 or result_data.get("name")
                 or result_data.get("object_ref")
             )
-            
+
         # Ensure we have the full pipeline name format (pipeline-{name}-{suffix})
         # This prevents 404 errors when the run_id is just the pipeline name without the prefix
         if run_id and not run_id.startswith("pipeline-"):
             # Check if we can get the full name from the object_ref
-            if "object_ref" in result_data and isinstance(result_data["object_ref"], str):
+            if "object_ref" in result_data and isinstance(
+                result_data["object_ref"], str
+            ):
                 if result_data["object_ref"].startswith("pipeline-"):
                     # Use the object_ref as it has the correct format
                     run_id = result_data["object_ref"]
                     logger.info(f"Using object_ref as run_id: {run_id}")
             # If last_run contains object_ref with pipeline prefix
-            elif "last_run" in result_data and isinstance(result_data["last_run"], dict):
-                if "object_ref" in result_data["last_run"] and result_data["last_run"]["object_ref"].startswith("pipeline-"):
+            elif "last_run" in result_data and isinstance(
+                result_data["last_run"], dict
+            ):
+                if "object_ref" in result_data["last_run"] and result_data["last_run"][
+                    "object_ref"
+                ].startswith("pipeline-"):
                     run_id = result_data["last_run"]["object_ref"]
                     logger.info(f"Using last_run.object_ref as run_id: {run_id}")
 
@@ -280,21 +463,21 @@ class PraxClient:
         """
         # According to the OpenAPI spec, the correct endpoint is /api/pipeline-runs/{run_name}
         url = f"{self.base_url}/api/pipeline-runs/{run_id}"
-        
+
         params = {
             "user": user,
             "org": org,
             "project": project,
             "stage": stage,
         }
-        
+
         logger.debug(f"Getting run status from: {url} with params {params}")
-        
+
         try:
             response = requests.get(
                 url, params=params, headers=self._get_headers(), timeout=30
             )
-            
+
             # Check if we got a successful response
             response.raise_for_status()
             result = response.json()
@@ -303,7 +486,7 @@ class PraxClient:
         except requests.exceptions.RequestException as e:
             error_msg = f"Error getting run status: {str(e)}"
             logger.error(error_msg)
-            
+
             # Provide a fallback option for development purposes
             if os.environ.get("ROMPY_DEV_MODE") == "1":
                 logger.warning("Development mode enabled - returning simulated status")
@@ -313,7 +496,7 @@ class PraxClient:
                     "run_id": run_id,
                     "pipeline": pipeline_name,
                 }
-            
+
             # In production, raise the error
             raise
 
@@ -344,31 +527,31 @@ class PraxClient:
         """
         # According to the OpenAPI spec, the correct endpoint is /api/pipeline-runs/{run_name}/logs
         url = f"{self.base_url}/api/pipeline-runs/{run_id}/logs"
-        
+
         params = {
             "user": user,
             "org": org,
             "project": project,
             "stage": stage,
         }
-        
+
         # Add optional parameters
         if task_name:
             params["task"] = task_name
-        
+
         logger.debug(f"Getting logs from: {url} with params {params}")
-        
+
         try:
             response = requests.get(
                 url, params=params, headers=self._get_headers(), timeout=30
             )
-            
+
             response.raise_for_status()
-            
+
             # Check if the response is JSON or plain text
-            content_type = response.headers.get('Content-Type', '')
-            
-            if 'application/json' in content_type:
+            content_type = response.headers.get("Content-Type", "")
+
+            if "application/json" in content_type:
                 # Parse as JSON
                 result = response.json()
                 logger.info(f"Successfully retrieved logs as JSON from {url}")
@@ -382,13 +565,13 @@ class PraxClient:
                     "run_id": run_id,
                     "pipeline": pipeline_name,
                     "task": task_name if task_name else "main",
-                    "content_type": content_type
+                    "content_type": content_type,
                 }
-                
+
         except requests.exceptions.RequestException as e:
             error_msg = f"Error getting run logs: {str(e)}"
             logger.error(error_msg)
-            
+
             # Provide a fallback option for development purposes
             if os.environ.get("ROMPY_DEV_MODE") == "1":
                 logger.warning("Development mode enabled - returning simulated logs")
@@ -398,7 +581,7 @@ class PraxClient:
                     "pipeline": pipeline_name,
                     "task": task_name if task_name else "main",
                 }
-            
+
             # In production, raise the error
             raise
 
@@ -438,23 +621,31 @@ class PraxClient:
                 project=project,
                 stage=stage,
             )
-            
+
             status = run_status.get("status", "")
             logger.info(f"Run status: {status}")
-            
+
             # If the run isn't completed yet, artifacts may not be available
-            if status.lower() not in ["completed", "succeeded", "success", "done", "finished"]:
+            if status.lower() not in [
+                "completed",
+                "succeeded",
+                "success",
+                "done",
+                "finished",
+            ]:
                 logger.warning(
                     f"Run is not completed (status: {status}). Artifacts may not be available yet."
                 )
-                
+
                 # Create the target directory
                 os.makedirs(target_dir, exist_ok=True)
-                
+
                 # In development mode or when run is not complete, provide placeholder files
                 # If not in development mode, we still want to give an empty response rather than error
                 if os.environ.get("ROMPY_DEV_MODE") == "1":
-                    logger.warning("Development mode enabled - creating placeholder artifacts")
+                    logger.warning(
+                        "Development mode enabled - creating placeholder artifacts"
+                    )
                     # Create placeholder files for development
                     placeholder_paths = [
                         os.path.join(target_dir, f"placeholder_output_{i}.nc")
@@ -470,28 +661,32 @@ class PraxClient:
                 else:
                     # Return empty list when not in dev mode and run not complete
                     # This prevents errors for runs that are still in progress
-                    logger.info(f"Returning empty artifact list for incomplete run (status: {status})")
+                    logger.info(
+                        f"Returning empty artifact list for incomplete run (status: {status})"
+                    )
                     return []
         except Exception as e:
-            logger.warning(f"Could not check run status before downloading artifacts: {str(e)}")
-        
+            logger.warning(
+                f"Could not check run status before downloading artifacts: {str(e)}"
+            )
+
         # Try multiple potential artifact endpoints since it's not clearly defined in the OpenAPI spec
         artifact_endpoints = [
             f"{self.base_url}/api/pipeline-runs/{run_id}/artifacts",  # Following the pattern from logs endpoint
             f"{self.base_url}/api/pipelines/{pipeline_name}/runs/{run_id}/artifacts",  # Traditional pattern
             f"{self.base_url}/api/runs/{run_id}/artifacts",  # Simplified pattern
         ]
-        
+
         params = {
             "user": user,
             "org": org,
             "project": project,
             "stage": stage,
         }
-        
+
         artifacts = []
         last_error = None
-        
+
         # Try each potential endpoint
         for url in artifact_endpoints:
             try:
@@ -499,7 +694,7 @@ class PraxClient:
                 response = requests.get(
                     url, params=params, headers=self._get_headers(), timeout=30
                 )
-                
+
                 response.raise_for_status()
                 artifacts = response.json()
                 logger.info(f"Successfully retrieved artifacts list from {url}")
@@ -507,14 +702,14 @@ class PraxClient:
             except requests.exceptions.RequestException as e:
                 logger.debug(f"Endpoint {url} failed: {str(e)}")
                 last_error = e
-        
+
         # If no artifacts were found
         if not artifacts:
             error_msg = "No artifacts found or available yet"
             if last_error:
                 error_msg = f"Error listing artifacts: {str(last_error)}"
             logger.error(error_msg)
-            
+
             # Provide a fallback option for development purposes
             if os.environ.get("ROMPY_DEV_MODE") == "1":
                 logger.warning(
@@ -532,35 +727,35 @@ class PraxClient:
                         f.write(
                             f"# Placeholder file for development\n# Real data would be downloaded here for run: {run_id}"
                         )
-                
+
                 logger.info(f"Created placeholder artifact files in {target_dir}")
                 return placeholder_paths
-            
+
             # In production, raise the error
             if last_error:
                 raise last_error
             else:
                 raise ValueError("No artifacts found or available for this run")
-        
+
         downloaded_files = []
-        
+
         # Create the target directory if it doesn't exist
         os.makedirs(target_dir, exist_ok=True)
-        
+
         # Download each artifact
         for artifact in artifacts:
             artifact_name = artifact.get("name")
             if not artifact_name:
                 logger.warning(f"Artifact without name: {artifact}")
                 continue
-            
+
             # Try multiple potential download URLs
             download_urls = [
                 f"{self.base_url}/api/pipeline-runs/{run_id}/artifacts/{artifact_name}",
                 f"{self.base_url}/api/pipelines/{pipeline_name}/runs/{run_id}/artifacts/{artifact_name}",
                 f"{self.base_url}/api/runs/{run_id}/artifacts/{artifact_name}",
             ]
-            
+
             download_success = False
             for download_url in download_urls:
                 try:
@@ -570,36 +765,38 @@ class PraxClient:
                         params=params,
                         headers=self._get_headers(),
                         stream=True,
-                        timeout=30  # Longer timeout for downloads
+                        timeout=30,  # Longer timeout for downloads
                     )
-                    
+
                     download_response.raise_for_status()
-                    
+
                     # Save to file
                     target_path = os.path.join(target_dir, f"{artifact_name}")
                     with open(target_path, "wb") as f:
                         for chunk in download_response.iter_content(chunk_size=8192):
                             f.write(chunk)
-                    
+
                     downloaded_files.append(target_path)
                     logger.info(f"Downloaded artifact {artifact_name} to {target_path}")
                     download_success = True
                     break  # Found working download URL, exit the loop
                 except requests.exceptions.RequestException as e:
                     logger.debug(f"Download from {download_url} failed: {str(e)}")
-            
+
             if not download_success:
-                error_msg = f"Failed to download artifact {artifact_name} from any endpoint"
+                error_msg = (
+                    f"Failed to download artifact {artifact_name} from any endpoint"
+                )
                 logger.error(error_msg)
-                
+
                 # Provide a fallback option for development purposes
                 if os.environ.get("ROMPY_DEV_MODE") == "1":
                     logger.warning(
                         f"Development mode enabled - skipping failed artifact download for {artifact_name}"
                     )
                     continue
-                
+
                 # In production, raise the error
                 raise ValueError(f"Could not download artifact {artifact_name}")
-        
+
         return downloaded_files
