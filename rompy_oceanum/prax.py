@@ -83,7 +83,14 @@ class PraxResult(BaseModel):
             stage=self.stage,
         )
 
-    def get_logs(self, task_name: Optional[str] = None) -> Dict[str, Any]:
+    def get_logs(
+        self,
+        task_name: Optional[str] = None,
+        follow: bool = False,
+        tail: int = 1000,
+        stream_to_stdout: bool = False,
+        format_logs: bool = True,
+    ) -> Dict[str, Any]:
         """Get logs from the pipeline run, optionally for a specific task."""
         if self.client is None:
             raise ValueError("No client configured for this PraxResult")
@@ -96,6 +103,10 @@ class PraxResult(BaseModel):
             project=self.project,
             stage=self.stage,
             task_name=task_name,
+            follow=follow,
+            tail=tail,
+            stream_to_stdout=stream_to_stdout,
+            format_logs=format_logs,
         )
 
     def wait_for_completion(
@@ -154,6 +165,88 @@ class PraxResult(BaseModel):
             stage=self.stage,
             target_dir=target_dir,
         )
+        
+    def summary_status(self, status=None):
+        """Display a formatted summary of the pipeline run status.
+        
+        Args:
+            status: Status dictionary from get_status(). If None, calls get_status() automatically.
+        """
+        if status is None:
+            status = self.get_status()
+            
+        # Check if status is available
+        if not status:
+            print("No status information available")
+            return
+            
+        # Extract basic run information
+        run_id = status.get('name', 'N/A')
+        overall_status = status.get('status', 'Unknown')
+        started_at = status.get('started_at', 'N/A')
+        updated_at = status.get('updated_at', 'N/A')
+        
+        # Extract organization and project details
+        org = status.get('org', 'N/A')
+        project = status.get('project', 'N/A')
+        stage = status.get('stage', 'N/A')
+        
+        # Extract pipeline details
+        details = status.get('details', {})
+        tasks = []
+        
+        # Process task details
+        for node_id, node_info in details.items():
+            # Skip the parent nodes to avoid duplication
+            if node_info.get('displayName', '').endswith('(0)'):
+                continue
+                
+            task_type = node_info.get('type', 'Unknown')
+            task_name = node_info.get('displayName', node_id)
+            task_status = node_info.get('phase', 'Unknown')
+            task_started = node_info.get('startedAt', 'N/A')
+            task_finished = node_info.get('finishedAt', 'N/A')
+            task_progress = node_info.get('progress', 'N/A')
+            
+            # Only add real tasks (not parent groups)
+            if task_type not in ['Retry', 'DAG']:
+                tasks.append({
+                    'name': task_name,
+                    'type': task_type,
+                    'status': task_status,
+                    'progress': task_progress,
+                    'started': task_started,
+                    'finished': task_finished
+                })
+        
+        # Format and print the summary
+        print("\n" + "="*80)
+        print(f"{'PIPELINE RUN SUMMARY':^80}")
+        print("="*80)
+        
+        print(f"\n{'Run ID:':<20}{run_id}")
+        print(f"{'Organization:':<20}{org}")
+        print(f"{'Project:':<20}{project}")
+        print(f"{'Stage:':<20}{stage}")
+        print(f"{'Status:':<20}{overall_status}")
+        print(f"{'Started:':<20}{started_at}")
+        print(f"{'Last Updated:':<20}{updated_at}")
+        
+        # Print task details
+        if tasks:
+            print("\n" + "-"*80)
+            print(f"{'TASKS':^80}")
+            print("-"*80)
+            
+            # Format header
+            print(f"{'TASK NAME':<30}{'TYPE':<15}{'STATUS':<15}{'PROGRESS':<15}")
+            print("-"*80)
+            
+            # Print each task
+            for task in tasks:
+                print(f"{task['name']:<30}{task['type']:<15}{task['status']:<15}{task['progress']:<15}")
+        
+        print("\n" + "="*80 + "\n")
 
 
 class PraxClient:
@@ -509,6 +602,10 @@ class PraxClient:
         project: str,
         stage: str,
         task_name: Optional[str] = None,
+        follow: bool = False,
+        tail: int = 1000,
+        stream_to_stdout: bool = False,
+        format_logs: bool = True,
     ) -> Union[Dict[str, Any], str]:
         """
         Get logs from a pipeline run.
@@ -521,9 +618,14 @@ class PraxClient:
             project: Project name
             stage: Stage name
             task_name: Optional task name to get logs for a specific task
+            follow: Whether to follow/stream the logs (default: False)
+            tail: Number of lines to show from the end of the logs (default: 1000)
+            stream_to_stdout: Whether to stream logs directly to stdout (default: False)
+            format_logs: Whether to format and clean up log lines by removing pipeline prefixes (default: True)
 
         Returns:
             Dictionary with logs information or string with logs text
+            If follow=True and stream_to_stdout=True, prints logs to stdout and returns None
         """
         # According to the OpenAPI spec, the correct endpoint is /api/pipeline-runs/{run_name}/logs
         url = f"{self.base_url}/api/pipeline-runs/{run_id}/logs"
@@ -533,6 +635,8 @@ class PraxClient:
             "org": org,
             "project": project,
             "stage": stage,
+            "follow": follow,
+            "tail": tail,
         }
 
         # Add optional parameters
@@ -542,31 +646,87 @@ class PraxClient:
         logger.debug(f"Getting logs from: {url} with params {params}")
 
         try:
-            response = requests.get(
-                url, params=params, headers=self._get_headers(), timeout=30
-            )
+            # Handle streaming logs if follow=True
+            if follow and stream_to_stdout:
+                logger.info(f"Streaming logs from: {url} with follow=True")
+                with requests.get(
+                    url,
+                    params=params,
+                    headers=self._get_headers(),
+                    stream=True,
+                    timeout=None,
+                ) as response:
+                    response.raise_for_status()
 
-            response.raise_for_status()
-
-            # Check if the response is JSON or plain text
-            content_type = response.headers.get("Content-Type", "")
-
-            if "application/json" in content_type:
-                # Parse as JSON
-                result = response.json()
-                logger.info(f"Successfully retrieved logs as JSON from {url}")
-                return result
+                    # Process and print the streaming response line by line
+                    try:
+                        for line in response.iter_lines(decode_unicode=True):
+                            if line:
+                                if format_logs and '[' in line and ']' in line:
+                                    try:
+                                        # Extract task info from prefix like [pipeline-name-task/main]
+                                        task_info = line.split('[', 1)[1].split(']', 1)[0]
+                                        # Get the actual log message (everything after the timestamp)
+                                        log_message = line.split(']', 1)[1]
+                                        
+                                        # Extract the subtask name (after the last slash if present)
+                                        subtask_name = "unknown"
+                                        if '/' in task_info:
+                                            subtask_name = task_info.split('/')[-1]
+                                        
+                                        # Extract the main task name from the pipeline ID
+                                        # Format is typically: pipeline-name-task-id-run-id/subtask
+                                        task_name = "unknown"
+                                        if '-' in task_info:
+                                            # Try to extract the task name from the pipeline ID
+                                            parts = task_info.split('-')
+                                            if len(parts) > 1:
+                                                for i, part in enumerate(parts):
+                                                    # Look for potential task identifiers
+                                                    if part in ['run', 'main', 'prepare', 'wait']:
+                                                        task_name = part
+                                                        break
+                                            
+                                        # Format and print the filtered log
+                                        formatted_line = f"Task {task_name} [{subtask_name}]:{log_message}"
+                                        print(formatted_line)
+                                    except IndexError:
+                                        # If parsing fails, just print the original line
+                                        print(line)
+                                else:
+                                    # Either format_logs is False or no pipeline prefix pattern found
+                                    print(line)
+                        return None  # Return None as we've printed everything to stdout
+                    except KeyboardInterrupt:
+                        logger.info("Log streaming stopped by user")
+                        return None
             else:
-                # Handle as plain text
-                result = response.text
-                logger.info(f"Successfully retrieved logs as text from {url}")
-                return {
-                    "logs": result,
-                    "run_id": run_id,
-                    "pipeline": pipeline_name,
-                    "task": task_name if task_name else "main",
-                    "content_type": content_type,
-                }
+                # Regular non-streaming request
+                response = requests.get(
+                    url, params=params, headers=self._get_headers(), timeout=30
+                )
+
+                response.raise_for_status()
+
+                # Check if the response is JSON or plain text
+                content_type = response.headers.get("Content-Type", "")
+
+                if "application/json" in content_type:
+                    # Parse as JSON
+                    result = response.json()
+                    logger.info(f"Successfully retrieved logs as JSON from {url}")
+                    return result
+                else:
+                    # Handle as plain text
+                    result = response.text
+                    logger.info(f"Successfully retrieved logs as text from {url}")
+                    return {
+                        "logs": result,
+                        "run_id": run_id,
+                        "pipeline": pipeline_name,
+                        "task": task_name if task_name else "main",
+                        "content_type": content_type,
+                    }
 
         except requests.exceptions.RequestException as e:
             error_msg = f"Error getting run logs: {str(e)}"
