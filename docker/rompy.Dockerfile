@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-# RUN echo "Installing rompy from git" # Temporary until rompy is released, adding to force rebuild
+RUN echo "Installing rompy from git" # Temporary until rompy is released, adding to force rebuild
 RUN pip install --no-cache-dir appdirs oceanum "rompy>=v0.2.4" "git+https://github.com/rom-py/rompy.git" "git+https://github.com/oceanum/rompy-oceanum.git"
 # RUN pip install --no-cache-dir appdirs oceanum git+https://github.com/rom-py/rompy.git@149-serialisation-issues
 
