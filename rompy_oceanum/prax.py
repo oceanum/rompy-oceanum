@@ -606,6 +606,7 @@ class PraxClient:
         tail: int = 1000,
         stream_to_stdout: bool = False,
         format_logs: bool = True,
+        filter_wait_logs: bool = True,
     ) -> Union[Dict[str, Any], str]:
         """
         Get logs from a pipeline run.
@@ -622,6 +623,7 @@ class PraxClient:
             tail: Number of lines to show from the end of the logs (default: 1000)
             stream_to_stdout: Whether to stream logs directly to stdout (default: False)
             format_logs: Whether to format and clean up log lines by removing pipeline prefixes (default: True)
+            filter_wait_logs: Whether to filter out logs from [wait] containers (default: True)
 
         Returns:
             Dictionary with logs information or string with logs text
@@ -683,10 +685,15 @@ class PraxClient:
                                             if len(parts) > 1:
                                                 for i, part in enumerate(parts):
                                                     # Look for potential task identifiers
-                                                    if part in ['run', 'main', 'prepare', 'wait']:
+                                                    if part in ['run', 'main', 'prepare', 'wait', 'register' ]:
                                                         task_name = part
                                                         break
                                             
+                                        # Skip logs from wait containers if filter_wait_logs is enabled
+                                        if filter_wait_logs and ('[wait]' in line):
+                                            # Skip this log line
+                                            continue
+                                        
                                         # Format and print the filtered log
                                         formatted_line = f"Task {task_name} [{subtask_name}]:{log_message}"
                                         print(formatted_line)
@@ -715,11 +722,31 @@ class PraxClient:
                     # Parse as JSON
                     result = response.json()
                     logger.info(f"Successfully retrieved logs as JSON from {url}")
+                    
+                    # If filter_wait_logs is True, filter out logs from [wait] containers
+                    if filter_wait_logs and "logs" in result and isinstance(result["logs"], str):
+                        # Simple filtering of wait logs for JSON response
+                        filtered_logs = []
+                        for line in result["logs"].splitlines():
+                            if "[wait]" not in line and "Task wait [" not in line and "Task run [wait]" not in line and "Task register [wait]" not in line:
+                                filtered_logs.append(line)
+                        result["logs"] = "\n".join(filtered_logs)
+                    
                     return result
                 else:
                     # Handle as plain text
                     result = response.text
                     logger.info(f"Successfully retrieved logs as text from {url}")
+                    
+                    # Filter out logs from [wait] containers if enabled
+                    if filter_wait_logs:
+                        filtered_lines = []
+                        for line in result.splitlines():
+                            # Skip lines from wait containers
+                            if "[wait]" not in line and "Task wait [" not in line and "Task run [wait]" not in line and "Task register [wait]" not in line:
+                                filtered_lines.append(line)
+                        result = "\n".join(filtered_lines)
+                    
                     return {
                         "logs": result,
                         "run_id": run_id,
