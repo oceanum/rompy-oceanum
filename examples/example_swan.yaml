@@ -71,25 +71,25 @@ config:
           x: longitude
           y: latitude
 
-  # boundary:
-  #   model_type: boundspec
-  #   shapespec:
-  #     model_type: shapespec
-  #     per_type: peak
-  #     dspr_type: degrees
-  #     shape:
-  #       model_type: tma
-  #       gamma: 3.3
-  #       d: 12.0
-  #   location:
-  #     model_type: side
-  #     side: west
-  #   data:
-  #     model_type: constantpar
-  #     hs: 2.0
-  #     per: 12.0
-  #     dir: 255.0
-  #     dd: 25.0
+  boundary:
+    model_type: boundspec
+    shapespec:
+      model_type: shapespec
+      per_type: peak
+      dspr_type: degrees
+      shape:
+        model_type: tma
+        gamma: 3.3
+        d: 12.0
+    location:
+      model_type: side
+      side: west
+    data:
+      model_type: constantpar
+      hs: 2.0
+      per: 12.0
+      dir: 255.0
+      dd: 25.0
 
   initial:
     kind:
