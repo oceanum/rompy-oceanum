@@ -64,6 +64,19 @@ resources:
             path: /app/run_id/swangrid.nc
           - name: spectra
             path: /app/run_id/swanspec.nc
+    - name: register
+      image:
+        buildRef: rompy-oceanum
+      command: datamesh write from-config
+      inputs:
+        artifacts:
+          - name: grid
+            path: /app/run_id/swangrid.nc
+          - name: spectra
+            path: /app/run_id/swanspec.nc
+      resources:
+        cpu: 1
+        memory: 1G
 
   pipelines:
     - name: swan-from-rompy
@@ -276,6 +289,20 @@ resources:
                   artifactRef: workspace
           dependencies:
             - name: prepare
+        - name: register
+          taskRef: register
+          arguments:
+            artifacts:
+              - name: spectra
+                stepRef: 
+                  name: run
+                  artifactRef: spectra
+              - name: grid
+                stepRef: 
+                  name: run
+                  artifactRef: grid
+          dependencies:
+            - name: run
   stages:
     - name: dev
       resources:

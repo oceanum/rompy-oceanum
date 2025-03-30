@@ -4,11 +4,10 @@ rompy-oceanum: Oceanum Prax integration for rompy
 This package extends rompy to allow submitting model runs to Oceanum's Prax system.
 """
 
-from .prax import PraxClient
+from .prax import PraxClient, PraxResult
 from .extension import extension
-from .model_extension import add_prax_methods_to_model_run
+from .model_extension import OceanumModelRun
 
-__all__ = ["PraxClient", "extension"]
+__all__ = ["PraxClient", "PraxResult", "OceanumModelRun", "extension"]
 
-# Initialize the extension on import
-add_prax_methods_to_model_run()
+# No need to initialize anymore, OceanumModelRun is ready to use

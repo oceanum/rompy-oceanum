@@ -689,10 +689,17 @@ class PraxClient:
                                                         task_name = part
                                                         break
                                             
-                                        # Skip logs from wait containers if filter_wait_logs is enabled
-                                        if filter_wait_logs and ('[wait]' in line):
-                                            # Skip this log line
-                                            continue
+                                        # Skip infrastructure logs if filter_wait_logs is enabled
+                                        # This filters out both wait logs and other infrastructure logs
+                                        if filter_wait_logs:
+                                            # Skip if it's a wait log
+                                            if ("[wait]" in line or "[wait]:" in line or "Task wait [" in line or 
+                                                "Task run [wait]" in line or "register [wait]" in line):
+                                                continue
+                                                
+                                            # Skip task register logs (infrastructure logs)
+                                            if "Task register [" in line and (": time=" in line or ": 20" in line):
+                                                continue
                                         
                                         # Format and print the filtered log
                                         formatted_line = f"Task {task_name} [{subtask_name}]:{log_message}"
@@ -728,7 +735,19 @@ class PraxClient:
                         # Simple filtering of wait logs for JSON response
                         filtered_logs = []
                         for line in result["logs"].splitlines():
-                            if "[wait]" not in line and "Task wait [" not in line and "Task run [wait]" not in line and "Task register [wait]" not in line:
+                            # Check for wait patterns and infrastructure logs
+                            skip_line = False
+                            
+                            # Check if it's a wait log
+                            if ("[wait]" in line or "[wait]:" in line or "Task wait [" in line or 
+                                "Task run [wait]" in line or "register [wait]" in line):
+                                skip_line = True
+                                
+                            # Check if it's a task register log (infrastructure logs)
+                            if "Task register [" in line and (": time=" in line or ": 20" in line):
+                                skip_line = True
+                                
+                            if not skip_line:
                                 filtered_logs.append(line)
                         result["logs"] = "\n".join(filtered_logs)
                     
@@ -742,8 +761,20 @@ class PraxClient:
                     if filter_wait_logs:
                         filtered_lines = []
                         for line in result.splitlines():
-                            # Skip lines from wait containers
-                            if "[wait]" not in line and "Task wait [" not in line and "Task run [wait]" not in line and "Task register [wait]" not in line:
+                            # Skip infrastructure logs - check for both wait and task register logs
+                            # Include the line only if it doesn't match our filter patterns
+                            skip_line = False
+                            
+                            # Check if it's a wait log
+                            if ("[wait]" in line or "[wait]:" in line or "Task wait [" in line or 
+                                "Task run [wait]" in line or "register [wait]" in line):
+                                skip_line = True
+                                
+                            # Check if it's a task register log (infrastructure logs)
+                            if "Task register [" in line and (": time=" in line or ": 20" in line):
+                                skip_line = True
+                                
+                            if not skip_line:
                                 filtered_lines.append(line)
                         result = "\n".join(filtered_lines)
                     

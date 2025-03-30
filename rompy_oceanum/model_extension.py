@@ -1,129 +1,420 @@
 """
 Model extension for rompy-oceanum.
 
-This module extends the rompy ModelRun class with methods for submitting to Prax.
+This module provides an extended version of the rompy ModelRun class with 
+additional methods for submitting to Prax using an inheritance approach.
 """
 
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+import json
+import pathlib
+from typing import Any, Dict, Optional, Union, TYPE_CHECKING, ClassVar, List, Callable
+from copy import deepcopy
 
 import yaml
+from pydantic import BaseModel, Field, validator
 
 from .prax import PraxClient, PraxResult
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# This is to avoid importing rompy which might not be installed yet
-# during setup/installation of this package
+# Forward reference for type hints
 if TYPE_CHECKING:
     from rompy.model import ModelRun
-else:
-    ModelRun = None
+
+# Import ModelRun for inheritance
+from rompy.model import ModelRun
 
 
-def add_prax_methods_to_model_run():
-    """Add Prax-related methods to the rompy ModelRun class."""
-    try:
-        # Import here to avoid circular imports
-        from rompy.model import ModelRun as _ModelRun
-
-        global ModelRun
-        ModelRun = _ModelRun
-
-        # Only add methods if they don't already exist
-        if not hasattr(ModelRun, "submit_to_prax"):
-            # Add the methods
-            ModelRun.submit_to_prax = submit_to_prax
-            ModelRun.to_prax_parameters = to_prax_parameters
-
-            logger.info("Added Prax methods to rompy ModelRun class")
-        else:
-            logger.info("Prax methods already added to rompy ModelRun class")
-
-    except ImportError:
-        logger.warning("Could not import rompy. Make sure it's installed.")
-        pass
+# Define Prax configuration models
+class PraxTaskResources(BaseModel):
+    """Resources configuration for a Prax task."""
+    cpu: int = 2
+    memory: str = "1G"
 
 
-def submit_to_prax(
-    self: "ModelRun",
-    pipeline_name: str = "swan-from-rompy",
-    user: str = None,
-    org: str = None,
-    project: str = None,
-    stage: str = "dev",
-    prax_url: str = "https://prax.oceanum.io",
-    token: Optional[str] = None,
-) -> PraxResult:
+class PraxResources(BaseModel):
+    """Resources configuration for Prax pipeline tasks."""
+    run: PraxTaskResources = Field(default_factory=PraxTaskResources)
+    
+    def get_cpu(self, task_name: str) -> int:
+        """Get CPU setting for a specific task."""
+        if task_name == "run" and hasattr(self, "run"):
+            return self.run.cpu
+        return 2  # Default CPU
+    
+    def get_memory(self, task_name: str) -> str:
+        """Get memory setting for a specific task."""
+        if task_name == "run" and hasattr(self, "run"):
+            return self.run.memory
+        return "1G"  # Default memory
+
+
+class PraxConfig(BaseModel):
+    """Prax pipeline configuration."""
+    pipeline_name: str = "swan-from-rompy"
+    user: str = ""
+    org: str = ""
+    project: str = ""
+    stage: str = "dev"
+    url: str = "https://prax.oceanum.io"
+    resources: PraxResources = Field(default_factory=PraxResources)
+    
+    @classmethod
+    def from_env(cls, **overrides) -> "PraxConfig":
+        """Create a PraxConfig with values from environment variables."""
+        return cls(
+            user=os.environ.get("PRAX_USER", ""),
+            org=os.environ.get("PRAX_ORG", ""),
+            project=os.environ.get("PRAX_PROJECT", ""),
+            **overrides
+        )
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "PraxConfig":
+        """Create a PraxConfig from a dictionary."""
+        if not data:
+            return cls.from_env()
+            
+        # Convert old-style resources dict to new model format
+        if "resources" in data and isinstance(data["resources"], dict):
+            resources_dict = data.pop("resources")
+            resources = PraxResources()
+            
+            if "run" in resources_dict and isinstance(resources_dict["run"], dict):
+                run_dict = resources_dict["run"]
+                resources.run = PraxTaskResources(**run_dict)
+                
+            data["resources"] = resources
+        
+        return cls(**data)
+
+
+# Default Prax configuration for backward compatibility
+DEFAULT_PRAX_CONFIG = PraxConfig().dict()
+
+# Path to the pipeline templates directory
+PIPELINE_TEMPLATES_DIR = pathlib.Path(__file__).parent.parent / "pipeline_templates"
+
+
+class OceanumModelRun(ModelRun):
     """
-    Submit this model run to an Oceanum Prax pipeline.
-
+    Extended version of rompy ModelRun with Oceanum-specific functionality.
+    
+    This class adds Prax submission capabilities to the base ModelRun class.
+    
     Args:
-        pipeline_name: Name of the pipeline to run (default: swan-from-rompy)
-        user: Username (default: from env var PRAX_USER)
-        org: Organization name (default: from env var PRAX_ORG)
-        project: Project name (default: from env var PRAX_PROJECT)
-        stage: Stage name (default: dev)
-        prax_url: Prax API base URL (default: https://prax.oceanum.io)
-        token: Prax API token (default: from env var PRAX_TOKEN)
-
-    Returns:
-        PraxResult object with information about the submitted run
+        prax_config: Configuration for Prax pipeline submission
+                    (dict or PraxConfig instance, optional)
     """
-    # Get values from environment variables if not provided
-    user = user or os.environ.get("PRAX_USER")
-    org = org or os.environ.get("PRAX_ORG")
-    project = project or os.environ.get("PRAX_PROJECT")
+    
+    # Prax configuration with default from environment variables
+    prax_config: PraxConfig = Field(default_factory=PraxConfig.from_env)
+    
+    # Swan pipeline template as a class variable
+    _swan_pipeline_template: ClassVar[Optional[Dict[str, Any]]] = None
+    
+    # Validator to convert dictionary to PraxConfig
+    @validator('prax_config', pre=True)
+    def validate_prax_config(cls, value):
+        """Convert dict to PraxConfig if needed"""
+        if isinstance(value, dict):
+            return PraxConfig.from_dict(value)
+        return value
+    
+    @classmethod
+    def from_spec(cls, spec: Dict[str, Any]) -> "OceanumModelRun":
+        """
+        Create a new OceanumModelRun instance from a specification dictionary.
+        
+        Args:
+            spec: Dictionary with model specification including Prax fields
+            
+        Returns:
+            New OceanumModelRun instance
+        """
+        # With Pydantic, we can just pass the entire spec including prax
+        # The validator will handle converting the prax dict to a PraxConfig object
+        return cls(**spec)
+            
+    @property
+    def swan_pipeline_template(self) -> Dict[str, Any]:
+        """
+        Get the Swan pipeline template with customized fields based on the current model configuration.
+        
+        Returns:
+            Customized Swan pipeline template as a dictionary
+        """
+        # Load the template if it hasn't been loaded yet
+        if OceanumModelRun._swan_pipeline_template is None:
+            template_path = PIPELINE_TEMPLATES_DIR / "swan.yaml"
+            if not template_path.exists():
+                raise FileNotFoundError(f"Swan pipeline template not found at {template_path}")
+                
+            with open(template_path, "r") as f:
+                OceanumModelRun._swan_pipeline_template = yaml.safe_load(f)
+        
+        # Create a deep copy to avoid modifying the original template
+        template = deepcopy(OceanumModelRun._swan_pipeline_template)
+        
+        # Get configuration values
+        run_id = self.run_id
+        cpu = self.prax_config.resources.run.cpu
+        memory = self.prax_config.resources.run.memory
+        
+        # Find the run task and update its resources
+        for task in template.get("resources", {}).get("tasks", []):
+            if task.get("name") == "run":
+                task["resources"] = {
+                    "cpu": cpu,
+                    "memory": memory
+                }
+        
+        # Update the pipeline parameters to use the model's run_id
+        for pipeline in template.get("resources", {}).get("pipelines", []):
+            if pipeline.get("name") == "swan-from-rompy":
+                for param in pipeline.get("arguments", {}).get("parameters", []):
+                    if param.get("name") == "rompy-config" and "value" in param:
+                        # Parse the YAML string value
+                        config_dict = yaml.safe_load(param["value"])
+                        # Update the run_id
+                        config_dict["run_id"] = run_id
+                        # Convert back to YAML string
+                        param["value"] = yaml.dump(config_dict, default_flow_style=False)
+        
+        return template
+    
+    def submit_to_prax(
+        self,
+        pipeline_name: str = None,
+        user: str = None,
+        org: str = None,
+        project: str = None,
+        stage: str = None,
+        prax_url: str = None,
+        token: Optional[str] = None,
+        deploy_template: bool = False,
+    ) -> PraxResult:
+        """
+        Submit this model run to an Oceanum Prax pipeline.
 
-    # Check required parameters
-    if not user:
-        raise ValueError(
-            "User is required. Provide as parameter or set PRAX_USER env var."
+        Args:
+            pipeline_name: Name of the pipeline to run (default: from prax_config or "swan-from-rompy")
+            user: Username (default: from prax_config or env var PRAX_USER)
+            org: Organization name (default: from prax_config or env var PRAX_ORG)
+            project: Project name (default: from prax_config or env var PRAX_PROJECT)
+            stage: Stage name (default: from prax_config or "dev")
+            prax_url: Prax API base URL (default: from prax_config or "https://prax.oceanum.io")
+            token: Prax API token (default: from env var PRAX_TOKEN)
+            deploy_template: Whether to deploy the pipeline template first (default: False)
+
+        Returns:
+            PraxResult object with information about the submitted run
+        """
+        # Use stored config values as defaults
+        pipeline_name = pipeline_name or self.prax_config.pipeline_name
+        user = user or self.prax_config.user
+        org = org or self.prax_config.org
+        project = project or self.prax_config.project
+        stage = stage or self.prax_config.stage
+        prax_url = prax_url or self.prax_config.url
+        
+        # Check required parameters
+        if not user:
+            raise ValueError(
+                "User is required. Provide as parameter, set in prax_config, or set PRAX_USER env var."
+            )
+        if not org:
+            raise ValueError(
+                "Organization is required. Provide as parameter, set in prax_config, or set PRAX_ORG env var."
+            )
+        if not project:
+            raise ValueError(
+                "Project is required. Provide as parameter, set in prax_config, or set PRAX_PROJECT env var."
+            )
+
+        # Create Prax client
+        client = PraxClient(base_url=prax_url, token=token)
+
+        # Convert model run to Prax parameters
+        parameters = self.to_prax_parameters()
+        
+        # If we need to deploy the pipeline template first
+        if deploy_template and pipeline_name == "swan-from-rompy":
+            # Create a temporary file with the customized template
+            template_path = pathlib.Path.cwd() / "swan_template_custom.yaml"
+            with open(template_path, "w") as f:
+                yaml.dump(self.swan_pipeline_template, f)
+            
+            logger.info(f"Deploying customized Swan pipeline template from {template_path}")
+            client.deploy_pipeline(
+                template_path=str(template_path),
+                user=user,
+                org=org,
+                project=project,
+                stage=stage
+            )
+            # Clean up the temporary file
+            template_path.unlink()
+
+        # Submit pipeline
+        logger.info(f"Submitting {pipeline_name} pipeline to Prax")
+        result = client.submit_pipeline(
+            pipeline_name=pipeline_name,
+            user=user,
+            org=org,
+            project=project,
+            stage=stage,
+            parameters=parameters,
         )
-    if not org:
-        raise ValueError(
-            "Organization is required. Provide as parameter or set PRAX_ORG env var."
-        )
-    if not project:
-        raise ValueError(
-            "Project is required. Provide as parameter or set PRAX_PROJECT env var."
-        )
 
-    # Create Prax client
-    client = PraxClient(base_url=prax_url, token=token)
+        logger.info(f"Pipeline submitted successfully with run ID: {result.run_id}")
+        return result
 
-    # Convert model run to Prax parameters
-    parameters = self.to_prax_parameters()
+    def to_prax_parameters(self) -> Dict[str, Any]:
+        """
+        Convert this model run configuration to Prax pipeline parameters.
 
-    # Submit pipeline
-    logger.info(f"Submitting {pipeline_name} pipeline to Prax")
-    result = client.submit_pipeline(
-        pipeline_name=pipeline_name,
-        user=user,
-        org=org,
-        project=project,
-        stage=stage,
-        parameters=parameters,
-    )
+        Returns:
+            Dictionary with Prax pipeline parameters
+        """
+        # Get the base model attributes first
+        # We need to create a copy of the model without the prax_config
+        # to avoid JSON serialization issues with Pydantic models
+        base_model_dict = {}
+        for key, value in self.dump_inputs_dict().items():
+            if key != 'prax_config':
+                base_model_dict[key] = value
+        
+        # Serialize the base model attributes to JSON
+        try:
+            config_json = json.dumps(base_model_dict)
+        except TypeError as e:
+            # Handle any other serialization errors
+            logger.warning(f"Error serializing model config: {e}")
+            # Fallback to a minimal config
+            config_json = json.dumps({"run_id": self.run_id})
+            
+        # Create pipeline parameters
+        parameters = {"rompy-config": config_json}
+        import ipdb
+        ipdb.set_trace()
+        
+        return parameters
+        
+    def get_spec(self) -> Dict[str, Any]:
+        """
+        Get the specification dictionary with Prax-related parameters added.
+        Extends the base ModelRun.get_spec() method.
+        
+        Returns:
+            Dictionary with model specification including Prax fields
+        """
+        # Get the base specification from parent class
+        spec = super().get_spec()
+        
+        # Add Prax-specific fields
+        spec.update({"prax": self.prax_config.dict()})
+        
+        return spec
+        
+    def submit_pipeline_with_template(self, template_path: Optional[str] = None) -> PraxResult:
+        """
+        Submit a pipeline to Prax using a template file, with customized fields.
+        
+        This method combines deploying a pipeline template with running it in one step.
+        If no template path is provided, uses the built-in Swan pipeline template.
+        
+        Args:
+            template_path: Optional path to a custom pipeline template file
+                          If None, uses the built-in Swan template
+                          
+        Returns:
+            PraxResult object with information about the submitted run
+        """
+        # Get Prax configuration values
+        pipeline_name = self.prax_config.pipeline_name
+        user = self.prax_config.user
+        org = self.prax_config.org
+        project = self.prax_config.project
+        stage = self.prax_config.stage
+        prax_url = self.prax_config.url
+        token = os.environ.get("PRAX_TOKEN")
+        
+        # If we're using the built-in Swan template
+        if template_path is None:
+            # Deploy the template and submit
+            return self.submit_to_prax(
+                pipeline_name=pipeline_name,
+                user=user,
+                org=org,
+                project=project,
+                stage=stage,
+                prax_url=prax_url,
+                token=token,
+                deploy_template=True
+            )
+        else:
+            # Create Prax client
+            client = PraxClient(base_url=prax_url, token=token)
+            
+            # Deploy the provided template
+            client.deploy_pipeline(
+                template_path=template_path,
+                user=user,
+                org=org,
+                project=project,
+                stage=stage
+            )
+            
+            # Submit the pipeline
+            return self.submit_to_prax(
+                pipeline_name=pipeline_name,
+                user=user,
+                org=org,
+                project=project,
+                stage=stage,
+                prax_url=prax_url,
+                token=token
+            )
+        
+    def dump_spec(self, filename: str) -> None:
+        """
+        Dump the model specification to a JSON file.
+        
+        Args:
+            filename: Path to the output JSON file
+        """
+        spec = self.get_spec()
+        with open(filename, "w") as f:
+            json.dump(spec, f, indent=2)
+        logger.info(f"Model specification saved to {filename}")
 
-    logger.info(f"Pipeline submitted successfully with run ID: {result.run_id}")
-    return result
+
+# Note about legacy monkey patching
+"""
+Legacy Note: Previously, this module supported a monkey patching approach
+that extended the rompy ModelRun class directly. That approach has been removed
+in favor of the cleaner inheritance model. If you have code that relied on
+the monkey patching approach, update it to use OceanumModelRun directly.
+
+Example migration:
+```python
+# Old approach (no longer supported):
+# from rompy.model import ModelRun
+# from rompy_oceanum.model_extension import add_prax_methods_to_model_run
+# add_prax_methods_to_model_run()
+# model = ModelRun(...)
+# model.submit_to_prax(...)
+
+# New approach:
+from rompy_oceanum.model_extension import OceanumModelRun
+model = OceanumModelRun(...)
+model.submit_to_prax(...)
+```
+"""
 
 
-def to_prax_parameters(self: "ModelRun") -> Dict[str, Any]:
-    """
-    Convert this model run configuration to Prax pipeline parameters.
-
-    Returns:
-        Dictionary with Prax pipeline parameters
-    """
-    # Convert model config to YAML
-    config_dict = self.dump_inputs_json()
-    # yaml_content = yaml.dump(config_dict, default_flow_style=False)
-
-    # Create pipeline parameters
-    parameters = {"rompy-config": config_dict}
-
-    return parameters
+# Legacy standalone functions are removed in favor of class methods

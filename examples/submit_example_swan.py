@@ -1,47 +1,86 @@
-import json
+#!/usr/bin/env python
 
+import json
 import rompy
 import yaml
 
-import rompy_oceanum
+from rompy_oceanum import OceanumModelRun
+from rompy_oceanum.model_extension import PraxConfig, PraxResources, PraxTaskResources
 
 # Load model configuration
 model_config = yaml.safe_load(open("example_swan.yaml"))
 
-
-# Create a rompy model configuration as usual
-model_run = rompy.model.ModelRun(**model_config)
-
-# # Write the model configuration to a file
-# yaml.dump(model_run.dump_inputs_dict(), open("model_config.yaml", "w"))
-# json.dump(model_run.dump_inputs_json(), open("model_config.json", "w"))
-# exit()
-
-
-# Submit to Prax pipeline
-result = model_run.submit_to_prax(
+# Define Prax configuration
+prax_config = PraxConfig(
     pipeline_name="swan-from-rompy",
     user="t.durrant@oceanum.science",
     org="oceanum",
     project="rompy-oceanum",
     stage="dev",
+    resources=PraxResources(
+        run=PraxTaskResources(cpu=2, memory="2G")
+    )
 )
+
+# Create an OceanumModelRun with the prax_config
+model_run = OceanumModelRun(
+    **model_config,
+    prax_config=prax_config
+)
+
+
+# Alternatively, you could use a dictionary for prax_config:
+# model_run = OceanumModelRun(
+#     **model_config,
+#     prax_config={
+#         "pipeline_name": "swan-from-rompy",
+#         "user": "t.durrant@oceanum.science",
+#         "org": "oceanum",
+#         "project": "rompy-oceanum",
+#         "stage": "dev",
+#         "resources": {
+#             "run": {"cpu": 2, "memory": "2G"}
+#         }
+#     }
+# )
+
+# # Write the model configuration to a file if needed
+# with open("model_config.json", "w") as f:
+#     json.dump(model_run.get_spec(), f, indent=2)
+# exit()
+
+# Submit to Prax pipeline
+# All the configuration is now part of the model_run.prax_config
+result = model_run.submit_to_prax()
 
 # Monitor status
 status = result.get_status()
-# sleep until status is "running"
-while status.get("status", "unknown").lower() != "running":
-    print(f"Status: {status.get('status', 'unknown')}")
-    time.sleep(5)
-    status = result.get_status()
 
+# Display a well-formatted summary of the status
+print("\nInitial Pipeline Status:")
+result.summary_status(status)
 
-# Get logs
-logs = result.get_logs()
-print("Intermediate logs:")
-print(logs)
-print("\n")
+# Get logs with streaming enabled
+print("Streaming logs (press Ctrl+C to stop)...")
+logs = result.get_logs(follow=True, stream_to_stdout=True)
 
+# Get updated status after some time
+status = result.get_status()
+print("\nUpdated Pipeline Status:")
+result.summary_status(status)
+
+# Stream logs again if needed
+print("Streaming more logs (press Ctrl+C to stop)...")
+logs = result.get_logs(follow=True, stream_to_stdout=True)
+
+# Get updated status after some time
+status = result.get_status()
+print("\nUpdated Pipeline Status:")
+result.summary_status(status)
+
+# Stream logs again if needed
+print("Streaming more logs (press Ctrl+C to stop)...")
+logs = result.get_logs(follow=True, stream_to_stdout=True)
 
 # Wait for completion
 print("Waiting for completion...")
@@ -49,16 +88,10 @@ result.wait_for_completion()
 
 # Get final status
 final_status = result.get_status()
-print("Final status:")
-print(final_status)
-print("\n")
+print("\nFinal Pipeline Status:")
+result.summary_status(final_status)
 
-# Get final logs
-final_logs = result.get_logs()
-print("Final logs:")
-print(final_logs)
-print("\n")
 
-# Download outputs when complete
-print("Downloading outputs...")
-result.download_outputs(target_dir="./outputs")
+# # Download outputs when complete (not yet implemented in Prax)
+# print("Downloading outputs...")
+# result.download_outputs(target_dir="./outputs")
