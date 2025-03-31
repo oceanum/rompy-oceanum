@@ -245,7 +245,7 @@ def write_from_config(
     config_path: Optional[str] = typer.Argument(
         None, help="Path to rompy config file, if not provided will use ROMPY_CONFIG env var"
     ),
-    datasource_id: str = typer.Option("rompy", help="Base DataMesh datasource ID"),
+    org: str = typer.Option("", help="Organisation name for dataset naming"),
     tags: Optional[List[str]] = typer.Option(None, help="Additional tags for the datasets"),
 ):
     """
@@ -253,8 +253,8 @@ def write_from_config(
     
     This command will:
     1. Read configuration from a file or ROMPY_CONFIG environment variable
-    2. Extract name and description from the config
-    3. Find and process swangrid.nc and swanspec.nc files from output_dir/run_id/
+    2. Create an OceanumModelRun instance from the config
+    3. Register the grid and spectra data with DataMesh
     """
     tags = tags or []
     
@@ -262,62 +262,41 @@ def write_from_config(
         # Load config from file or environment variable
         config = load_rompy_config(config_path)
         
-        # Extract required information from config
-        run_id = config.get("run_id")
-        output_dir = config.get("output_dir")
+        # Import here to avoid circular imports
+        from rompy_oceanum.model_extension import OceanumModelRun, DataMeshConfig
         
-        if not run_id or not output_dir:
-            raise ValueError("Config must contain 'run_id' and 'output_dir' fields")
+        # Create an OceanumModelRun instance from the config
+        model_run = OceanumModelRun.from_spec(config)
         
-        # Construct the output path
-        output_path = Path(output_dir) / run_id
+        # Set up DataMesh configuration
+        org = org or os.environ.get("DATAMESH_ORGANISATION", "")
         
-        # Look for required files
-        grid_file = output_path / "swangrid.nc"
-        spectra_file = output_path / "swanspec.nc"
-        
-        # Extract name and description
-        name = "ROMPY Model Run"
-        description = "ROMPY generated dataset"
-        
-        # Try to get more descriptive name and description from config
-        if "config" in config and "startup" in config["config"]:
-            if "project" in config["config"]["startup"]:
-                project = config["config"]["startup"]["project"]
-                if "name" in project:
-                    name = project["name"]
-                if "title1" in project:
-                    description = project["title1"]
+        if not org:
+            raise ValueError("Organisation name is required. Provide it as parameter or set DATAMESH_ORGANISATION env var.")
         
         # Display summary of what will be processed
         console.print(Panel(
-            f"[bold]Processing model output for:[/] {name}\n"
-            f"[bold]Description:[/] {description}\n"
-            f"[bold]Run ID:[/] {run_id}\n"
-            f"[bold]Output directory:[/] {output_path}"
+            f"[bold]Processing model output for:[/] {model_run.name if hasattr(model_run, 'name') else 'ROMPY Model Run'}\n"
+            f"[bold]Run ID:[/] {model_run.run_id}\n"
+            f"[bold]Output directory:[/] {model_run.output_dir}\n"
+            f"[bold]Organisation:[/] {org}"
         ))
         
-        # Create the writer
-        writer = DatameshWriter(
-            datasource_id=f"{datasource_id}_{run_id}", 
-            name=name, 
-            description=description, 
-            tags=["rompy", "model-output"] + tags
-        )
-        
         # Process grid file if it exists
+        grid_file = model_run.output_dir / model_run.run_id / "swangrid.nc"
         if grid_file.exists():
-            console.print(f"[bold blue]Writing grid data from:[/] {grid_file}")
-            writer.write_grid(grid_file)
-            console.print("[bold green]✓[/] Grid data written successfully")
+            console.print(f"[bold blue]Registering grid data with DataMesh:[/] {grid_file}")
+            dataset_name = model_run.register_with_datamesh("grid")
+            console.print(f"[bold green]✓[/] Grid data registered successfully as '{dataset_name}'")
         else:
             console.print(f"[bold yellow]Warning:[/] Grid file not found at {grid_file}")
         
         # Process spectra file if it exists
+        spectra_file = model_run.output_dir / model_run.run_id / "swanspec.nc"
         if spectra_file.exists():
-            console.print(f"[bold blue]Writing spectra data from:[/] {spectra_file}")
-            writer.write_spectra(spectra_file)
-            console.print("[bold green]✓[/] Spectra data written successfully")
+            console.print(f"[bold blue]Registering spectra data with DataMesh:[/] {spectra_file}")
+            dataset_name = model_run.register_with_datamesh("spectra")
+            console.print(f"[bold green]✓[/] Spectra data registered successfully as '{dataset_name}'")
         else:
             console.print(f"[bold yellow]Warning:[/] Spectra file not found at {spectra_file}")
             

@@ -175,3 +175,7 @@ config:
         fname: hotfile.txt
         format: free
       hottimes: [-1]
+datamesh_config:
+  enabled: true
+  organisation: "oceanum"
+  tags: ["rompy", "demo"]
