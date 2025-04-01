@@ -126,7 +126,7 @@ app = typer.Typer(
     help="DataMesh CLI for working with grid and spectra data",
     rich_markup_mode="rich",
     pretty_exceptions_enable=False,  # Show full tracebacks instead of simplified errors
-    pretty_exceptions_show_locals=True,  # Show local variables in tracebacks
+    pretty_exceptions_show_locals=False,  # Show local variables in tracebacks
 )
 write_app = typer.Typer(help="Write data to DataMesh")
 app.add_typer(write_app, name="write")
