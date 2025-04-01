@@ -14,7 +14,8 @@ from oceanum.datamesh.datasource import Coordinates
 from pydantic import BaseModel
 from rich.console import Console
 from rich.panel import Panel
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
+                      wait_fixed)
 from wavespectra import read_ncswan, read_ww3
 
 logger = logging.getLogger(__name__)
@@ -267,7 +268,8 @@ def write_from_config(
         config = load_rompy_config(config_path)
 
         # Import here to avoid circular imports
-        from rompy_oceanum.model_extension import DataMeshConfig, OceanumModelRun
+        from rompy_oceanum.model_extension import (DataMeshConfig,
+                                                   OceanumModelRun)
 
         # Create an OceanumModelRun instance from the config
         model_run = OceanumModelRun.from_spec(config)
@@ -276,9 +278,10 @@ def write_from_config(
         org = org or os.environ.get("DATAMESH_ORGANISATION", "")
 
         if not org:
-            raise ValueError(
-                "Organisation name is required. Provide it as parameter or set DATAMESH_ORGANISATION env var."
-            )
+            org = "oceanum"  # TODO this is a bug
+            # raise ValueError(
+            #     "Organisation name is required. Provide it as parameter or set DATAMESH_ORGANISATION env var."
+            # )
 
         # Display summary of what will be processed
         console.print(

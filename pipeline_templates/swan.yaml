@@ -40,7 +40,7 @@ resources:
     - name: prepare
       image:
         buildRef: rompy-oceanum
-      command: rompy
+      command: rompy-oceanm
       outputs:
         artifacts:
           - name: workspace 
