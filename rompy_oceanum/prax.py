@@ -7,6 +7,7 @@ This module provides a client for interacting with Oceanum's Prax API.
 import json
 import logging
 import os
+import re
 import time
 from typing import Any, Dict, List, Optional, Union
 
@@ -165,65 +166,67 @@ class PraxResult(BaseModel):
             stage=self.stage,
             target_dir=target_dir,
         )
-        
+
     def summary_status(self, status=None):
         """Display a formatted summary of the pipeline run status.
-        
+
         Args:
             status: Status dictionary from get_status(). If None, calls get_status() automatically.
         """
         if status is None:
             status = self.get_status()
-            
+
         # Check if status is available
         if not status:
             print("No status information available")
             return
-            
+
         # Extract basic run information
-        run_id = status.get('name', 'N/A')
-        overall_status = status.get('status', 'Unknown')
-        started_at = status.get('started_at', 'N/A')
-        updated_at = status.get('updated_at', 'N/A')
-        
+        run_id = status.get("name", "N/A")
+        overall_status = status.get("status", "Unknown")
+        started_at = status.get("started_at", "N/A")
+        updated_at = status.get("updated_at", "N/A")
+
         # Extract organization and project details
-        org = status.get('org', 'N/A')
-        project = status.get('project', 'N/A')
-        stage = status.get('stage', 'N/A')
-        
+        org = status.get("org", "N/A")
+        project = status.get("project", "N/A")
+        stage = status.get("stage", "N/A")
+
         # Extract pipeline details
-        details = status.get('details', {})
+        details = status.get("details", {})
         tasks = []
-        
+
         # Process task details
         for node_id, node_info in details.items():
             # Skip the parent nodes to avoid duplication
-            if node_info.get('displayName', '').endswith('(0)'):
+            if node_info.get("displayName", "").endswith("(0)"):
                 continue
-                
-            task_type = node_info.get('type', 'Unknown')
-            task_name = node_info.get('displayName', node_id)
-            task_status = node_info.get('phase', 'Unknown')
-            task_started = node_info.get('startedAt', 'N/A')
-            task_finished = node_info.get('finishedAt', 'N/A')
-            task_progress = node_info.get('progress', 'N/A')
-            
+
+            task_type = node_info.get("type", "Unknown")
+            task_name = node_info.get("displayName", node_id)
+            task_status = node_info.get("phase", "Unknown")
+            task_started = node_info.get("startedAt", "N/A")
+            task_finished = node_info.get("finishedAt", "N/A")
+            task_progress = node_info.get("progress", "N/A")
+
             # Only add real tasks (not parent groups)
-            if task_type not in ['Retry', 'DAG']:
-                tasks.append({
-                    'name': task_name,
-                    'type': task_type,
-                    'status': task_status,
-                    'progress': task_progress,
-                    'started': task_started,
-                    'finished': task_finished
-                })
-        
+            if task_type not in ["Retry", "DAG"]:
+                tasks.append(
+                    {
+                        "name": task_name,
+                        "type": task_type,
+                        "status": task_status,
+                        "progress": task_progress,
+                        "started": task_started,
+                        "finished": task_finished,
+                    }
+                )
+
         # Format and print the summary
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print(f"{'PIPELINE RUN SUMMARY':^80}")
-        print("="*80)
-        
+        print("=" * 80)
+
         print(f"\n{'Run ID:':<20}{run_id}")
         print(f"{'Organization:':<20}{org}")
         print(f"{'Project:':<20}{project}")
@@ -231,22 +234,24 @@ class PraxResult(BaseModel):
         print(f"{'Status:':<20}{overall_status}")
         print(f"{'Started:':<20}{started_at}")
         print(f"{'Last Updated:':<20}{updated_at}")
-        
+
         # Print task details
         if tasks:
-            print("\n" + "-"*80)
+            print("\n" + "-" * 80)
             print(f"{'TASKS':^80}")
-            print("-"*80)
-            
+            print("-" * 80)
+
             # Format header
             print(f"{'TASK NAME':<30}{'TYPE':<15}{'STATUS':<15}{'PROGRESS':<15}")
-            print("-"*80)
-            
+            print("-" * 80)
+
             # Print each task
             for task in tasks:
-                print(f"{task['name']:<30}{task['type']:<15}{task['status']:<15}{task['progress']:<15}")
-        
-        print("\n" + "="*80 + "\n")
+                print(
+                    f"{task['name']:<30}{task['type']:<15}{task['status']:<15}{task['progress']:<15}"
+                )
+
+        print("\n" + "=" * 80 + "\n")
 
 
 class PraxClient:
@@ -664,43 +669,60 @@ class PraxClient:
                     try:
                         for line in response.iter_lines(decode_unicode=True):
                             if line:
-                                if format_logs and '[' in line and ']' in line:
+                                if format_logs and "[" in line and "]" in line:
                                     try:
                                         # Extract task info from prefix like [pipeline-name-task/main]
-                                        task_info = line.split('[', 1)[1].split(']', 1)[0]
+                                        task_info = line.split("[", 1)[1].split("]", 1)[
+                                            0
+                                        ]
                                         # Get the actual log message (everything after the timestamp)
-                                        log_message = line.split(']', 1)[1]
-                                        
+                                        log_message = line.split("]", 1)[1]
+
                                         # Extract the subtask name (after the last slash if present)
                                         subtask_name = "unknown"
-                                        if '/' in task_info:
-                                            subtask_name = task_info.split('/')[-1]
-                                        
+                                        if "/" in task_info:
+                                            subtask_name = task_info.split("/")[-1]
+
                                         # Extract the main task name from the pipeline ID
                                         # Format is typically: pipeline-name-task-id-run-id/subtask
                                         task_name = "unknown"
-                                        if '-' in task_info:
+                                        if "-" in task_info:
                                             # Try to extract the task name from the pipeline ID
-                                            parts = task_info.split('-')
+                                            parts = task_info.split("-")
                                             if len(parts) > 1:
                                                 for i, part in enumerate(parts):
                                                     # Look for potential task identifiers
-                                                    if part in ['run', 'main', 'prepare', 'wait', 'register' ]:
+                                                    if part in [
+                                                        "run",
+                                                        "main",
+                                                        "prepare",
+                                                        "wait",
+                                                        "register",
+                                                    ]:
                                                         task_name = part
                                                         break
-                                            
+
                                         # Skip infrastructure logs if filter_wait_logs is enabled
                                         # This filters out both wait logs and other infrastructure logs
                                         if filter_wait_logs:
                                             # Skip if it's a wait log
-                                            if ("[wait]" in line or "[wait]:" in line or "Task wait [" in line or 
-                                                "Task run [wait]" in line or "register [wait]" in line):
+                                            re.search(r"\[wait\]", line) is not None
+                                            if (
+                                                "[wait]" in line
+                                                or "[wait]:" in line
+                                                or "Task wait [" in line
+                                                or "Task run [wait]" in line
+                                                or "register [wait]" in line
+                                                or "/wait" in line
+                                            ):
                                                 continue
-                                                
+
                                             # Skip task register logs (infrastructure logs)
-                                            if "Task register [" in line and (": time=" in line or ": 20" in line):
+                                            if "Task register [" in line and (
+                                                ": time=" in line or ": 20" in line
+                                            ):
                                                 continue
-                                        
+
                                         # Format and print the filtered log
                                         formatted_line = f"Task {task_name} [{subtask_name}]:{log_message}"
                                         print(formatted_line)
@@ -729,34 +751,45 @@ class PraxClient:
                     # Parse as JSON
                     result = response.json()
                     logger.info(f"Successfully retrieved logs as JSON from {url}")
-                    
+
                     # If filter_wait_logs is True, filter out logs from [wait] containers
-                    if filter_wait_logs and "logs" in result and isinstance(result["logs"], str):
+                    if (
+                        filter_wait_logs
+                        and "logs" in result
+                        and isinstance(result["logs"], str)
+                    ):
                         # Simple filtering of wait logs for JSON response
                         filtered_logs = []
                         for line in result["logs"].splitlines():
                             # Check for wait patterns and infrastructure logs
                             skip_line = False
-                            
+
                             # Check if it's a wait log
-                            if ("[wait]" in line or "[wait]:" in line or "Task wait [" in line or 
-                                "Task run [wait]" in line or "register [wait]" in line):
+                            if (
+                                "[wait]" in line
+                                or "[wait]:" in line
+                                or "Task wait [" in line
+                                or "Task run [wait]" in line
+                                or "register [wait]" in line
+                            ):
                                 skip_line = True
-                                
+
                             # Check if it's a task register log (infrastructure logs)
-                            if "Task register [" in line and (": time=" in line or ": 20" in line):
+                            if "Task register [" in line and (
+                                ": time=" in line or ": 20" in line
+                            ):
                                 skip_line = True
-                                
+
                             if not skip_line:
                                 filtered_logs.append(line)
                         result["logs"] = "\n".join(filtered_logs)
-                    
+
                     return result
                 else:
                     # Handle as plain text
                     result = response.text
                     logger.info(f"Successfully retrieved logs as text from {url}")
-                    
+
                     # Filter out logs from [wait] containers if enabled
                     if filter_wait_logs:
                         filtered_lines = []
@@ -764,20 +797,27 @@ class PraxClient:
                             # Skip infrastructure logs - check for both wait and task register logs
                             # Include the line only if it doesn't match our filter patterns
                             skip_line = False
-                            
+
                             # Check if it's a wait log
-                            if ("[wait]" in line or "[wait]:" in line or "Task wait [" in line or 
-                                "Task run [wait]" in line or "register [wait]" in line):
+                            if (
+                                "[wait]" in line
+                                or "[wait]:" in line
+                                or "Task wait [" in line
+                                or "Task run [wait]" in line
+                                or "register [wait]" in line
+                            ):
                                 skip_line = True
-                                
+
                             # Check if it's a task register log (infrastructure logs)
-                            if "Task register [" in line and (": time=" in line or ": 20" in line):
+                            if "Task register [" in line and (
+                                ": time=" in line or ": 20" in line
+                            ):
                                 skip_line = True
-                                
+
                             if not skip_line:
                                 filtered_lines.append(line)
                         result = "\n".join(filtered_lines)
-                    
+
                     return {
                         "logs": result,
                         "run_id": run_id,
