@@ -1,4 +1,5 @@
 name: rompy-oceanum
+model_type: oceanum_modelrun
 resources:
 
   sources:
