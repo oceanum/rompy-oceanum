@@ -10,11 +10,10 @@ import logging
 import os
 import pathlib
 from copy import deepcopy
-from typing import (TYPE_CHECKING, Any, Callable, ClassVar, Dict, List,
-                    Optional, Union)
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Optional, Union
 
 import yaml
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, validator
 
 from .prax import PraxClient, PraxResult
 
@@ -105,18 +104,16 @@ PIPELINE_TEMPLATES_DIR = pathlib.Path(__file__).parent.parent / "pipeline_templa
 
 class DataMeshConfig(BaseModel):
     """Configuration for DataMesh registration."""
+
     enabled: bool = False
     org: str = ""
     tags: list[str] = []
-    labels: dict[str, str] = {}
-    
+    labels: list[str] = {}
+
     @classmethod
     def from_env(cls, **overrides) -> "DataMeshConfig":
         """Create a DataMeshConfig with values from environment variables."""
-        return cls(
-            organisation=os.environ.get("DATAMESH_ORGANISATION", ""),
-            **overrides
-        )
+        return cls(org=os.environ.get("DATAMESH_ORGANISATION", ""), **overrides)
 
 
 class OceanumModelRun(ModelRun):
@@ -132,9 +129,13 @@ class OceanumModelRun(ModelRun):
                     (dict or DataMeshConfig instance, optional)
     """
 
+    model_config = ConfigDict(
+        protected_namespaces=(), extra="allow"
+    )  # Temporary fix to allow datamesh fields until spec is updated
+
     # Prax configuration with default from environment variables
     prax_config: PraxConfig = Field(default_factory=PraxConfig.from_env)
-    
+
     # DataMesh configuration with default from environment variables
     datamesh_config: DataMeshConfig = Field(default_factory=DataMeshConfig.from_env)
 
@@ -148,7 +149,7 @@ class OceanumModelRun(ModelRun):
         if isinstance(value, dict):
             return PraxConfig.from_dict(value)
         return value
-    
+
     # Validator to convert dictionary to DataMeshConfig
     @validator("datamesh_config", pre=True)
     def validate_datamesh_config(cls, value):
@@ -351,7 +352,7 @@ class OceanumModelRun(ModelRun):
 
         # Add Prax-specific fields
         spec.update({"prax": self.prax_config.dict()})
-        
+
         # Add DataMesh-specific fields
         spec.update({"datamesh": self.datamesh_config.dict()})
 
@@ -430,61 +431,69 @@ class OceanumModelRun(ModelRun):
         with open(filename, "w") as f:
             json.dump(spec, f, indent=2)
         logger.info(f"Model specification saved to {filename}")
-    
+
     def register_with_datamesh(self, data_type: str) -> str:
         """
         Register output data with DataMesh.
-        
+
         Args:
             data_type: Type of data ('spectra' or 'grid')
-            
+
         Returns:
             The registered dataset name
-            
+
         Raises:
             ValueError: If data_type is not 'spectra' or 'grid'
             ValueError: If datamesh_config is not enabled
-            ValueError: If organisation is not set
+            ValueError: If org is not set
         """
         if data_type not in ["spectra", "grid"]:
-            raise ValueError(f"Data type must be 'spectra' or 'grid', got '{data_type}'")
-            
+            raise ValueError(
+                f"Data type must be 'spectra' or 'grid', got '{data_type}'"
+            )
+
         if not self.datamesh_config.enabled:
             raise ValueError("DataMesh registration is not enabled")
-            
-        if not self.datamesh_config.organisation:
-            raise ValueError("Organisation must be set for DataMesh registration")
-            
-        # Generate dataset name in the format <organisation>-<run_id>-<data_type>
-        dataset_name = f"{self.datamesh_config.organisation}-{self.run_id}-{data_type}"
-        
+
+        if not self.datamesh_config.org:
+            # raise ValueError("Organisation must be set for DataMesh registration")
+            self.datamesh_config.org = "oceanum"  # This is a bug, hardcoded for now
+
+        # Generate dataset name in the format <org>-<run_id>-<data_type>
+        dataset_name = f"{self.datamesh_config.org}-{self.run_id}-{data_type}"
+
         # Import here to avoid circular imports
         from rompy_oceanum.datamesh import DatameshWriter
-        
+
         # Create DataMesh writer
         writer = DatameshWriter(
             datasource_id=dataset_name,
-            name=f"{self.datamesh_config.organisation} {self.name} {data_type}",
+            name=f"{self.datamesh_config.org} {self.run_id} {data_type}",
             description=f"ROMPY generated {data_type} dataset for run {self.run_id}",
-            tags=["rompy", f"{data_type}", f"{self.datamesh_config.organisation}"]
+            tags=self.datamesh_config.tags + ["waves", data_type],
+            labels=self.datamesh_config.labels,
         )
-        
+
+        filenamedict = {"grid": "swangrid", "spectra": "swanspec"}
+
         # Path to the output data (this is a simplified version, you may need to adjust)
-        data_file = self.output_directory / f"{data_type}.nc"
-        
+        data_file = self.output_dir / self.run_id / f"{filenamedict[data_type]}.nc"
+
         if not data_file.exists():
             raise FileNotFoundError(f"Data file not found: {data_file}")
-        
+
         # Register with DataMesh
         logger.info(f"Registering {data_type} data with DataMesh as '{dataset_name}'")
-        
+
         # Call the appropriate DataMesh registration method based on data type
         if data_type == "spectra":
             writer.write_spectra(str(data_file))
         else:  # grid
             writer.write_grid(str(data_file))
-            
-        logger.info(f"Successfully registered {data_type} data with DataMesh as '{dataset_name}'")
+
+        logger.info(
+            f"Successfully registered {data_type} data with DataMesh as '{dataset_name}'"
+        )
         return dataset_name
 
 

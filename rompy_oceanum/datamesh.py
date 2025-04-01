@@ -212,17 +212,16 @@ def load_rompy_config(config_path: Optional[str] = None) -> Dict:
         Parsed configuration as a dictionary
     """
     if config_path is None:
-        config = os.getenv("ROMPY_CONFIG")
-        if not config:
+        file_content = os.getenv("ROMPY_CONFIG")
+        if not file_content:
             raise ValueError(
                 "No config path provided and ROMPY_CONFIG environment variable not set"
             )
-        return config
-
-    try:
+    else:
         with open(config_path, "r") as f:
             file_content = f.read()
 
+    try:
         # The example model_config.json contains an escaped JSON string, not a raw JSON object
         # Handle this special case by checking if it starts and ends with quotes
         if file_content.startswith('"') and file_content.endswith('"'):
