@@ -29,6 +29,7 @@ class DatameshWriter(BaseModel):
     name: str
     description: str
     tags: list[str] = []
+    labels: list[str] = []
     _connector: None
 
     @property
@@ -55,6 +56,7 @@ class DatameshWriter(BaseModel):
         times = ds[coordinates["t"]].to_pandas()
         datasource_id = "_".join([self.datasource_id] + dataset_id_postfix)
         logger.info(f"\t -- writing to datamesh datasource_id {datasource_id}")
+        __import__("ipdb").set_trace()
         datasource = self.connector.write_datasource(
             datasource_id=datasource_id,
             name=" ".join([self.name] + name_postfix),
@@ -62,6 +64,7 @@ class DatameshWriter(BaseModel):
             data=ds,
             coordinates=coordinates,
             tags=self.tags + additional_tags,
+            labels=self.labels,
             tstart=times[0],
             tend=times[-1],
             geom={
@@ -155,12 +158,17 @@ def write_grid(
         "ROMPY generated dataset", help="Description for the dataset"
     ),
     tags: Optional[List[str]] = typer.Option(None, help="Tags for the dataset"),
+    labels: Optional[List[str]] = typer.Option(None, help="Labels for the dataset"),
 ):
     """Write grid data to DataMesh."""
     tags = tags or []
     try:
         writer = DatameshWriter(
-            datasource_id=datasource_id, name=name, description=description, tags=tags
+            datasource_id=datasource_id,
+            name=name,
+            description=description,
+            tags=tags,
+            labels=labels,
         )
 
         console.print(f"[bold blue]Writing grid data from file:[/] {file}")

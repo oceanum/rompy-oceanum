@@ -180,4 +180,4 @@ datamesh_config:
   enabled: true
   org: "oceanum"
   tags: ["rompy", "demo"]
-  labels: ["validation"]
+  labels: ["metoceanum_validation_wave"]
