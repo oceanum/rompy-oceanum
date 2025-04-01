@@ -14,8 +14,7 @@ from oceanum.datamesh.datasource import Coordinates
 from pydantic import BaseModel
 from rich.console import Console
 from rich.panel import Panel
-from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
-                      wait_fixed)
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from wavespectra import read_ncswan, read_ww3
 
 logger = logging.getLogger(__name__)
@@ -205,22 +204,25 @@ def write_spectra(
 def load_rompy_config(config_path: Optional[str] = None) -> Dict:
     """
     Load a rompy configuration from a file or environment variable.
-    
+
     Args:
         config_path: Path to the config file, if None will try to use ROMPY_CONFIG environment variable
-        
+
     Returns:
         Parsed configuration as a dictionary
     """
     if config_path is None:
-        config_path = os.environ.get("ROMPY_CONFIG")
-        if not config_path:
-            raise ValueError("No config path provided and ROMPY_CONFIG environment variable not set")
-    
+        config = os.getenv("ROMPY_CONFIG")
+        if not config:
+            raise ValueError(
+                "No config path provided and ROMPY_CONFIG environment variable not set"
+            )
+        return config
+
     try:
         with open(config_path, "r") as f:
             file_content = f.read()
-        
+
         # The example model_config.json contains an escaped JSON string, not a raw JSON object
         # Handle this special case by checking if it starts and ends with quotes
         if file_content.startswith('"') and file_content.endswith('"'):
@@ -232,7 +234,7 @@ def load_rompy_config(config_path: Optional[str] = None) -> Dict:
         else:
             # Regular JSON file - parse directly
             config = json.loads(file_content)
-        
+
         return config
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse config file: {e}")
@@ -243,65 +245,84 @@ def load_rompy_config(config_path: Optional[str] = None) -> Dict:
 @write_app.command("from-config")
 def write_from_config(
     config_path: Optional[str] = typer.Argument(
-        None, help="Path to rompy config file, if not provided will use ROMPY_CONFIG env var"
+        None,
+        help="Path to rompy config file, if not provided will use ROMPY_CONFIG env var",
     ),
     org: str = typer.Option("", help="Organisation name for dataset naming"),
-    tags: Optional[List[str]] = typer.Option(None, help="Additional tags for the datasets"),
+    tags: Optional[List[str]] = typer.Option(
+        None, help="Additional tags for the datasets"
+    ),
 ):
     """
     Write both grid and spectra data to DataMesh based on a rompy config file.
-    
+
     This command will:
     1. Read configuration from a file or ROMPY_CONFIG environment variable
     2. Create an OceanumModelRun instance from the config
     3. Register the grid and spectra data with DataMesh
     """
     tags = tags or []
-    
+
     try:
         # Load config from file or environment variable
         config = load_rompy_config(config_path)
-        
+
         # Import here to avoid circular imports
-        from rompy_oceanum.model_extension import OceanumModelRun, DataMeshConfig
-        
+        from rompy_oceanum.model_extension import DataMeshConfig, OceanumModelRun
+
         # Create an OceanumModelRun instance from the config
         model_run = OceanumModelRun.from_spec(config)
-        
+
         # Set up DataMesh configuration
         org = org or os.environ.get("DATAMESH_ORGANISATION", "")
-        
+
         if not org:
-            raise ValueError("Organisation name is required. Provide it as parameter or set DATAMESH_ORGANISATION env var.")
-        
+            raise ValueError(
+                "Organisation name is required. Provide it as parameter or set DATAMESH_ORGANISATION env var."
+            )
+
         # Display summary of what will be processed
-        console.print(Panel(
-            f"[bold]Processing model output for:[/] {model_run.name if hasattr(model_run, 'name') else 'ROMPY Model Run'}\n"
-            f"[bold]Run ID:[/] {model_run.run_id}\n"
-            f"[bold]Output directory:[/] {model_run.output_dir}\n"
-            f"[bold]Organisation:[/] {org}"
-        ))
-        
+        console.print(
+            Panel(
+                f"[bold]Processing model output for:[/] {model_run.name if hasattr(model_run, 'name') else 'ROMPY Model Run'}\n"
+                f"[bold]Run ID:[/] {model_run.run_id}\n"
+                f"[bold]Output directory:[/] {model_run.output_dir}\n"
+                f"[bold]Organisation:[/] {org}"
+            )
+        )
+
         # Process grid file if it exists
         grid_file = model_run.output_dir / model_run.run_id / "swangrid.nc"
         if grid_file.exists():
-            console.print(f"[bold blue]Registering grid data with DataMesh:[/] {grid_file}")
+            console.print(
+                f"[bold blue]Registering grid data with DataMesh:[/] {grid_file}"
+            )
             dataset_name = model_run.register_with_datamesh("grid")
-            console.print(f"[bold green]✓[/] Grid data registered successfully as '{dataset_name}'")
+            console.print(
+                f"[bold green]✓[/] Grid data registered successfully as '{dataset_name}'"
+            )
         else:
-            console.print(f"[bold yellow]Warning:[/] Grid file not found at {grid_file}")
-        
+            console.print(
+                f"[bold yellow]Warning:[/] Grid file not found at {grid_file}"
+            )
+
         # Process spectra file if it exists
         spectra_file = model_run.output_dir / model_run.run_id / "swanspec.nc"
         if spectra_file.exists():
-            console.print(f"[bold blue]Registering spectra data with DataMesh:[/] {spectra_file}")
+            console.print(
+                f"[bold blue]Registering spectra data with DataMesh:[/] {spectra_file}"
+            )
             dataset_name = model_run.register_with_datamesh("spectra")
-            console.print(f"[bold green]✓[/] Spectra data registered successfully as '{dataset_name}'")
+            console.print(
+                f"[bold green]✓[/] Spectra data registered successfully as '{dataset_name}'"
+            )
         else:
-            console.print(f"[bold yellow]Warning:[/] Spectra file not found at {spectra_file}")
-            
+            console.print(
+                f"[bold yellow]Warning:[/] Spectra file not found at {spectra_file}"
+            )
+
         console.print("[bold green]✓[/] Processing complete")
-        
+
     except Exception as e:
         console.print(f"[bold red]Error:[/] {str(e)}")
         if logger.level <= logging.DEBUG:  # Only show traceback in debug mode
