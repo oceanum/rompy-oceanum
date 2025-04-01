@@ -10,7 +10,8 @@ import logging
 import os
 import pathlib
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Optional, Union
+from typing import (TYPE_CHECKING, Any, Callable, ClassVar, Dict, List,
+                    Optional, Union)
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, validator
@@ -460,7 +461,7 @@ class OceanumModelRun(ModelRun):
             self.datamesh_config.org = "oceanum"  # This is a bug, hardcoded for now
 
         # Generate dataset name in the format <org>-<run_id>-<data_type>
-        dataset_name = f"{self.datamesh_config.org}-{self.run_id}-{data_type}"
+        dataset_name = f"{self.datamesh_config.org}-rompy-{self.run_id}-{data_type}"
 
         # Import here to avoid circular imports
         from rompy_oceanum.datamesh import DatameshWriter

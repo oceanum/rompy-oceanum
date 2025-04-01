@@ -63,7 +63,7 @@ class DatameshWriter(BaseModel):
             data=ds,
             coordinates=coordinates,
             tags=self.tags + additional_tags,
-            labels=self.labels,
+            # labels=self.labels,
             tstart=times[0],
             tend=times[-1],
             geom={
@@ -167,7 +167,7 @@ def write_grid(
             name=name,
             description=description,
             tags=tags,
-            labels=labels,
+            # labels=labels,
         )
 
         console.print(f"[bold blue]Writing grid data from file:[/] {file}")
