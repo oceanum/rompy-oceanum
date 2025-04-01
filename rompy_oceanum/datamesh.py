@@ -56,7 +56,6 @@ class DatameshWriter(BaseModel):
         times = ds[coordinates["t"]].to_pandas()
         datasource_id = "_".join([self.datasource_id] + dataset_id_postfix)
         logger.info(f"\t -- writing to datamesh datasource_id {datasource_id}")
-        __import__("ipdb").set_trace()
         datasource = self.connector.write_datasource(
             datasource_id=datasource_id,
             name=" ".join([self.name] + name_postfix),
