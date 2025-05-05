@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-RUN pip install --no-cache-dir appdirs oceanum "rompy>=v0.2.4"
+RUN pip install --no-cache-dir appdirs oceanum rompy
 
 # Copy the local rompy-oceanum source code
 COPY . /app/rompy-oceanum
