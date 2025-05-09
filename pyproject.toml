@@ -29,6 +29,11 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["rompy_oceanum"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"rompy_oceanum" = ["pipeline_templates/*.yaml"]
+
 
 [project.urls]
 Homepage = "https://github.com/rom-py/rompy"
