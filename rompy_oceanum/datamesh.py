@@ -1,7 +1,8 @@
 import json
 import logging
 import os
-***REMOVED***
+import sys
+import traceback
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -12,16 +13,15 @@ from oceanum.datamesh import Connector
 from oceanum.datamesh.connection import DatameshWriteError
 from oceanum.datamesh.datasource import Coordinates
 from pydantic import BaseModel
-from rich.console import Console
-from rich.panel import Panel
 from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
                       wait_fixed)
 from wavespectra import read_ncswan, read_ww3
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-
-console = Console()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s"
+)
 
 
 class DatameshWriter(BaseModel):
@@ -126,9 +126,10 @@ class DatameshWriter(BaseModel):
 # Create typer apps
 app = typer.Typer(
     help="DataMesh CLI for working with grid and spectra data",
-    rich_markup_mode="rich",
-    pretty_exceptions_enable=False,  # Show full tracebacks instead of simplified errors
-    pretty_exceptions_show_locals=False,  # Show local variables in tracebacks
+    rich_markup_mode="none",  # Disable rich markup to avoid terminal characters
+    pretty_exceptions_enable=False,
+    pretty_exceptions_show_locals=False,
+    no_args_is_help=True,
 )
 write_app = typer.Typer(help="Write data to DataMesh")
 app.add_typer(write_app, name="write")
@@ -143,9 +144,9 @@ def callback(
     """DataMesh CLI with debugging options."""
     if debug:
         # Set logging level to DEBUG for more verbose output
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format="%(message)s")
         logger.setLevel(logging.DEBUG)
-        console.print("[bold yellow]Debug mode enabled[/]")
+        print("Debug mode enabled")
 
 
 @write_app.command("grid")
@@ -170,14 +171,14 @@ def write_grid(
             # labels=labels,
         )
 
-        console.print(f"[bold blue]Writing grid data from file:[/] {file}")
+        print(f"Writing grid data from file: {file}")
         writer.write_grid(file)
-        console.print("[bold green]✓[/] Grid data written successfully")
+        print("✓ Grid data written successfully")
     except Exception as e:
-        console.print(f"[bold red]Error:[/] {str(e)}")
+        print(f"Error: {str(e)}")
         if logger.level <= logging.DEBUG:  # Only show traceback in debug mode
-            console.print("[bold yellow]Debug traceback:[/]")
-            console.print_exception(show_locals=True)
+            print("Debug traceback:")
+            traceback.print_exc()
         raise typer.Exit(code=1)
 
 
@@ -198,14 +199,14 @@ def write_spectra(
             datasource_id=datasource_id, name=name, description=description, tags=tags
         )
 
-        console.print(f"[bold blue]Writing spectra data from file:[/] {file}")
+        print(f"Writing spectra data from file: {file}")
         writer.write_spectra(file)
-        console.print("[bold green]✓[/] Spectra data written successfully")
+        print("✓ Spectra data written successfully")
     except Exception as e:
-        console.print(f"[bold red]Error:[/] {str(e)}")
+        print(f"Error: {str(e)}")
         if logger.level <= logging.DEBUG:  # Only show traceback in debug mode
-            console.print("[bold yellow]Debug traceback:[/]")
-            console.print_exception(show_locals=True)
+            print("Debug traceback:")
+            traceback.print_exc()
         raise typer.Exit(code=1)
 
 
@@ -291,64 +292,52 @@ def write_from_config(
             # )
 
         # Display summary of what will be processed
-        console.print(
-            Panel(
-                f"[bold]Processing model output for:[/] {model_run.name if hasattr(model_run, 'name') else 'ROMPY Model Run'}\n"
-                f"[bold]Run ID:[/] {model_run.run_id}\n"
-                f"[bold]Output directory:[/] {model_run.output_dir}\n"
-                f"[bold]Organisation:[/] {org}"
-            )
-        )
+        print("=" * 60)
+        print(f"Processing model output for: {model_run.name if hasattr(model_run, 'name') else 'ROMPY Model Run'}")
+        print(f"Run ID: {model_run.run_id}")
+        print(f"Output directory: {model_run.output_dir}")
+        print(f"Organisation: {org}")
+        print("=" * 60)
 
         # Process grid file if it exists
         grid_file = model_run.output_dir / model_run.run_id / "swangrid.nc"
         if grid_file.exists():
-            console.print(
-                f"[bold blue]Registering grid data with DataMesh:[/] {grid_file}"
-            )
+            print(f"Registering grid data with DataMesh: {grid_file}")
             dataset_name = model_run.register_with_datamesh("grid")
-            console.print(
-                f"[bold green]✓[/] Grid data registered successfully as '{dataset_name}'"
-            )
+            print(f"✓ Grid data registered successfully as '{dataset_name}'")
         else:
-            console.print(
-                f"[bold yellow]Warning:[/] Grid file not found at {grid_file}"
-            )
+            print(f"Warning: Grid file not found at {grid_file}")
 
         # Process spectra file if it exists
         spectra_file = model_run.output_dir / model_run.run_id / "swanspec.nc"
         if spectra_file.exists():
-            console.print(
-                f"[bold blue]Registering spectra data with DataMesh:[/] {spectra_file}"
-            )
+            print(f"Registering spectra data with DataMesh: {spectra_file}")
             dataset_name = model_run.register_with_datamesh("spectra")
-            console.print(
-                f"[bold green]✓[/] Spectra data registered successfully as '{dataset_name}'"
-            )
+            print(f"✓ Spectra data registered successfully as '{dataset_name}'")
         else:
-            console.print(
-                f"[bold yellow]Warning:[/] Spectra file not found at {spectra_file}"
-            )
+            print(f"Warning: Spectra file not found at {spectra_file}")
 
-        console.print("[bold green]✓[/] Processing complete")
+        print("✓ Processing complete")
 
     except Exception as e:
-        console.print(f"[bold red]Error:[/] {str(e)}")
+        print(f"Error: {str(e)}")
         if logger.level <= logging.DEBUG:  # Only show traceback in debug mode
-            console.print("[bold yellow]Debug traceback:[/]")
-            console.print_exception(show_locals=True)
+            print("Debug traceback:")
+            traceback.print_exc()
         raise typer.Exit(code=1)
 
 
 def main():
     """Main entry point for the CLI."""
     try:
-        app()
+        app(prog_name="datamesh")
     except Exception as e:
-        console.print("[bold red]Error:[/]")
-        console.print_exception(
-            show_locals=True
-        )  # Show detailed exception info with local variables
+        # Simplified error output
+        if logger.level <= logging.DEBUG:
+            print("Error:")
+            traceback.print_exc()
+        else:
+            print(f"Error: {str(e)}")
         sys.exit(1)
 
 
