@@ -61,10 +61,20 @@ class PraxConfig(BaseModel):
     pipeline_name: str = "swan-from-rompy"
     user: str = ""
     org: str = ""
+    datamesh_token: str = os.environ.get("DATAMESH_TOKEN", None)
     project: str = ""
     stage: str = "dev"
     url: str = "https://prax.oceanum.io"
     resources: PraxResources = Field(default_factory=PraxResources)
+
+    # raise if datamesh is None
+    @validator("datamesh_token")
+    def datamesh_token_is_not_none(cls, v):
+        if v is None:
+            raise ValueError(
+                "datamesh_token not set. Please set in config, or set DATAMESH_TOKEN environment variable"
+            )
+        return v
 
     @classmethod
     def from_env(cls, **overrides) -> "PraxConfig":
@@ -336,7 +346,10 @@ class OceanumModelRun(ModelRun):
             config_json = json.dumps({"run_id": self.run_id})
 
         # Create pipeline parameters
-        parameters = {"rompy-config": config_json}
+        parameters = {
+            "rompy-config": config_json,
+            "datamesh-token": self.prax_config.datamesh_token,
+        }
 
         return parameters
 
