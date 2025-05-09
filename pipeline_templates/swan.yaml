@@ -1,46 +1,10 @@
 name: rompy-oceanum
-model_type: oceanum_modelrun
 resources:
-
-  sources:
-    - name: rompy-oceanum
-      userSecretRef: gitlab-rw-oceanum-dev
-      defaultBranch: main
-      gitlab:
-        project: oceanum/rompy/rompy-oceanum
-        username: oceanum-dev
-
-  builds:
-    - name: swan
-      sourceRef: 
-        name: rompy-oceanum
-        branch: main
-      env:
-        - name: GITLAB_TOKEN
-          userSecretRef:
-            name: gitlab-rw-oceanum-dev
-            key: token
-      credentials:
-        userSecretRef: gitlab-rw-oceanum-dev
-      dockerfile: docker/swan.Dockerfile
-    - name: rompy-oceanum
-      sourceRef: 
-        name: rompy-oceanum
-        branch: main
-      env:
-        - name: GITLAB_TOKEN
-          userSecretRef:
-            name: gitlab-rw-oceanum-dev
-            key: token
-      credentials:
-        userSecretRef: gitlab-rw-oceanum-dev
-      dockerfile: docker/rompy.Dockerfile
 
   tasks:
     - name: prepare
-      image:
-        buildRef: rompy-oceanum
-      command: rompy-oceanm
+      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
+      command: rompy-oceanum
       outputs:
         artifacts:
           - name: workspace 
@@ -49,8 +13,7 @@ resources:
         cpu: 1
         memory: 1G
     - name: run
-      image:
-        buildRef: swan
+      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest"
       inputs:
         artifacts:
           - name: workspace
@@ -66,8 +29,7 @@ resources:
           - name: spectra
             path: /app/run_id/swanspec.nc
     - name: register
-      image:
-        buildRef: rompy-oceanum
+      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest"
       command: datamesh write from-config
       inputs:
         artifacts:
@@ -83,6 +45,8 @@ resources:
     - name: swan-from-rompy
       arguments:
         parameters:
+          - name: datamesh-token
+            env: DATAMESH_TOKEN
           - name: rompy-config
             env: ROMPY_CONFIG
             value: |
@@ -265,9 +229,6 @@ resources:
                     hottimes: [-1]
       defaults:
         env:
-          - name: DATAMESH_TOKEN
-            value: DATAMESH_TOKEN
-            # value: {DATAMESH_TOKEN}"
           - name: ROMPY_MODEL
             value: "swan"
           - name: OMPI_ALLOW_RUN_AS_ROOT
