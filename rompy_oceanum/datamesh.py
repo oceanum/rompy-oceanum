@@ -54,7 +54,7 @@ class DatameshWriter(BaseModel):
         description_postfix: list = [],
     ):
         times = ds[coordinates["t"]].to_pandas()
-        datasource_id = "_".join([self.datasource_id] + dataset_id_postfix)
+        datasource_id = "-".join([self.datasource_id] + dataset_id_postfix)
         logger.info(f"\t -- writing to datamesh datasource_id {datasource_id}")
         datasource = self.connector.write_datasource(
             datasource_id=datasource_id,
