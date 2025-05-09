@@ -29,7 +29,7 @@ resources:
           - name: spectra
             path: /app/run_id/swanspec.nc
     - name: register
-      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest"
+      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
       command: datamesh write from-config
       inputs:
         artifacts:

@@ -3,9 +3,14 @@
 import json
 import rompy
 import yaml
+import logging
 
 from rompy_oceanum import OceanumModelRun
 from rompy_oceanum.model_extension import PraxConfig, PraxResources, PraxTaskResources
+
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(level=logging.INFO)
 
 # Load model configuration
 model_config = yaml.safe_load(open("example_swan.yaml"))
@@ -91,6 +96,10 @@ final_status = result.get_status()
 print("\nFinal Pipeline Status:")
 result.summary_status(final_status)
 
+logger.info("Pipeline completed")
+logger.info("Output datasets available in datamesh:")
+logger.info("\t paramaters: https://ui.datamesh.oceanum.io/datasource/oceanum-run_id-grid_grid")
+logger.info("\t spectra:    https://ui.datamesh.oceanum.io/datasource/oceanum-rompy-run_id-spectra_spectra")
 
 # # Download outputs when complete (not yet implemented in Prax)
 # print("Downloading outputs...")

@@ -227,14 +227,14 @@ class OceanumModelRun(ModelRun):
                             config_dict = yaml.safe_load(param["value"])
                         else:
                             config_dict = param["value"]
-                            
+
                         # Update the run_id
                         config_dict["run_id"] = run_id
-                        
+
                         # Add the model config if it's not already there
                         if not config_dict.get("config") and hasattr(self, "config"):
                             config_dict["config"] = self.config.model_dump()
-                            
+
                         # Convert back to YAML string
                         param["value"] = yaml.dump(
                             config_dict, default_flow_style=False
@@ -484,7 +484,7 @@ class OceanumModelRun(ModelRun):
             self.datamesh_config.org = "oceanum"  # This is a bug, hardcoded for now
 
         # Generate dataset name in the format <org>-<run_id>-<data_type>
-        dataset_name = f"{self.datamesh_config.org}-rompy-{self.run_id}-{data_type}"
+        dataset_name = f"{self.datamesh_config.org}-rompy-{self.run_id}"
 
         # Import here to avoid circular imports
         from rompy_oceanum.datamesh import DatameshWriter

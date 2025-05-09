@@ -1,4 +1,4 @@
-run_id: run_id
+run_id: test
 output_dir: /app
 period:
   start: 20230101T000000
@@ -10,7 +10,7 @@ config:
     project:
       model_type: project
       name: Test declarative
-      nr: 'run1'
+      nr: "run1"
       title1: Declarative definition of a Swan config with rompy
     set:
       model_type: set
@@ -178,6 +178,5 @@ config:
 
 datamesh_config:
   enabled: true
-  org: "oceanum"
   tags: ["rompy", "demo"]
   labels: ["metoceanum_validation_wave"]
