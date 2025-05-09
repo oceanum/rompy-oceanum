@@ -12,6 +12,7 @@ import time
 from typing import Any, Dict, List, Optional, Union
 
 import requests
+import yaml
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -335,7 +336,7 @@ class PraxClient:
             raise ValueError(f"Error reading template file: {str(e)}")
 
         # Deploy the pipeline using the Prax API
-        url = f"{self.base_url}/api/pipelines/deploy"
+        url = f"{self.base_url}/api/projects"
 
         params = {
             "user": user,
@@ -344,9 +345,21 @@ class PraxClient:
             "stage": stage,
         }
 
-        # Prepare the payload with the template content
+        # The API expects a project_spec object with a name field
+        # Extract project name from the template if possible, or use a default name
+        try:
+            template_yaml = yaml.safe_load(template_content)
+            project_name = template_yaml.get("name", f"pipeline-{project}")
+        except Exception:
+            project_name = f"pipeline-{project}"
+
+        # Create the project spec with the required fields
         payload = {
-            "yaml_content": template_content,
+            "name": project_name,
+            "description": f"Pipeline deployed from {os.path.basename(template_path)}",
+            "version": "v1",
+            # Don't include content directly, we'll use the original template structure
+            "resources": template_yaml.get("resources", {}),
         }
 
         logger.debug(f"Deploying pipeline from template {template_path}")

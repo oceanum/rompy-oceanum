@@ -110,7 +110,7 @@ class PraxConfig(BaseModel):
 DEFAULT_PRAX_CONFIG = PraxConfig().dict()
 
 # Path to the pipeline templates directory
-PIPELINE_TEMPLATES_DIR = pathlib.Path(__file__).parent.parent / "pipeline_templates"
+PIPELINE_TEMPLATES_DIR = pathlib.Path(__file__).parent / "pipeline_templates"
 
 
 class DataMeshConfig(BaseModel):
@@ -221,10 +221,20 @@ class OceanumModelRun(ModelRun):
             if pipeline.get("name") == "swan-from-rompy":
                 for param in pipeline.get("arguments", {}).get("parameters", []):
                     if param.get("name") == "rompy-config" and "value" in param:
-                        # Parse the YAML string value
-                        config_dict = yaml.safe_load(param["value"])
+                        # Parse the YAML string value if it's a string
+                        config_dict = {}
+                        if isinstance(param["value"], str):
+                            config_dict = yaml.safe_load(param["value"])
+                        else:
+                            config_dict = param["value"]
+                            
                         # Update the run_id
                         config_dict["run_id"] = run_id
+                        
+                        # Add the model config if it's not already there
+                        if not config_dict.get("config") and hasattr(self, "config"):
+                            config_dict["config"] = self.config.model_dump()
+                            
                         # Convert back to YAML string
                         param["value"] = yaml.dump(
                             config_dict, default_flow_style=False

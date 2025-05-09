@@ -3,8 +3,8 @@
 Example script for submitting a SWAN model run to Prax with automatic pipeline deployment.
 """
 
-import os
 import logging
+import os
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -15,8 +15,11 @@ from rompy_oceanum.model_extension import PraxConfig, PraxResources, PraxTaskRes
 from rompy_oceanum.prax import PraxClient
 
 # Path to the pipeline template file
-TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                            "pipeline_templates", "swan.yaml")
+TEMPLATE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "pipeline_templates",
+    "swan.yaml",
+)
 
 # Initialize the client
 client = PraxClient()
@@ -28,9 +31,7 @@ prax_config = PraxConfig(
     org="oceanum",
     project="rompy-oceanum",
     stage="dev",
-    resources=PraxResources(
-        run=PraxTaskResources(cpu=2, memory="1G")
-    )
+    resources=PraxResources(run=PraxTaskResources(cpu=2, memory="1G")),
 )
 
 # Create an OceanumModelRun instance with the prax configuration
@@ -41,7 +42,9 @@ result = model.submit_to_prax(deploy_template=True)
 
 # No need to deploy separately, we're using deploy_template=True in submit_to_prax
 # The template_path is automatically determined from the model's swan_pipeline_template property
-print(f"Pipeline '{model.prax_config.pipeline_name}' will be deployed automatically if needed")
+print(
+    f"Pipeline '{model.prax_config.pipeline_name}' will be deployed automatically if needed"
+)
 
 # Get status
 status = result.get_status()
