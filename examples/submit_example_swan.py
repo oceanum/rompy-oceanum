@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 import json
-import rompy
-import yaml
 import logging
 
+import rompy
+import yaml
+
 from rompy_oceanum import OceanumModelRun
-from rompy_oceanum.model_extension import PraxConfig, PraxResources, PraxTaskResources
+from rompy_oceanum.model_extension import (PraxConfig, PraxResources,
+                                           PraxTaskResources)
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +24,11 @@ prax_config = PraxConfig(
     org="oceanum",
     project="rompy-oceanum",
     stage="dev",
-    resources=PraxResources(
-        run=PraxTaskResources(cpu=2, memory="2G")
-    )
+    resources=PraxResources(run=PraxTaskResources(cpu=2, memory="2G")),
 )
 
 # Create an OceanumModelRun with the prax_config
-model_run = OceanumModelRun(
-    **model_config,
-    prax_config=prax_config
-)
+model_run = OceanumModelRun(**model_config, prax_config=prax_config)
 
 
 # Alternatively, you could use a dictionary for prax_config:
@@ -98,8 +95,12 @@ result.summary_status(final_status)
 
 logger.info("Pipeline completed")
 logger.info("Output datasets available in datamesh:")
-logger.info("\t paramaters: https://ui.datamesh.oceanum.io/datasource/oceanum-run_id-grid_grid")
-logger.info("\t spectra:    https://ui.datamesh.oceanum.io/datasource/oceanum-rompy-run_id-spectra_spectra")
+logger.info(
+    f"\t paramaters: https://ui.datamesh.oceanum.io/datasource/oceanum-rompy-{model_run.run_id}-grid"
+)
+logger.info(
+    f"\t spectra:    https://ui.datamesh.oceanum.io/datasource/oceanum-rompy-{model_run.run_id}-spectra"
+)
 
 # # Download outputs when complete (not yet implemented in Prax)
 # print("Downloading outputs...")

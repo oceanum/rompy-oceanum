@@ -13,15 +13,11 @@ from oceanum.datamesh import Connector
 from oceanum.datamesh.connection import DatameshWriteError
 from oceanum.datamesh.datasource import Coordinates
 from pydantic import BaseModel
-from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
-                      wait_fixed)
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from wavespectra import read_ncswan, read_ww3
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 class DatameshWriter(BaseModel):
@@ -89,7 +85,7 @@ class DatameshWriter(BaseModel):
                     ]
                 ],
             },
-            append=coordinates["t"],
+            # append=coordinates["t"],  # Commented for now as this causes error in datamesh if data doesn't exist
         )
         return datasource
 
@@ -276,8 +272,7 @@ def write_from_config(
         config = load_rompy_config(config_path)
 
         # Import here to avoid circular imports
-        from rompy_oceanum.model_extension import (DataMeshConfig,
-                                                   OceanumModelRun)
+        from rompy_oceanum.model_extension import DataMeshConfig, OceanumModelRun
 
         # Create an OceanumModelRun instance from the config
         model_run = OceanumModelRun.from_spec(config)
@@ -285,15 +280,11 @@ def write_from_config(
         # Set up DataMesh configuration
         org = org or os.environ.get("DATAMESH_ORGANISATION", "")
 
-        if not org:
-            org = "oceanum"  # TODO this is a bug
-            # raise ValueError(
-            #     "Organisation name is required. Provide it as parameter or set DATAMESH_ORGANISATION env var."
-            # )
-
         # Display summary of what will be processed
         print("=" * 60)
-        print(f"Processing model output for: {model_run.name if hasattr(model_run, 'name') else 'ROMPY Model Run'}")
+        print(
+            f"Processing model output for: {model_run.name if hasattr(model_run, 'name') else 'ROMPY Model Run'}"
+        )
         print(f"Run ID: {model_run.run_id}")
         print(f"Output directory: {model_run.output_dir}")
         print(f"Organisation: {org}")

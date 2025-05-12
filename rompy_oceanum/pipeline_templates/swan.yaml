@@ -20,8 +20,8 @@ resources:
             path: /app/run_id
       command: bash -c "cd /app/run_id && mpirun -n 2 /usr/local/bin/swan.exe"
       resources:
-        cpu: 2
-        memory: 1G
+        cpu: 4
+        memory: 2G
       outputs:
         artifacts:
           - name: grid
