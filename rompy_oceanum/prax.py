@@ -309,6 +309,7 @@ class PraxClient:
             # If we're not sure, we'll assume it doesn't exist
             return False
 
+
     def deploy_pipeline(
         self, template_path: str, user: str, org: str, project: str, stage: str
     ) -> Dict[str, Any]:
@@ -377,6 +378,40 @@ class PraxClient:
             result = response.json()
 
             logger.info(f"Successfully deployed pipeline from {template_path}")
+
+            # Wait for the pipeline to be fully created
+            pipeline_name = template_yaml.get("name")
+
+            if pipeline_name:
+                logger.info(
+                    f"Waiting for pipeline {pipeline_name} to be fully created...this may take a few minutes"
+                )
+                max_wait_time = 300  # Maximum wait time in seconds
+                check_interval = 10  # Check interval in seconds
+                start_time = time.time()
+
+                while time.time() - start_time < max_wait_time:
+                    # Check if the pipeline exists and is ready
+                    if self.check_pipeline_exists(
+                        pipeline_name=pipeline_name,
+                        user=user,
+                        org=org,
+                        project=project,
+                        stage=stage,
+                    ):
+                        logger.info(
+                            f"Pipeline {pipeline_name} is now fully created and ready"
+                        )
+                        break
+
+                    # Wait before checking again
+                    time.sleep(check_interval)
+                else:
+                    logger.warning(
+                        f"Timed out waiting for pipeline {pipeline_name} to be fully created"
+                    )
+                    raise Exception("Timed out waiting for pipeline")
+
             return result
 
         except requests.exceptions.RequestException as e:
@@ -403,6 +438,9 @@ class PraxClient:
 
             # In production, raise the error
             raise
+
+        return result
+
 
     def __init__(
         self, base_url: str = "https://prax.oceanum.io", token: Optional[str] = None

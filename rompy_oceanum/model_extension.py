@@ -1,3 +1,4 @@
+from tabnanny import check
 """
 Model extension for rompy-oceanum.
 
@@ -10,7 +11,8 @@ import logging
 import os
 import pathlib
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Optional, Union
+from typing import (TYPE_CHECKING, Any, Callable, ClassVar, Dict, List,
+                    Optional, Union)
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, validator
@@ -298,23 +300,28 @@ class OceanumModelRun(ModelRun):
 
         # If we need to deploy the pipeline template first
         if deploy_template and pipeline_name == "swan-from-rompy":
-            # Create a temporary file with the customized template
-            template_path = pathlib.Path.cwd() / "swan_template_custom.yaml"
-            with open(template_path, "w") as f:
-                yaml.dump(self.swan_pipeline_template, f)
+            # check if pipeline project exists
+            exists = client.check_pipeline_exists(pipeline_name=pipeline_name, org=org, project=project, user=user, stage=stage)
+            if exists:
+                logger.info(f"Pipeline project {pipeline_name} already exists")
+            else:
+                # Create a temporary file with the customized template
+                template_path = pathlib.Path.cwd() / "swan_template_custom.yaml"
+                with open(template_path, "w") as f:
+                    yaml.dump(self.swan_pipeline_template, f)
 
-            logger.info(
-                f"Deploying customized Swan pipeline template from {template_path}"
-            )
-            client.deploy_pipeline(
-                template_path=str(template_path),
-                user=user,
-                org=org,
-                project=project,
-                stage=stage,
-            )
-            # Clean up the temporary file
-            template_path.unlink()
+                logger.info(
+                    f"Deploying customized Swan pipeline template from {template_path}"
+                )
+                client.deploy_pipeline(
+                    template_path=str(template_path),
+                    user=user,
+                    org=org,
+                    project=project,
+                    stage=stage,
+                )
+                # Clean up the temporary file
+                template_path.unlink()
 
         # Submit pipeline
         logger.info(f"Submitting {pipeline_name} pipeline to Prax")

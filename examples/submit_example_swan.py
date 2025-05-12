@@ -53,7 +53,7 @@ model_run = OceanumModelRun(**model_config, prax_config=prax_config)
 
 # Submit to Prax pipeline
 # All the configuration is now part of the model_run.prax_config
-result = model_run.submit_to_prax()
+result = model_run.submit_to_prax(deploy_template=True)
 
 # Monitor status
 status = result.get_status()
