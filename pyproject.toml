@@ -5,26 +5,26 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "rompy-oceanum"
 version = "0.1.0"
-authors = [
-  { name = "rompy-oceanum contributors" }
-]
+authors = [{ name = "rompy-oceanum contributors" }]
 description = "Oceanum Prax pipeline integration for rompy"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent"
+    "Operating System :: OS Independent",
 ]
 dependencies = [
-    "rompy>=0.2.3",
+    "rompy[swan,schism]>=0.5.1",
     "pydantic>=2.0.0",
     "pyyaml>=6.0",
     "requests>=2.25.0",
     "tenacity>=9.0.0",
     "typer>=0.15.0",
     "shellingham>=1.5.0",
-    "rich>=10.11.0"
+    "rich>=10.11.0",
+    "oceanum",
+    "oceanum-prax",
 ]
 
 [tool.setuptools]
@@ -38,6 +38,12 @@ include-package-data = true
 [project.urls]
 Homepage = "https://github.com/rom-py/rompy"
 "Bug Tracker" = "https://github.com/rom-py/rompy/issues"
+
+[project.entry-points."rompy.pipeline"]
+prax = "rompy_oceanum.pipeline:PraxPipelineBackend"
+
+[project.entry-points."rompy.postprocess"]
+datamesh = "rompy_oceanum.postprocess:DataMeshPostprocessor"
 
 [project.entry-points."rompy.extensions"]
 oceanum = "rompy_oceanum:extension"
@@ -55,8 +61,4 @@ python_functions = "test_*"
 addopts = "--cov=rompy_oceanum --cov-report=term-missing"
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=6.0.0",
-    "pytest-cov>=2.12.0",
-    "pytest-mock>=3.6.0"
-]
+dev = ["pytest>=6.0.0", "pytest-cov>=2.12.0", "pytest-mock>=3.6.0"]

@@ -1,0 +1,168 @@
+# Pipeline-specific backend configuration for SWAN execution in Prax environment
+# This configuration is designed to work with the rompy CLI and Prax pipeline system
+
+# SWAN model execution configuration
+swan:
+  # Model configuration
+  model_type: "swan"
+  model_version: "latest"
+
+  # Generation stage backend
+  generate:
+    type: docker
+    image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
+    timeout: 1800  # 30 minutes
+    cpu: 1
+    memory: "1G"
+    user: "root"
+    working_dir: "/app"
+    env_vars:
+      ROMPY_MODEL: "swan"
+      ROMPY_LOG_LEVEL: "INFO"
+      PYTHONUNBUFFERED: "1"
+    remove_container: true
+
+  # Execution stage backend
+  run:
+    type: docker
+    image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest"
+    timeout: 3600  # 1 hour
+    cpu: 4
+    memory: "2G"
+    mpiexec: "mpirun -n 2"
+    executable: "/usr/local/bin/swan.exe"
+    user: "root"
+    working_dir: "/app"
+    env_vars:
+      OMPI_ALLOW_RUN_AS_ROOT: "1"
+      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: "1"
+      OMP_NUM_THREADS: "2"
+      ROMPY_MODEL: "swan"
+    volumes: []
+    remove_container: true
+
+  # Postprocessing stage backend
+  postprocess:
+    type: docker
+    image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
+    timeout: 1800  # 30 minutes
+    cpu: 1
+    memory: "1G"
+    user: "root"
+    working_dir: "/app"
+    env_vars:
+      ROMPY_MODEL: "swan"
+      PYTHONUNBUFFERED: "1"
+    remove_container: true
+
+# Postprocessor configuration
+postprocessors:
+  datamesh:
+    processor: "datamesh"
+    config:
+      # File patterns to include in DataMesh registration
+      output_patterns:
+        - "*.nc"      # NetCDF output files
+        - "*.dat"     # SWAN data files
+        - "*.csv"     # CSV output files
+        - "*.log"     # Log files
+        - "*.tab"     # Tabular output files
+
+      # Tags to apply to the dataset
+      tags:
+        - "swan"
+        - "wave-model"
+        - "oceanum"
+        - "rompy-generated"
+
+      # Additional metadata
+      metadata:
+        model_type: "swan"
+        generated_by: "rompy-oceanum"
+        framework: "rompy"
+        execution_environment: "prax"
+
+      # DataMesh specific settings
+      dataset_name_template: "swan-{run_id}-{timestamp}"
+      include_model_config: true
+      include_execution_metadata: true
+
+# Pipeline execution settings
+pipeline:
+  # Default stage execution order
+  stages:
+    - generate
+    - run
+    - postprocess
+
+  # Stage dependencies
+  dependencies:
+    run:
+      - generate
+    postprocess:
+      - run
+
+  # Artifact passing between stages
+  artifacts:
+    workspace:
+      source_stage: generate
+      target_stages: [run]
+      path: "/app"
+    outputs:
+      source_stage: run
+      target_stages: [postprocess]
+      path: "/app/outputs"
+
+  # Pipeline-level environment variables
+  env_vars:
+    ROMPY_PIPELINE: "swan-from-rompy"
+    ROMPY_BACKEND_SYSTEM: "prax"
+    ROMPY_EXECUTION_MODE: "pipeline"
+
+# Resource limits and requests
+resources:
+  # Resource requests (guaranteed)
+  requests:
+    cpu: "500m"      # 0.5 CPU cores
+    memory: "512Mi"  # 512 MB
+
+  # Resource limits (maximum)
+  limits:
+    cpu: "4"         # 4 CPU cores max
+    memory: "4Gi"    # 4 GB max
+
+# Error handling and retry configuration
+error_handling:
+  # Retry configuration
+  retry:
+    max_attempts: 2
+    backoff_factor: 2
+    retry_on:
+      - "timeout"
+      - "resource_limit"
+      - "transient_error"
+
+  # Cleanup on failure
+  cleanup_on_failure: true
+
+  # Stage validation
+  validate_stages: true
+  validate_outputs: true
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "structured"
+  capture_stdout: true
+  capture_stderr: true
+
+  # Log destinations
+  destinations:
+    - console
+    - file
+
+  # Log file settings
+  file_settings:
+    path: "/app/logs"
+    rotation: "daily"
+    retention: "7d"

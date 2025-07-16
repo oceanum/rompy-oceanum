@@ -1,0 +1,32 @@
+backend:
+  cpu: 4
+  env_vars:
+    OMPI_ALLOW_RUN_AS_ROOT: '1'
+    OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: '1'
+    OMP_NUM_THREADS: '4'
+    ROMPY_MODEL: swan
+  executable: /usr/local/bin/swan.exe
+  image: us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest
+  memory: 2G
+  mpiexec: mpirun -n 2
+  remove_container: true
+  timeout: 3600
+  type: docker
+  user: root
+  volumes: []
+postprocess:
+  config:
+    metadata:
+      backend_type: docker
+      generated_by: rompy-oceanum
+      model_type: swan
+    output_patterns:
+    - '*.nc'
+    - '*.dat'
+    - '*.csv'
+    - '*.log'
+    tags:
+    - swan
+    - oceanum
+    - rompy-generated
+  processor: datamesh

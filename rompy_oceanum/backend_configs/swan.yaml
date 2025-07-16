@@ -1,0 +1,41 @@
+# Backend configuration for SWAN model execution using Docker backend
+# This configuration is for local testing/development - spawns Docker containers
+
+backend:
+  type: docker
+  image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest"
+  timeout: 3600
+  cpu: 4
+  memory: "2G"
+  mpiexec: "mpirun -n 2"
+  executable: "/usr/local/bin/swan.exe"
+  user: "root"
+  env_vars:
+    OMPI_ALLOW_RUN_AS_ROOT: "1"
+    OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: "1"
+    OMP_NUM_THREADS: "2"
+    ROMPY_MODEL: "swan"
+  volumes: []
+  remove_container: true
+
+postprocess:
+  processor: datamesh
+  config:
+    output_patterns:
+      - "*.nc"
+      - "*.dat"
+      - "*.csv"
+      - "*.log"
+    tags:
+      - "swan"
+      - "wave-model"
+      - "oceanum"
+      - "rompy-generated"
+      - "local-testing"
+    metadata:
+      model_type: "swan"
+      backend_type: "docker"
+      execution_environment: "local"
+      purpose: "development"
+      generated_by: "rompy-oceanum"
+      framework: "rompy"
