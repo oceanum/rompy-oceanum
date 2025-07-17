@@ -262,7 +262,7 @@ def write_from_config(
 
     This command will:
     1. Read configuration from a file or ROMPY_CONFIG environment variable
-    2. Create an OceanumModelRun instance from the config
+    2. Load the model configuration data
     3. Register the grid and spectra data with DataMesh
     """
     tags = tags or []
