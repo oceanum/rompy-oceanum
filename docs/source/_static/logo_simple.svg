@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="80" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- White background with border for maximum contrast -->
+  <rect width="300" height="80" fill="#ffffff" stroke="#0d2d3f" stroke-width="2"/>
+
+  <!-- Main title with strong contrast -->
+  <text x="20" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#0d2d3f">
+    rompy-oceanum
+  </text>
+
+  <!-- Subtitle -->
+  <text x="20" y="55" font-family="Arial, sans-serif" font-size="12" fill="#0d2d3f">
+    Ocean Modeling via Oceanum CLI
+  </text>
+
+  <!-- Simple wave icon -->
+  <g transform="translate(250, 25)">
+    <circle cx="0" cy="0" r="15" fill="#a9dce0" stroke="#0d2d3f" stroke-width="1"/>
+    <path d="M-8,0 Q-4,-4 0,0 T8,0" stroke="#0d2d3f" stroke-width="2" fill="none"/>
+    <path d="M-8,4 Q-4,0 0,4 T8,4" stroke="#0d2d3f" stroke-width="1.5" fill="none"/>
+    <circle cx="0" cy="0" r="2" fill="#b84528"/>
+  </g>
+
+  <!-- CLI badge -->
+  <rect x="200" y="45" width="80" height="18" rx="9" fill="#b84528"/>
+  <text x="240" y="57" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    oceanum CLI
+  </text>
+</svg>
