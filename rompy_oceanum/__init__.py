@@ -1,13 +1,18 @@
 """
 rompy-oceanum: Oceanum Prax integration for rompy
 
-This package extends rompy to allow submitting model runs to Oceanum's Prax system.
+This package extends rompy with Prax pipeline backend integration using
+the rompy plugin architecture.
 """
 
-from .extension import extension
-from .model_extension import OceanumModelRun
-from .prax import PraxClient, PraxResult
+from .client import PraxClient, PraxResult
+from .config import PraxConfig, DataMeshConfig, PraxPipelineConfig
+from .pipeline import PraxPipelineBackend
+from .postprocess import DataMeshPostprocessor
 
-__all__ = ["PraxClient", "PraxResult", "OceanumModelRun", "extension"]
+__all__ = [
+    "PraxClient", "PraxResult", "PraxConfig", "DataMeshConfig",
+    "PraxPipelineConfig", "PraxPipelineBackend", "DataMeshPostprocessor"
+]
 
-__version__ = "pre-alpha"
+__version__ = "0.1.0"

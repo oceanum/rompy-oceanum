@@ -176,7 +176,7 @@ config:
         format: free
       hottimes: [-1]
 
-datamesh_config:
-  enabled: true
-  tags: ["rompy", "demo"]
-  labels: ["metoceanum_validation_wave"]
+# datamesh_config:
+#   enabled: true
+#   tags: ["rompy", "demo"]
+#   labels: ["metoceanum_validation_wave"]

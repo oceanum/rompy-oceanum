@@ -17,6 +17,11 @@ RUN pip install --no-cache-dir appdirs oceanum rompy
 # Copy the local rompy-oceanum source code
 COPY . /app/rompy-oceanum
 
+# # install required rompy branch from git
+# WORKDIR /app
+# RUN git clone https://github.com/rom-py/rompy.git && \
+#     cd rompy && git checkout 162-run-and-postprocess-plugin-framework && pip install -e .
+
 # Install rompy-oceanum from the local source code
 WORKDIR /app/rompy-oceanum
 RUN pip install -e .

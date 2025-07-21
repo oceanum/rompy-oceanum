@@ -1,58 +1,357 @@
 # rompy-oceanum
 
-A rompy extension for interacting with the Oceanum Prax pipeline deployment and management system.
+[![Documentation](https://github.com/rom-py/rompy-oceanum/actions/workflows/docs.yml/badge.svg)](https://github.com/rom-py/rompy-oceanum/actions/workflows/docs.yml)
+[![Pages](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://rom-py.github.io/rompy-oceanum/)
+
+A rompy plugin that provides seamless integration with the oceanum CLI and Prax pipeline backend for executing ocean models on Oceanum's platform. Available as the `oceanum rompy` command group with enhanced user experience and unified authentication.
+
+📖 **[View Full Documentation](https://rom-py.github.io/rompy-oceanum/)**
 
 ## Installation
 
 ```bash
-pip install rompy-oceanum
+pip install rompy-oceanum oceanum
+```
+
+Verify the integration works:
+
+```bash
+oceanum rompy --help
 ```
 
 ## Features
 
-- Submit rompy model configurations to Oceanum Prax pipelines
-- Monitor pipeline status and logs
-- Download output files from completed pipelines
+- **Oceanum CLI Integration**: Seamlessly integrated as `oceanum rompy` command group
+- **Unified Authentication**: Uses oceanum's built-in authentication system (no manual token management)
+- **Enhanced User Experience**: Rich terminal output with progress indicators and organized file management
+- **Template-Based Configuration**: Generate optimized rompy configurations automatically
+- **Complete Workflow Support**: From configuration creation to result management
+- **Pipeline Backend**: Execute rompy models on Oceanum's Prax platform
+- **Smart Output Management**: Automatic file organization by stage and type
 
 ## Usage
 
-```python
-import rompy
-import rompy_oceanum
-
-# Create a rompy model configuration as usual
-model_run = rompy.ModelRun(...)
-
-# Submit to Prax pipeline
-result = model_run.submit_to_prax(
-    pipeline_name="swan-from-rompy",
-    user="username",
-    org="orgname",
-    project="project-name",
-    stage="dev"
-)
-
-# Monitor status
-status = result.get_status()
-
-# Get logs
-logs = result.get_logs()
-
-# Download outputs when complete
-result.download_outputs(target_dir="./outputs")
-```
-
-## Authentication
-
-Set your Prax API token as an environment variable:
+### Quick Start with Oceanum CLI
 
 ```bash
-export PRAX_TOKEN="your_token_here"
+# Authenticate with oceanum (one-time setup)
+oceanum auth login
+
+# Generate optimized rompy configuration
+oceanum rompy init swan --template basic --domain "my_domain"
+
+# Execute model via Prax pipeline
+oceanum rompy run config.yml swan --pipeline-name my-pipeline
+
+# Monitor execution
+oceanum rompy status <run-id> --watch
+
+# Download organized results
+oceanum rompy sync <run-id> ./outputs --organize
+```
+
+### Available CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `oceanum rompy init` | Generate optimized rompy configurations from templates |
+| `oceanum rompy run` | Execute models via Prax pipeline with enhanced monitoring |
+| `oceanum rompy status` | Monitor pipeline execution with real-time updates |
+| `oceanum rompy logs` | View and filter pipeline logs |
+| `oceanum rompy sync` | Download and organize pipeline outputs |
+
+### Basic Pipeline Execution (Programmatic)
+
+```python
+import rompy
+
+# Create a rompy model configuration as usual
+model_run = rompy.ModelRun(
+    config=swan_config,
+    output_dir="./outputs",
+    run_id="my-run"
+)
+
+# Execute using Prax pipeline backend (authentication handled automatically)
+result = model_run.pipeline(
+    backend="prax",
+    pipeline_name="swan-from-rompy",
+    wait_for_completion=True,
+    download_outputs=True
+)
+
+# Check results
+if result["success"]:
+    print(f"Pipeline completed! Run ID: {result['prax_run_id']}")
+    print(f"Downloaded files: {result.get('downloaded_files', [])}")
+```
+
+### Configuration Templates
+
+Generate optimized configurations for different use cases:
+
+```bash
+# Basic operational configuration
+oceanum rompy init swan --template basic --domain "perth_coast"
+
+# Advanced research configuration
+oceanum rompy init swan --template research --domain "great_barrier_reef"
+
+# Interactive configuration setup
+oceanum rompy init schism --template advanced --interactive
+
+# Custom grid specification
+oceanum rompy init ww3 --bbox "110,-35,120,-25" --grid-resolution 0.05
+```
+
+Template types:
+- `basic`: Essential model physics and standard outputs
+- `advanced`: Additional physics, validation, and diagnostics  
+- `research`: Comprehensive analysis and statistics
+- `operational`: Optimized for speed and monitoring
+
+### Authentication
+
+rompy-oceanum uses oceanum's unified authentication system:
+
+```bash
+# Authenticate once (session persists)
+oceanum auth login
+
+# Check authentication status
+oceanum auth status
+
+# Logout when needed
+oceanum auth logout
+```
+
+No manual token management is required - all authentication is handled automatically.
+
+### Complete Workflow Example
+
+```bash
+#!/bin/bash
+# Complete modeling workflow
+
+# Ensure authentication
+oceanum auth login
+
+# Generate configuration
+oceanum rompy init swan --template operational --domain "perth_coast"
+
+# Execute model
+RUN_ID=$(oceanum rompy run config.yml swan --pipeline-name swan-operational | grep "Prax run ID:" | cut -d' ' -f4)
+
+# Monitor execution
+oceanum rompy status $RUN_ID --watch
+
+# Download results when complete
+oceanum rompy sync $RUN_ID ./outputs --organize
+```
+
+### CLI Reference
+
+```bash
+# Generate configuration from template
+oceanum rompy init swan --template basic --domain "my_domain"
+
+# Execute model via Prax pipeline
+oceanum rompy run config.yml swan --pipeline-name my-pipeline
+
+# Monitor pipeline execution
+oceanum rompy status <run-id> --watch
+
+# View real-time logs
+oceanum rompy logs <run-id> --follow
+
+# Download organized outputs
+oceanum rompy sync <run-id> ./outputs --organize
+```
+
+## Enhanced Features
+
+### Rich Terminal Output
+
+The oceanum CLI integration provides enhanced user experience:
+
+```bash
+🚀 Executing pipeline: swan-operational
+📊 Model: swan, Run ID: perth_coast_swan_basic
+🏢 Org: oceanum, Project: wave-forecasting, Stage: dev
+✅ Pipeline executed successfully!
+🆔 Prax run ID: prax-perth_coast_swan_basic
+💡 Monitor with: oceanum rompy status prax-perth_coast_swan_basic
+```
+
+### Organized File Downloads
+
+Automatic file organization by stage and type:
+
+```bash
+📁 Files organized by stage and type:
+  outputs/
+  ├── postprocess/
+  │   ├── netcdf/
+  │   │   └── wave_height.nc
+  │   └── plots/
+  │       └── wave_field.png
+  ├── run/
+  │   └── logs/
+  │       └── model.log
+  └── run_metadata.json
+```
+
+### Automation-Friendly
+
+Perfect for scripts and automation:
+
+```bash
+# Batch processing multiple domains
+for domain in "perth" "sydney" "melbourne"; do
+    oceanum rompy init swan --template operational --domain "$domain" --output "${domain}_config.yml"
+    oceanum rompy run "${domain}_config.yml" swan --pipeline-name swan-operational &
+done
+wait  # Wait for all background jobs
+```
+
+## Configuration
+
+### Authentication
+
+rompy-oceanum uses oceanum's unified authentication system - no manual token management required:
+
+```bash
+# Authenticate once (session persists across terminals)
+oceanum auth login
+
+# Check authentication status
+oceanum auth status
+
+# Logout when needed
+oceanum auth logout
+```
+
+### Optional Environment Variables
+
+You can set default values for common parameters:
+
+```bash
+export ROMPY_CONFIG="./configs/default.yml"  # Default configuration file
+export ROMPY_MODEL="swan"                    # Default model type
+export PRAX_PROJECT="wave-forecasting"      # Default project name
+export PRAX_STAGE="dev"                     # Default deployment stage
+```
+
+### Template Configuration
+
+Generate configurations using built-in templates:
+
+```bash
+# List available templates
+oceanum rompy init --help
+
+# Generate with template
+oceanum rompy init swan --template operational --domain "my_domain"
+```
+
+For programmatic configuration:
+
+```bash
+export DATAMESH_TOKEN="your_datamesh_token"
+export DATAMESH_BASE_URL="https://datamesh.oceanum.io"  # Optional
+```
+
+### Configuration Files
+
+You can also provide configuration explicitly in your code:
+
+```python
+from rompy_oceanum.config import PraxConfig
+
+config = PraxConfig(
+    base_url="https://prax.oceanum.io",
+    token="your-token",
+    org="your-org",
+    project="your-project",
+    stage="dev"
+)
+```
+
+## Architecture
+
+This package implements rompy's plugin architecture:
+
+- **Pipeline Backend**: Registered as `rompy.pipeline` entry point
+- **Postprocessor**: DataMesh integration via `rompy.postprocess` entry point
+- **Runtime Selection**: Backends chosen at execution time, not configuration time
+- **Separation of Concerns**: Model configuration separate from execution configuration
+
+## Migration
+
+If you're upgrading from the legacy `OceanumModelRun` approach, see [MIGRATION.md](./MIGRATION.md) for a complete migration guide.
+
+## Examples
+
+### Complete Workflow Scripts
+
+See workflow automation examples:
+
+```bash
+# Batch processing script
+for domain in "domain1" "domain2" "domain3"; do
+    oceanum rompy init swan --template operational --domain "$domain" --output "${domain}.yml"
+    oceanum rompy run "${domain}.yml" swan --pipeline-name swan-operational
+done
+```
+
+### Python Integration
+
+```python
+import subprocess
+
+# Generate configuration
+subprocess.run([
+    "oceanum", "rompy", "init", "swan",
+    "--template", "research",
+    "--domain", "research_domain"
+], check=True)
+
+# Execute model
+result = subprocess.run([
+    "oceanum", "rompy", "run", "config.yml", "swan",
+    "--pipeline-name", "swan-research", 
+    "--wait"
+], capture_output=True, text=True, check=True)
+
+# Extract run ID for further processing
+for line in result.stdout.split('\n'):
+    if '🆔 Prax run ID:' in line:
+        run_id = line.split()[-1]
+        break
 ```
 
 ## Documentation
 
-For more detailed documentation, see the [docs](./docs) directory.
+For comprehensive documentation including CLI reference, configuration guides, and examples:
+
+- **Full Documentation**: [docs/](./docs/) directory
+- **CLI Reference**: Complete command documentation with examples
+- **Getting Started**: Step-by-step tutorials with oceanum CLI integration
+- **Configuration Guide**: Template system and advanced configuration options
+
+## Migration from Standalone CLI
+
+If you were using the standalone `rompy-oceanum` CLI, the new commands are:
+
+| Old Command | New Command |
+|-------------|-------------|
+| `rompy-oceanum run` | `oceanum rompy run` |
+| `rompy-oceanum status` | `oceanum rompy status` |
+| `rompy-oceanum logs` | `oceanum rompy logs` |
+| `rompy-oceanum download` | `oceanum rompy sync` |
+| Manual config | `oceanum rompy init` |
+
+Authentication is now handled via `oceanum auth login` instead of environment variables.
 
 ## License
 

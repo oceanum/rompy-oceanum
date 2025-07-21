@@ -262,7 +262,7 @@ def write_from_config(
 
     This command will:
     1. Read configuration from a file or ROMPY_CONFIG environment variable
-    2. Create an OceanumModelRun instance from the config
+    2. Load the model configuration data
     3. Register the grid and spectra data with DataMesh
     """
     tags = tags or []
@@ -271,42 +271,69 @@ def write_from_config(
         # Load config from file or environment variable
         config = load_rompy_config(config_path)
 
-        # Import here to avoid circular imports
-        from rompy_oceanum.model_extension import DataMeshConfig, OceanumModelRun
-
-        # Create an OceanumModelRun instance from the config
-        model_run = OceanumModelRun.from_spec(config)
+        # Extract basic info from config
+        run_id = config.get('run_id', 'unknown')
+        output_dir = Path(config.get('output_dir', '/app'))
 
         # Set up DataMesh configuration
-        org = org or os.environ.get("DATAMESH_ORGANISATION", "")
+        org = org or os.environ.get("DATAMESH_ORGANISATION", "oceanum")
 
         # Display summary of what will be processed
         print("=" * 60)
-        print(
-            f"Processing model output for: {model_run.name if hasattr(model_run, 'name') else 'ROMPY Model Run'}"
-        )
-        print(f"Run ID: {model_run.run_id}")
-        print(f"Output directory: {model_run.output_dir}")
+        print("Processing model output for: ROMPY Model Run")
+        print(f"Run ID: {run_id}")
+        print(f"Output directory: {output_dir}")
         print(f"Organisation: {org}")
         print("=" * 60)
 
+        # Determine correct file paths based on run_id_subdir configuration
+        run_id_subdir = config.get('run_id_subdir', True)
+
+        if run_id_subdir:
+            # Traditional path with run_id subdirectory
+            base_path = output_dir / run_id
+        else:
+            # Direct path without run_id subdirectory (Prax pipeline context)
+            base_path = output_dir
+
+        print(f"Looking for output files in: {base_path}")
+
+        # Create DataMesh writer for this run
+        datasource_base = f"{org}-rompy-{run_id}"
+
         # Process grid file if it exists
-        grid_file = model_run.output_dir / model_run.run_id / "swangrid.nc"
+        grid_file = base_path / "swangrid.nc"
         if grid_file.exists():
             print(f"Registering grid data with DataMesh: {grid_file}")
-            dataset_name = model_run.register_with_datamesh("grid")
-            print(f"✓ Grid data registered successfully as '{dataset_name}'")
+            grid_writer = DatameshWriter(
+                datasource_id=f"{datasource_base}-grid",
+                name=f"{org} ROMPY Grid Data",
+                description=f"ROMPY generated grid data for run {run_id}",
+                tags=tags + ["rompy", "swan", "grid", org]
+            )
+            grid_writer.write_grid(grid_file)
+            print(f"✓ Grid data registered successfully as '{datasource_base}-grid'")
         else:
-            print(f"Warning: Grid file not found at {grid_file}")
+            error_msg = f"Error: Grid file not found at {grid_file}"
+            print(error_msg)
+            raise FileNotFoundError(error_msg)
 
         # Process spectra file if it exists
-        spectra_file = model_run.output_dir / model_run.run_id / "swanspec.nc"
+        spectra_file = base_path / "swanspec.nc"
         if spectra_file.exists():
             print(f"Registering spectra data with DataMesh: {spectra_file}")
-            dataset_name = model_run.register_with_datamesh("spectra")
-            print(f"✓ Spectra data registered successfully as '{dataset_name}'")
+            spectra_writer = DatameshWriter(
+                datasource_id=f"{datasource_base}-spectra",
+                name=f"{org} ROMPY Spectra Data",
+                description=f"ROMPY generated spectra data for run {run_id}",
+                tags=tags + ["rompy", "swan", "spectra", org]
+            )
+            spectra_writer.write_spectra(spectra_file)
+            print(f"✓ Spectra data registered successfully as '{datasource_base}-spectra'")
         else:
-            print(f"Warning: Spectra file not found at {spectra_file}")
+            error_msg = f"Error: Spectra file not found at {spectra_file}"
+            print(error_msg)
+            raise FileNotFoundError(error_msg)
 
         print("✓ Processing complete")
 

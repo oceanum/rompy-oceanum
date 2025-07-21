@@ -1,0 +1,31 @@
+
+# Ignore Python virtual environments
+.venv/
+venv/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore build/test artifacts
+*.egg-info/
+build/
+dist/
+
+# Ignore git-related files
+.git/
+.gitignore
+.github/
+.pytest_cache
+.ropeproject
+.tasks
+.vscode
+.coverage.env
+
+# Ignore editor configs
+*.swp
+*.swo
+.DS_Store
+
+# Ignore outputs
+outputs/
