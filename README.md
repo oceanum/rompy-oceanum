@@ -40,8 +40,8 @@ oceanum auth login
 # Generate optimized rompy configuration
 oceanum rompy init swan --template basic --domain "my_domain"
 
-# Execute model via Prax pipeline
-oceanum rompy run config.yml swan --pipeline-name my-pipeline
+# Execute model via Prax pipeline (use filename from init command)
+oceanum rompy run rompy_config_swan_basic.yml swan --pipeline-name my-pipeline
 
 # Monitor execution
 oceanum rompy status <run-id> --watch

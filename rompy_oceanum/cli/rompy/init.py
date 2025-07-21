@@ -1,555 +1,378 @@
-"""Init command for creating rompy configuration templates optimized for Oceanum Prax."""
+"""Init command for creating new rompy configurations."""
 
-import logging
+import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Optional
 
 import click
 import yaml
 from oceanum.cli.common.models import ContextObject
 
 
-logger = logging.getLogger(__name__)
+# Template configurations for different model types
+SWAN_TEMPLATE = {
+    "run_id": "swan_example_run",
+    "model_type": "swan",
+    "period": {
+        "start": "2024-01-01T00:00:00",
+        "end": "2024-01-02T00:00:00",
+        "interval": "1H"
+    },
+    "output": {
+        "grid": {
+            "type": "regular",
+            "lon_min": -180,
+            "lon_max": -170,
+            "lat_min": 20,
+            "lat_max": 30,
+            "resolution": 0.1
+        },
+        "variables": ["hs", "tp", "dir", "tm01"],
+        "format": "netcdf"
+    },
+    "physics": {
+        "gen": 3,
+        "whitecapping": "komen",
+        "quadruplets": True,
+        "triads": True,
+        "breaking": True,
+        "friction": "jonswap",
+        "diffraction": False
+    },
+    "forcing": {
+        "winds": {
+            "source": "gfs",
+            "resolution": 0.25
+        },
+        "waves": {
+            "source": "ww3",
+            "resolution": 0.5
+        },
+        "currents": {
+            "source": "hycom",
+            "resolution": 0.08
+        }
+    },
+    "computational": {
+        "dt": 600,
+        "npnts": 95,
+        "cgrid": {
+            "resolution": 0.05,
+            "ntheta": 36,
+            "nfreq": 35
+        }
+    }
+}
+
+SCHISM_TEMPLATE = {
+    "run_id": "schism_example_run",
+    "model_type": "schism",
+    "period": {
+        "start": "2024-01-01T00:00:00",
+        "end": "2024-01-02T00:00:00",
+        "dt": 150,
+        "nspool": 360,
+        "ihfskip": 720
+    },
+    "grid": {
+        "hgrid_file": "hgrid.gr3",
+        "vgrid_file": "vgrid.in",
+        "min_depth": 0.5,
+        "coordinate_system": "geographic"
+    },
+    "physics": {
+        "baroclinic": True,
+        "temperature": True,
+        "salinity": True,
+        "turbulence": "gotm",
+        "bottom_friction": "drag",
+        "atmospheric_pressure": True,
+        "tides": True
+    },
+    "forcing": {
+        "atmospheric": {
+            "source": "gfs",
+            "variables": ["wind", "pressure", "air_temperature", "humidity", "precipitation", "radiation"]
+        },
+        "ocean_boundary": {
+            "source": "hycom",
+            "variables": ["elevation", "velocity", "temperature", "salinity"]
+        },
+        "rivers": {
+            "source": "usgs",
+            "temperature": 15.0
+        }
+    },
+    "output": {
+        "stations": {
+            "file": "station.in",
+            "variables": ["elevation", "velocity", "temperature", "salinity"]
+        },
+        "global": {
+            "variables": ["elevation", "velocity", "temperature", "salinity", "turbulence"],
+            "format": "netcdf"
+        }
+    }
+}
+
+WW3_TEMPLATE = {
+    "run_id": "ww3_example_run",
+    "model_type": "ww3",
+    "period": {
+        "start": "2024-01-01T00:00:00",
+        "end": "2024-01-02T00:00:00",
+        "dt": 3600
+    },
+    "grid": {
+        "name": "global_grid",
+        "type": "regular",
+        "lon_min": -180,
+        "lon_max": 180,
+        "lat_min": -90,
+        "lat_max": 90,
+        "resolution": 0.5,
+        "closure": "global"
+    },
+    "physics": {
+        "source_terms": {
+            "input": "st4",
+            "dissipation": "st4",
+            "nonlinear": "nl1",
+            "bottom": "bt4"
+        },
+        "propagation": {
+            "scheme": "umb",
+            "refraction": True,
+            "diffraction": False
+        },
+        "numerics": {
+            "time_step_global": 1800,
+            "time_step_spatial": 600,
+            "time_step_spectral": 300
+        }
+    },
+    "forcing": {
+        "winds": {
+            "source": "gfs",
+            "format": "grib2",
+            "resolution": 0.25
+        },
+        "ice": {
+            "source": "nsidc",
+            "concentration_threshold": 0.5
+        },
+        "currents": {
+            "source": "hycom",
+            "resolution": 0.08
+        }
+    },
+    "output": {
+        "fields": {
+            "variables": ["hs", "tp", "dp", "tm01", "tm02", "spr", "fp"],
+            "interval": 3600,
+            "format": "netcdf"
+        },
+        "spectra": {
+            "points": "spec_points.txt",
+            "interval": 3600,
+            "format": "netcdf"
+        },
+        "restart": {
+            "interval": 21600
+        }
+    }
+}
+
+TEMPLATES = {
+    "swan": SWAN_TEMPLATE,
+    "schism": SCHISM_TEMPLATE,
+    "ww3": WW3_TEMPLATE
+}
 
 
 @click.command()
-@click.argument("model", type=click.Choice(["swan", "schism", "ww3"]))
 @click.option(
-    "--template",
-    type=click.Choice(["basic", "advanced", "research", "operational"]),
-    default="basic",
-    help="Configuration template type"
+    "--type",
+    "model_type",
+    type=click.Choice(["swan", "schism", "ww3"]),
+    prompt="Which model type would you like to configure",
+    help="Ocean/wave model type"
 )
 @click.option(
     "--output",
     "-o",
-    help="Output configuration file path (default: rompy_config_{model}_{template}.yml)"
+    type=click.Path(),
+    help="Output file path (default: <model>_config.yml)"
 )
 @click.option(
-    "--domain",
-    help="Model domain name"
-)
-@click.option(
-    "--grid-resolution",
-    type=float,
-    help="Grid resolution in degrees (e.g., 0.1)"
-)
-@click.option(
-    "--time-start",
-    help="Start time (ISO format: 2023-01-01T00:00:00)"
-)
-@click.option(
-    "--time-end",
-    help="End time (ISO format: 2023-01-02T00:00:00)"
-)
-@click.option(
-    "--bbox",
-    help="Bounding box as 'lon_min,lat_min,lon_max,lat_max'"
-)
-@click.option(
-    "--forcing",
-    type=click.Choice(["era5", "gfs", "local"]),
-    default="era5",
-    help="Atmospheric forcing data source"
-)
-@click.option(
-    "--prax-optimized/--no-prax-optimized",
-    default=True,
-    help="Include Prax-specific optimizations"
+    "--format",
+    "output_format",
+    type=click.Choice(["yaml", "json"]),
+    default="yaml",
+    help="Output format"
 )
 @click.option(
     "--interactive",
     is_flag=True,
-    help="Interactive configuration setup"
+    help="Interactive mode to customize configuration"
 )
 @click.pass_obj
 def init(
     obj: ContextObject,
-    model,
-    template,
-    output,
-    domain,
-    grid_resolution,
-    time_start,
-    time_end,
-    bbox,
-    forcing,
-    prax_optimized,
-    interactive
+    model_type: str,
+    output: Optional[str],
+    output_format: str,
+    interactive: bool
 ):
-    """Initialize a rompy configuration optimized for Oceanum Prax execution.
+    """Initialize a new rompy model configuration.
 
-    Args:
-        model: Model type (swan, schism, ww3)
+    Creates a template configuration file for the specified ocean/wave model
+    that can be customized and run with 'oceanum rompy run'.
 
-    Usage:
-        oceanum rompy init swan --template basic --domain "my_domain"
-        oceanum rompy init schism --template advanced --interactive
-        oceanum rompy init ww3 --bbox "-180,-90,180,90" --grid-resolution 0.1
+    Examples:
+        oceanum rompy init --type swan
+        oceanum rompy init --type schism --output my_model.yml
+        oceanum rompy init --type ww3 --interactive
     """
-    # Determine output file path
+    # Get the template
+    template = TEMPLATES[model_type].copy()
+
+    # Interactive customization if requested
+    if interactive:
+        click.echo(f"\n🔧 Customizing {model_type.upper()} configuration...\n")
+
+        # Run ID
+        template["run_id"] = click.prompt(
+            "Run ID",
+            default=template["run_id"],
+            type=str
+        )
+
+        # Time period
+        click.echo("\n📅 Time Period Configuration:")
+        template["period"]["start"] = click.prompt(
+            "  Start time (ISO format)",
+            default=template["period"]["start"],
+            type=str
+        )
+        template["period"]["end"] = click.prompt(
+            "  End time (ISO format)",
+            default=template["period"]["end"],
+            type=str
+        )
+
+        # Model-specific customization
+        if model_type == "swan":
+            click.echo("\n🌊 SWAN Grid Configuration:")
+            template["output"]["grid"]["lon_min"] = click.prompt(
+                "  Longitude min",
+                default=template["output"]["grid"]["lon_min"],
+                type=float
+            )
+            template["output"]["grid"]["lon_max"] = click.prompt(
+                "  Longitude max",
+                default=template["output"]["grid"]["lon_max"],
+                type=float
+            )
+            template["output"]["grid"]["lat_min"] = click.prompt(
+                "  Latitude min",
+                default=template["output"]["grid"]["lat_min"],
+                type=float
+            )
+            template["output"]["grid"]["lat_max"] = click.prompt(
+                "  Latitude max",
+                default=template["output"]["grid"]["lat_max"],
+                type=float
+            )
+            template["output"]["grid"]["resolution"] = click.prompt(
+                "  Resolution (degrees)",
+                default=template["output"]["grid"]["resolution"],
+                type=float
+            )
+
+        elif model_type == "schism":
+            click.echo("\n🌊 SCHISM Configuration:")
+            template["grid"]["hgrid_file"] = click.prompt(
+                "  Horizontal grid file",
+                default=template["grid"]["hgrid_file"],
+                type=str
+            )
+            template["grid"]["vgrid_file"] = click.prompt(
+                "  Vertical grid file",
+                default=template["grid"]["vgrid_file"],
+                type=str
+            )
+            template["physics"]["baroclinic"] = click.confirm(
+                "  Enable baroclinic mode?",
+                default=template["physics"]["baroclinic"]
+            )
+
+        elif model_type == "ww3":
+            click.echo("\n🌊 WW3 Grid Configuration:")
+            template["grid"]["resolution"] = click.prompt(
+                "  Grid resolution (degrees)",
+                default=template["grid"]["resolution"],
+                type=float
+            )
+            template["grid"]["closure"] = click.prompt(
+                "  Grid closure",
+                default=template["grid"]["closure"],
+                type=click.Choice(["global", "regional"])
+            )
+
+    # Determine output file
     if not output:
-        output = f"rompy_config_{model}_{template}.yml"
+        output = f"{model_type}_config.{output_format}"
 
     output_path = Path(output)
 
     # Check if file exists
     if output_path.exists():
-        if not click.confirm(f"File {output_path} already exists. Overwrite?"):
-            click.echo("❌ Initialization cancelled.")
+        if not click.confirm(f"\n⚠️  File '{output}' already exists. Overwrite?"):
+            click.echo("Aborted.")
             return
 
-    # Interactive mode
-    if interactive:
-        click.echo("🎯 Interactive rompy configuration setup")
-        click.echo("=" * 40)
-
-        domain = domain or click.prompt("Domain name", default="my_domain")
-
-        if not grid_resolution:
-            grid_resolution = click.prompt("Grid resolution (degrees)", type=float, default=0.1)
-
-        if not time_start:
-            time_start = click.prompt("Start time (YYYY-MM-DDTHH:MM:SS)", default="2023-01-01T00:00:00")
-
-        if not time_end:
-            time_end = click.prompt("End time (YYYY-MM-DDTHH:MM:SS)", default="2023-01-02T00:00:00")
-
-        if not bbox:
-            click.echo("Bounding box coordinates:")
-            lon_min = click.prompt("  Longitude min", type=float, default=-180.0)
-            lat_min = click.prompt("  Latitude min", type=float, default=-90.0)
-            lon_max = click.prompt("  Longitude max", type=float, default=180.0)
-            lat_max = click.prompt("  Latitude max", type=float, default=90.0)
-            bbox = f"{lon_min},{lat_min},{lon_max},{lat_max}"
-
-        forcing = click.prompt(
-            "Forcing data source",
-            type=click.Choice(["era5", "gfs", "local"]),
-            default=forcing
-        )
-
-    # Parse bounding box
-    if bbox:
-        try:
-            lon_min, lat_min, lon_max, lat_max = map(float, bbox.split(','))
-        except ValueError:
-            click.echo("❌ Invalid bounding box format. Use: 'lon_min,lat_min,lon_max,lat_max'", err=True)
-            return
-    else:
-        # Default global domain
-        lon_min, lat_min, lon_max, lat_max = -180.0, -90.0, 180.0, 90.0
-
-    # Generate configuration
+    # Write configuration
     try:
-        config = _generate_config(
-            model=model,
-            template=template,
-            domain=domain or "my_domain",
-            grid_resolution=grid_resolution or 0.1,
-            time_start=time_start or "2023-01-01T00:00:00",
-            time_end=time_end or "2023-01-02T00:00:00",
-            lon_min=lon_min,
-            lat_min=lat_min,
-            lon_max=lon_max,
-            lat_max=lat_max,
-            forcing=forcing,
-            prax_optimized=prax_optimized,
-            oceanum_context=obj
-        )
-
-        # Write configuration file
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
         with open(output_path, 'w') as f:
-            yaml.dump(config, f, default_flow_style=False, indent=2, sort_keys=False)
+            if output_format == "yaml":
+                yaml.dump(template, f, default_flow_style=False, sort_keys=False)
+            else:
+                json.dump(template, f, indent=2)
 
-        click.echo(f"✅ Configuration created: {output_path}")
-        click.echo(f"📊 Model: {model}, Template: {template}")
-
-        if prax_optimized:
-            click.echo("🚀 Prax optimizations enabled")
+        click.echo(f"\n✅ Created {model_type.upper()} configuration: {output}")
 
         # Show next steps
-        click.echo(f"\n💡 Next steps:")
-        click.echo(f"  1. Review and customize: {output_path}")
-        click.echo(f"  2. Execute via Prax: oceanum rompy run {output_path} {model} --pipeline-name my-pipeline")
+        click.echo("\n📝 Next steps:")
+        click.echo(f"1. Edit the configuration file: {output}")
+        click.echo("2. Prepare your input files (grids, forcing data, etc.)")
+        click.echo("3. List available pipelines:")
+        click.echo("   oceanum rompy list pipelines")
+        click.echo("4. Run the model:")
+        click.echo(f"   oceanum rompy run {output} --pipeline-name {model_type}-from-rompy")
 
-        # Show template-specific guidance
-        _show_template_guidance(model, template)
+        # Model-specific tips
+        if model_type == "swan":
+            click.echo("\n💡 SWAN Tips:")
+            click.echo("   - Use 'gen: 3' for third-generation mode")
+            click.echo("   - Enable 'quadruplets' for deep water applications")
+            click.echo("   - Set appropriate grid resolution based on your domain")
+
+        elif model_type == "schism":
+            click.echo("\n💡 SCHISM Tips:")
+            click.echo("   - Prepare hgrid.gr3 and vgrid.in files for your domain")
+            click.echo("   - Configure atmospheric forcing for accurate results")
+            click.echo("   - Set appropriate time steps based on grid resolution")
+
+        elif model_type == "ww3":
+            click.echo("\n💡 WW3 Tips:")
+            click.echo("   - Use 'st4' source terms for latest physics")
+            click.echo("   - Configure ice forcing for polar regions")
+            click.echo("   - Set spectral resolution based on application")
 
     except Exception as e:
-        click.echo(f"❌ Error creating configuration: {e}", err=True)
-        logger.exception("Configuration creation failed")
+        raise click.ClickException(f"Failed to write configuration: {e}")
 
 
-def _generate_config(
-    model: str,
-    template: str,
-    domain: str,
-    grid_resolution: float,
-    time_start: str,
-    time_end: str,
-    lon_min: float,
-    lat_min: float,
-    lon_max: float,
-    lat_max: float,
-    forcing: str,
-    prax_optimized: bool,
-    oceanum_context: ContextObject
-) -> Dict[str, Any]:
-    """Generate rompy configuration based on parameters."""
-
-    # Create the model configuration
-    model_config = _get_model_config(
-        model, template, domain, grid_resolution, time_start, time_end,
-        lon_min, lat_min, lon_max, lat_max, forcing
-    )
-
-    # Create the complete config structure for rompy ModelRun
-    config = {
-        "run_id": f"{domain}_{model}_{template}",
-        "config": model_config
-    }
-
-    # Add period information
-    config["period"] = {
-        "start": time_start.replace("T", "T").replace(":", "").replace("-", ""),  # Format: 20230101T000000
-        "duration": "1d",
-        "interval": "1h"
-    }
-
-    # Add output directory
-    config["output_dir"] = "/app"
-
-    return config
-
-
-def _get_model_config(
-    model: str, template: str, domain: str, grid_resolution: float,
-    time_start: str, time_end: str, lon_min: float, lat_min: float,
-    lon_max: float, lat_max: float, forcing: str
-) -> Dict[str, Any]:
-    """Get model-specific configuration for rompy."""
-
-    if model == "swan":
-        return _get_swan_config(
-            template, domain, grid_resolution, time_start, time_end,
-            lon_min, lat_min, lon_max, lat_max, forcing
-        )
-    elif model == "schism":
-        return _get_schism_config(
-            template, domain, grid_resolution, time_start, time_end,
-            lon_min, lat_min, lon_max, lat_max, forcing
-        )
-    else:  # ww3
-        return _get_ww3_config(
-            template, domain, grid_resolution, time_start, time_end,
-            lon_min, lat_min, lon_max, lat_max, forcing
-        )
-
-
-def _get_swan_config(
-    template: str, domain: str, grid_resolution: float,
-    time_start: str, time_end: str, lon_min: float, lat_min: float,
-    lon_max: float, lat_max: float, forcing: str
-) -> Dict[str, Any]:
-    """Generate a proper SWAN configuration following rompy schema."""
-
-    # Calculate grid dimensions
-    xlen = lon_max - lon_min
-    ylen = lat_max - lat_min
-    mx = max(10, int(xlen / grid_resolution))
-    my = max(10, int(ylen / grid_resolution))
-
-    return {
-        "model_type": "swanconfig",
-        "startup": {
-            "project": {
-                "model_type": "project",
-                "name": domain[:16],  # Limit to 16 characters
-                "nr": "run1",
-                "title1": f"Generated {template} SWAN configuration"
-            },
-            "set": {
-                "model_type": "set",
-                "level": 0.0,
-                "depmin": 0.05,
-                "direction_convention": "nautical"
-            },
-            "mode": {
-                "model_type": "mode",
-                "kind": "nonstationary",
-                "dim": "twodimensional"
-            },
-            "coordinates": {
-                "model_type": "coordinates",
-                "kind": {
-                    "model_type": "spherical"
-                }
-            }
-        },
-        "cgrid": {
-            "model_type": "regular",
-            "spectrum": {
-                "mdc": 36,
-                "flow": 0.04,
-                "fhigh": 1.0
-            },
-            "grid": {
-                "xp": lon_min + xlen / 2,
-                "yp": lat_min + ylen / 2,
-                "alp": 0.0,
-                "xlen": xlen,
-                "ylen": ylen,
-                "mx": mx,
-                "my": my
-            }
-        },
-        "inpgrid": {
-            "model_type": "data_interface",
-            "bottom": {
-                "var": "bottom",
-                "source": {
-                    "model_type": "datamesh",
-                    "datasource": "our-changing-coast-gebco_1_degree_for_testing",
-                    "token": None
-                },
-                "fac": -1.0,
-                "buffer": 1.0,
-                "z1": "elevation",
-                "coords": {
-                    "x": "lon",
-                    "y": "lat"
-                }
-            },
-            "input": [
-                {
-                    "var": "wind",
-                    "source": {
-                        "model_type": "datamesh",
-                        "datasource": "era5_wind10m" if forcing == "era5" else "gfs_wind10m",
-                        "token": None
-                    },
-                    "buffer": 2.0,
-                    "filter": {
-                        "sort": {
-                            "coords": ["latitude"]
-                        }
-                    },
-                    "z1": "u10",
-                    "z2": "v10",
-                    "coords": {
-                        "x": "longitude",
-                        "y": "latitude"
-                    }
-                }
-            ]
-        },
-        "boundary": {
-            "model_type": "boundspec",
-            "shapespec": {
-                "model_type": "shapespec",
-                "per_type": "peak",
-                "dspr_type": "degrees",
-                "shape": {
-                    "model_type": "tma",
-                    "gamma": 3.3,
-                    "d": 12.0
-                }
-            },
-            "location": {
-                "model_type": "side",
-                "side": "west"
-            },
-            "data": {
-                "model_type": "constantpar",
-                "hs": 2.0,
-                "per": 12.0,
-                "dir": 270.0,
-                "dd": 25.0
-            }
-        },
-        "initial": {
-            "kind": {
-                "model_type": "default"
-            }
-        },
-        "physics": {
-            "gen": {
-                "model_type": "gen3",
-                "source_terms": {
-                    "model_type": "westhuysen"
-                }
-            },
-            "quadrupl": {
-                "iquad": 2
-            },
-            "breaking": {
-                "model_type": "constant",
-                "gamma": 0.73
-            },
-            "friction": {
-                "model_type": "madsen",
-                "kn": 0.05
-            },
-            "triad": {
-                "model_type": "triad"
-            }
-        },
-        "prop": {
-            "scheme": {
-                "model_type": "bsbt"
-            }
-        },
-        "numeric": {
-            "stop": {
-                "model_type": "stopc",
-                "dabs": 0.05,
-                "drel": 0.05,
-                "curvat": 0.05,
-                "npnts": 95,
-                "mode": {
-                    "model_type": "nonstat",
-                    "mxitns": 3
-                }
-            }
-        },
-        "output": {
-            "points": {
-                "model_type": "points",
-                "sname": "pts",
-                "xp": [lon_min + xlen * 0.3, lon_min + xlen * 0.7],
-                "yp": [lat_min + ylen * 0.3, lat_min + ylen * 0.7]
-            },
-            "quantity": {
-                "model_type": "quantities",
-                "quantities": [
-                    {
-                        "output": ["depth", "hsign", "tps", "dir", "tm01"],
-                        "excv": -9
-                    },
-                    {
-                        "output": ["hswell"],
-                        "fswell": 0.125
-                    }
-                ]
-            },
-            "block": {
-                "model_type": "block",
-                "sname": "COMPGRID",
-                "fname": "swangrid.nc",
-                "output": ["depth", "wind", "hsign", "tps", "dir"],
-                "times": {
-                    "dfmt": "hr"
-                }
-            },
-            "table": {
-                "sname": "pts",
-                "format": "header",
-                "fname": "swantable.txt",
-                "output": ["time", "hsign", "hswell", "dir", "tps", "tm01"],
-                "times": {
-                    "dfmt": "hr"
-                }
-            },
-            "specout": {
-                "sname": "pts",
-                "fname": "swanspec.nc",
-                "dim": {
-                    "model_type": "spec2d"
-                },
-                "freq": {
-                    "model_type": "abs"
-                },
-                "times": {
-                    "dfmt": "hr"
-                }
-            }
-        },
-        "lockup": {
-            "compute": {
-                "model_type": "nonstat",
-                "initstat": True,
-                "times": {
-                    "model_type": "nonstationary",
-                    "tfmt": 1,
-                    "dfmt": "hr"
-                },
-                "hotfile": {
-                    "fname": "hotfile.txt",
-                    "format": "free"
-                },
-                "hottimes": [-1]
-            }
-        }
-    }
-
-
-def _get_schism_config(
-    template: str, domain: str, grid_resolution: float,
-    time_start: str, time_end: str, lon_min: float, lat_min: float,
-    lon_max: float, lat_max: float, forcing: str
-) -> Dict[str, Any]:
-    """Generate a basic SCHISM configuration."""
-    return {
-        "model_type": "schism",
-        "grid": {
-            "model_type": "unstructured"
-        },
-        "time": {
-            "model_type": "time_range",
-            "start": time_start,
-            "end": time_end,
-            "step": "PT1H"
-        }
-    }
-
-
-def _get_ww3_config(
-    template: str, domain: str, grid_resolution: float,
-    time_start: str, time_end: str, lon_min: float, lat_min: float,
-    lon_max: float, lat_max: float, forcing: str
-) -> Dict[str, Any]:
-    """Generate a basic WW3 configuration."""
-    return {
-        "model_type": "ww3",
-        "grid": {
-            "model_type": "regular_grid",
-            "spacing": grid_resolution
-        },
-        "time": {
-            "model_type": "time_range",
-            "start": time_start,
-            "end": time_end,
-            "step": "PT1H"
-        }
-    }
-
-
-
-
-
-def _show_template_guidance(model: str, template: str):
-    """Show template-specific guidance."""
-
-    guidance = {
-        "basic": "🎯 Basic template includes essential model physics and standard outputs.",
-        "advanced": "⚙️  Advanced template includes additional physics, validation, and diagnostics.",
-        "research": "🔬 Research template includes comprehensive analysis and statistics.",
-        "operational": "🏭 Operational template optimized for speed and monitoring."
-    }
-
-    model_notes = {
-        "swan": "🌊 SWAN: Spectral wave model - good for coastal and nearshore applications",
-        "schism": "🌍 SCHISM: 3D hydrodynamic model - suitable for estuarine and coastal modeling",
-        "ww3": "🌐 WaveWatch III: Global wave model - ideal for ocean-scale applications"
-    }
-
-    click.echo(f"\n📚 Template info: {guidance.get(template, '')}")
-    click.echo(f"📝 Model info: {model_notes.get(model, '')}")
-
-    if template == "basic":
-        click.echo("💡 Consider 'advanced' template for production runs")
-    elif template == "research":
-        click.echo("💡 Review analysis settings in the configuration file")
+# Export the command
+__all__ = ["init"]

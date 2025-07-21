@@ -1,29 +1,30 @@
-"""Logs command for viewing rompy pipeline run logs via Oceanum Prax."""
+"""Clean logs command implementation that delegates to oceanum prax."""
 
-import logging
-from datetime import datetime
+import subprocess
+from typing import Optional
 
 import click
 from oceanum.cli.common.models import ContextObject
 
-from ...config import PraxConfig
-from ...client import PraxClient
-
-
-logger = logging.getLogger(__name__)
+from .utils import format_pipeline_filters
 
 
 @click.command()
-@click.argument("run_id", required=True)
+@click.argument("run_id")
 @click.option(
     "--project",
     envvar="PRAX_PROJECT",
     help="Prax project (overrides oceanum context)"
 )
 @click.option(
-    "--tail",
-    default=100,
-    help="Number of log lines to retrieve"
+    "--stage",
+    default="dev",
+    envvar="PRAX_STAGE",
+    help="Deployment stage"
+)
+@click.option(
+    "--task",
+    help="Specific task name to get logs for"
 )
 @click.option(
     "--follow",
@@ -32,266 +33,109 @@ logger = logging.getLogger(__name__)
     help="Follow log output (like tail -f)"
 )
 @click.option(
-    "--stage",
-    help="Filter logs by specific pipeline stage"
-)
-@click.option(
-    "--level",
-    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
-    help="Filter logs by minimum level"
+    "--tail",
+    type=int,
+    default=100,
+    help="Number of lines to show from the end"
 )
 @click.option(
     "--since",
-    help="Show logs since timestamp (ISO format: 2023-01-01T12:00:00)"
+    help="Show logs since timestamp (e.g., '10m', '1h', '2023-01-01')"
 )
 @click.option(
-    "--timestamps/--no-timestamps",
-    default=True,
-    help="Show timestamps in log output"
-)
-@click.option(
-    "--raw",
+    "--no-color",
     is_flag=True,
-    help="Output raw log lines without formatting"
+    help="Disable colored output"
 )
 @click.pass_obj
 def logs(
     obj: ContextObject,
-    run_id,
-    project,
-    tail,
-    follow,
-    stage,
-    level,
-    since,
-    timestamps,
-    raw
+    run_id: str,
+    project: Optional[str],
+    stage: str,
+    task: Optional[str],
+    follow: bool,
+    tail: int,
+    since: Optional[str],
+    no_color: bool,
 ):
-    """View logs for a rompy pipeline run.
+    """Get logs for a rompy pipeline run.
 
-    Args:
-        run_id: Prax pipeline run identifier
+    This command wraps 'oceanum prax logs pipeline-run' to retrieve
+    logs from a rompy model execution.
 
-    Usage:
-        oceanum rompy logs abc123-def456-789
-        oceanum rompy logs abc123 --tail 50 --follow
-        oceanum rompy logs abc123 --stage generate --level ERROR
-        oceanum rompy logs abc123 --since 2023-01-01T12:00:00
+    Example:
+        oceanum rompy logs abc123def --tail 50
+        oceanum rompy logs abc123def --follow
     """
-    # Create Prax configuration using oceanum context
-    prax_config_data = {
-        "org": obj.domain.split('.')[0] if '.' in obj.domain else obj.domain,
-    }
+    # Build prax command
+    cmd = ['oceanum', 'prax', 'logs', 'pipeline-run', run_id]
 
-    # Override project if specified
-    if project:
-        prax_config_data["project"] = project
+    # Add context parameters
+    filters = format_pipeline_filters(
+        project or obj.project,
+        obj.org,
+        stage
+    )
+    for key, value in filters.items():
+        cmd.extend([f'--{key}', value])
 
-    # Use oceanum's token for authentication
-    if obj.token and obj.token.access_token:
-        prax_config_data["token"] = obj.token.access_token
-
-    try:
-        prax_config = PraxConfig.from_env(**prax_config_data)
-    except ValueError as e:
-        click.echo(f"❌ Configuration error: {e}", err=True)
-        return
-
-    client = PraxClient(prax_config)
-
-    def _format_log_line(log_entry):
-        """Format a single log line for display."""
-        if raw:
-            if isinstance(log_entry, dict):
-                return log_entry.get('message', '')
-            return str(log_entry)
-
-        # Handle string log entries
-        if isinstance(log_entry, str):
-            return log_entry
-
-        # Extract components from dict log entries
-        timestamp = log_entry.get('timestamp', '')
-        log_level = log_entry.get('level', 'INFO')
-        message = log_entry.get('message', '')
-        stage_name = log_entry.get('stage', '')
-
-        # Format timestamp
-        formatted_time = ''
-        if timestamps and timestamp:
-            try:
-                if isinstance(timestamp, str):
-                    dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-                    formatted_time = dt.strftime("%Y-%m-%d %H:%M:%S")
-                else:
-                    formatted_time = str(timestamp)
-            except Exception:
-                formatted_time = str(timestamp)
-
-        # Format level with colors/emojis
-        level_map = {
-            'DEBUG': '🔍 DEBUG',
-            'INFO': 'ℹ️  INFO ',
-            'WARNING': '⚠️  WARN ',
-            'ERROR': '❌ ERROR',
-            'CRITICAL': '🚨 CRIT '
-        }
-        formatted_level = level_map.get(log_level.upper(), f"   {log_level}")
-
-        # Build output line
-        parts = []
-        if formatted_time:
-            parts.append(f"[{formatted_time}]")
-        parts.append(formatted_level)
-        if stage_name:
-            parts.append(f"[{stage_name}]")
-        parts.append(message)
-
-        return " ".join(parts)
-
-    def _filter_logs(logs_list):
-        """Apply filters to log entries."""
-        filtered = logs_list
-
-        # Filter by level
-        if level:
-            level_priority = {
-                'DEBUG': 0, 'INFO': 1, 'WARNING': 2, 'ERROR': 3, 'CRITICAL': 4
-            }
-            min_priority = level_priority.get(level.upper(), 0)
-            filtered = [
-                log for log in filtered
-                if isinstance(log, dict) and level_priority.get(log.get('level', 'INFO').upper(), 1) >= min_priority
-            ]
-
-        # Filter by stage
-        if stage:
-            filtered = [
-                log for log in filtered
-                if isinstance(log, dict) and log.get('stage', '').lower() == stage.lower()
-            ]
-
-        # Filter by timestamp
-        if since:
-            try:
-                since_dt = datetime.fromisoformat(since.replace('Z', '+00:00'))
-                filtered = [
-                    log for log in filtered
-                    if isinstance(log, dict) and _parse_timestamp(log.get('timestamp')) >= since_dt
-                ]
-            except ValueError:
-                click.echo(f"⚠️  Invalid timestamp format: {since}", err=True)
-
-        return filtered
-
-    def _parse_timestamp(timestamp_str):
-        """Parse timestamp string to datetime object."""
-        if not timestamp_str:
-            return datetime.min
-        try:
-            if isinstance(timestamp_str, str):
-                return datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-            return timestamp_str
-        except Exception:
-            return datetime.min
-
-    def _display_logs():
-        """Retrieve and display logs."""
-        try:
-            # Get logs from Prax client
-            logs_list = client.get_run_logs(run_id, tail=tail)
-
-            if not logs_list:
-                click.echo("📭 No logs found for this run.")
-                return True
-
-            # Apply filters
-            filtered_logs = _filter_logs(logs_list)
-
-            if not filtered_logs:
-                click.echo("📭 No logs match the specified filters.")
-                return True
-
-            # Display header
-            if not raw and not follow:
-                filter_info = []
-                if stage:
-                    filter_info.append(f"stage={stage}")
-                if level:
-                    filter_info.append(f"level>={level}")
-                if since:
-                    filter_info.append(f"since={since}")
-
-                filter_str = f" ({', '.join(filter_info)})" if filter_info else ""
-                click.echo(f"📋 Logs for run {run_id}{filter_str}:")
-                click.echo("=" * 50)
-
-            # Display logs
-            for log_entry in filtered_logs:
-                click.echo(_format_log_line(log_entry))
-
-            return True
-
-        except Exception as e:
-            click.echo(f"❌ Error retrieving logs: {e}", err=True)
-            return False
-
-    # Initial log display
-    if not _display_logs():
-        return
-
-    # Follow mode
+    # Add optional parameters
+    if task:
+        cmd.extend(['--task', task])
     if follow:
-        import time
-        last_timestamp = None
+        cmd.append('--follow')
+    if tail:
+        cmd.extend(['--tail', str(tail)])
+    if since:
+        cmd.extend(['--since', since])
+    if no_color:
+        cmd.append('--no-color')
 
-        click.echo(f"\n👀 Following logs (refresh every 5s). Press Ctrl+C to stop.")
-
+    # Execute command
+    if follow:
+        # For follow mode, we need to stream output
+        click.echo(f"Following logs for pipeline run {run_id} (press Ctrl+C to stop)...")
         try:
-            while True:
-                time.sleep(5)
+            # Use Popen for streaming output
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1  # Line buffered
+            )
 
-                try:
-                    # Get new logs since last timestamp
-                    logs_list = client.get_run_logs(run_id, tail=tail)
+            # Stream output line by line
+            try:
+                for line in process.stdout:
+                    click.echo(line, nl=False)
+            except KeyboardInterrupt:
+                click.echo("\n⏸️  Stopped following logs")
+                process.terminate()
+                return
 
-                    # Filter to only new logs
-                    if last_timestamp:
-                        new_logs = [
-                            log for log in logs_list
-                            if isinstance(log, dict) and _parse_timestamp(log.get('timestamp')) > last_timestamp
-                        ]
-                    else:
-                        new_logs = logs_list
+            # Wait for process to complete
+            process.wait()
 
-                    if new_logs:
-                        # Apply other filters
-                        filtered_logs = _filter_logs(new_logs)
+            if process.returncode != 0:
+                error = process.stderr.read()
+                raise click.ClickException(f"Failed to get logs: {error}")
 
-                        for log_entry in filtered_logs:
-                            click.echo(_format_log_line(log_entry))
+        except subprocess.SubprocessError as e:
+            raise click.ClickException(f"Failed to execute command: {e}")
 
-                        # Update last timestamp
-                        timestamps_in_logs = [
-                            _parse_timestamp(log.get('timestamp'))
-                            for log in new_logs
-                            if isinstance(log, dict) and log.get('timestamp')
-                        ]
-                        if timestamps_in_logs:
-                            last_timestamp = max(timestamps_in_logs)
+    else:
+        # Non-follow mode - just execute and print
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            click.echo(result.stdout)
 
-                    # Check if run is complete
-                    try:
-                        status_info = client.get_run_status(run_id)
-                        if status_info.get('status', '').lower() in ['completed', 'failed', 'cancelled']:
-                            click.echo("\n🏁 Run completed. Stopping log following.")
-                            break
-                    except Exception:
-                        pass
-
-                except Exception as e:
-                    click.echo(f"❌ Error following logs: {e}", err=True)
-                    break
-
-        except KeyboardInterrupt:
-            click.echo("\n👋 Log following stopped.")
+        except subprocess.CalledProcessError as e:
+            error_msg = e.stderr or str(e)
+            raise click.ClickException(f"Failed to get logs: {error_msg}")

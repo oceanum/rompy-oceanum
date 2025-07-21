@@ -15,21 +15,11 @@ def main(obj: ContextObject):
     pass
 
 
-# Import and register subcommands directly
-from .rompy.run import run
-from .rompy.status import status
-from .rompy.logs import logs
-from .rompy.sync import sync
-from .rompy.init import init
-from .rompy.pipelines import pipelines
+# Import our rompy group command which has all subcommands registered
+from .rompy import rompy_group, rompy
 
-# Add commands to the main group
-main.add_command(run)
-main.add_command(status)
-main.add_command(logs)
-main.add_command(sync)
-main.add_command(init)
-main.add_command(pipelines)
+# Add the rompy group command directly to main
+main.add_command(rompy)
 
 # Alias for oceanum CLI plugin system compatibility
 cli = main

@@ -1,227 +1,147 @@
-"""Status command for monitoring rompy pipeline runs via Oceanum Prax."""
+"""Clean status command implementation that delegates to oceanum prax."""
 
-import json
-import logging
-from datetime import datetime
+import subprocess
+from typing import Optional
 
 import click
 from oceanum.cli.common.models import ContextObject
 
-from ...config import PraxConfig
-from ...client import PraxClient
-
-
-logger = logging.getLogger(__name__)
+from .utils import format_pipeline_filters, parse_prax_response, format_status_output
 
 
 @click.command()
-@click.argument("run_id", required=True)
+@click.argument("run_id")
 @click.option(
     "--project",
     envvar="PRAX_PROJECT",
     help="Prax project (overrides oceanum context)"
 )
 @click.option(
+    "--stage",
+    default="dev",
+    envvar="PRAX_STAGE",
+    help="Deployment stage"
+)
+@click.option(
     "--format",
     "output_format",
-    type=click.Choice(["table", "json", "brief"]),
-    default="table",
+    type=click.Choice(["json", "table", "summary"]),
+    default="summary",
     help="Output format"
 )
 @click.option(
     "--watch",
     is_flag=True,
-    help="Watch status updates (refresh every 30 seconds)"
+    help="Continuously watch status until completion"
 )
 @click.option(
-    "--refresh-interval",
-    default=30,
-    help="Refresh interval in seconds when watching"
+    "--interval",
+    default=10,
+    type=int,
+    help="Watch interval in seconds"
 )
 @click.pass_obj
 def status(
     obj: ContextObject,
-    run_id,
-    project,
-    output_format,
-    watch,
-    refresh_interval
+    run_id: str,
+    project: Optional[str],
+    stage: str,
+    output_format: str,
+    watch: bool,
+    interval: int,
 ):
-    """Get status for a rompy pipeline run.
+    """Check status of a rompy pipeline run.
 
-    Args:
-        run_id: Prax pipeline run identifier
+    This command wraps 'oceanum prax get pipeline-run' to check the
+    status of a submitted rompy model run.
 
-    Usage:
-        oceanum rompy status abc123-def456-789
-        oceanum rompy status abc123 --format json
-        oceanum rompy status abc123 --watch
+    Example:
+        oceanum rompy status abc123def
     """
-    # Create Prax configuration using oceanum context
-    prax_config_data = {
-        "org": obj.domain.split('.')[0] if '.' in obj.domain else obj.domain,
-    }
+    import time
 
-    # Override project if specified
-    if project:
-        prax_config_data["project"] = project
+    # Build prax command
+    cmd = ['oceanum', 'prax', 'get', 'pipeline-run', run_id]
 
-    # Use oceanum's token for authentication
-    if obj.token and obj.token.access_token:
-        prax_config_data["token"] = obj.token.access_token
+    # Add context parameters
+    filters = format_pipeline_filters(
+        project or obj.project,
+        obj.org,
+        stage
+    )
+    for key, value in filters.items():
+        cmd.extend([f'--{key}', value])
 
-    try:
-        prax_config = PraxConfig.from_env(**prax_config_data)
-    except ValueError as e:
-        click.echo(f"❌ Configuration error: {e}", err=True)
-        return
-
-    client = PraxClient(prax_config)
-
-    def _display_status():
-        """Display status information."""
-        try:
-            status_info = client.get_run_status(run_id)
-
-            if output_format == "json":
-                click.echo(json.dumps(status_info, indent=2))
-            elif output_format == "brief":
-                _display_brief_status(status_info)
-            else:
-                _display_table_status(status_info, run_id)
-
-        except Exception as e:
-            click.echo(f"❌ Error retrieving status: {e}", err=True)
-            return False
-        return True
-
-    def _display_table_status(status_info, run_id):
-        """Display status in table format."""
-        click.echo(f"📊 Status for run: {run_id}")
-        click.echo("=" * 50)
-
-        # Basic info
-        click.echo(f"🏃 Status: {_format_status(status_info.get('status', 'Unknown'))}")
-        click.echo(f"📅 Created: {_format_timestamp(status_info.get('created_at'))}")
-        click.echo(f"🕒 Updated: {_format_timestamp(status_info.get('updated_at'))}")
-
-        # Pipeline info
-        if 'pipeline' in status_info:
-            pipeline = status_info['pipeline']
-            click.echo(f"🔧 Pipeline: {pipeline.get('name', 'Unknown')}")
-            click.echo(f"📦 Version: {pipeline.get('version', 'Unknown')}")
-
-        # Stage information
-        if 'stages' in status_info:
-            click.echo("\n📋 Stages:")
-            for stage in status_info['stages']:
-                stage_status = _format_status(stage.get('status', 'Unknown'))
-                stage_name = stage.get('name', 'Unknown')
-                click.echo(f"  • {stage_name}: {stage_status}")
-
-                if stage.get('error'):
-                    click.echo(f"    ❌ Error: {stage['error']}")
-
-        # Resource usage
-        if 'resources' in status_info:
-            resources = status_info['resources']
-            click.echo(f"\n💻 Resources:")
-            if 'cpu' in resources:
-                click.echo(f"  🖥️  CPU: {resources['cpu']}")
-            if 'memory' in resources:
-                click.echo(f"  🧠 Memory: {resources['memory']}")
-            if 'duration' in resources:
-                click.echo(f"  ⏱️  Duration: {_format_duration(resources['duration'])}")
-
-        # Logs info
-        if status_info.get('has_logs'):
-            click.echo(f"\n💡 View logs with: oceanum rompy logs {run_id}")
-
-        # Output info
-        if status_info.get('outputs'):
-            click.echo(f"\n💡 Download outputs with: oceanum rompy sync {run_id} ./outputs")
-
-    def _display_brief_status(status_info):
-        """Display brief status information."""
-        status = status_info.get('status', 'Unknown')
-        pipeline = status_info.get('pipeline', {}).get('name', 'Unknown')
-        updated = _format_timestamp(status_info.get('updated_at'), brief=True)
-
-        click.echo(f"{_format_status(status)} | {pipeline} | {updated}")
-
-    def _format_status(status):
-        """Format status with appropriate emoji and color."""
-        status_map = {
-            'running': '🏃 Running',
-            'completed': '✅ Completed',
-            'failed': '❌ Failed',
-            'pending': '⏳ Pending',
-            'cancelled': '🛑 Cancelled',
-            'timeout': '⏰ Timeout'
-        }
-        return status_map.get(status.lower(), f"❓ {status}")
-
-    def _format_timestamp(timestamp, brief=False):
-        """Format timestamp for display."""
-        if not timestamp:
-            return "Unknown"
-
-        try:
-            if isinstance(timestamp, str):
-                dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-            else:
-                dt = timestamp
-
-            if brief:
-                return dt.strftime("%H:%M:%S")
-            else:
-                return dt.strftime("%Y-%m-%d %H:%M:%S UTC")
-        except Exception:
-            return str(timestamp)
-
-    def _format_duration(duration_seconds):
-        """Format duration in human readable format."""
-        if not duration_seconds:
-            return "Unknown"
-
-        try:
-            duration = int(duration_seconds)
-            hours, remainder = divmod(duration, 3600)
-            minutes, seconds = divmod(remainder, 60)
-
-            if hours > 0:
-                return f"{hours}h {minutes}m {seconds}s"
-            elif minutes > 0:
-                return f"{minutes}m {seconds}s"
-            else:
-                return f"{seconds}s"
-        except Exception:
-            return str(duration_seconds)
-
-    # Initial status display
-    if not _display_status():
-        return
-
-    # Watch mode
+    # Handle watch mode
     if watch:
-        import time
-        click.echo(f"\n👀 Watching status (refresh every {refresh_interval}s). Press Ctrl+C to stop.")
+        click.echo(f"Watching pipeline run {run_id} (press Ctrl+C to stop)...")
+        last_status = None
 
         try:
             while True:
-                time.sleep(refresh_interval)
-                click.clear()
-                if not _display_status():
-                    break
+                # Get status in JSON format for parsing
+                json_cmd = cmd + ['--output', 'json']
+                result = subprocess.run(
+                    json_cmd,
+                    capture_output=True,
+                    text=True,
+                    check=False
+                )
 
-                # Check if run is complete
-                try:
-                    status_info = client.get_run_status(run_id)
-                    if status_info.get('status', '').lower() in ['completed', 'failed', 'cancelled']:
-                        click.echo("\n🏁 Run completed. Stopping watch mode.")
-                        break
-                except Exception:
-                    pass
+                if result.returncode == 0:
+                    try:
+                        status_data = parse_prax_response(result.stdout)
+                        current_status = status_data.get('status', 'unknown').lower()
+
+                        # Clear screen and show formatted status
+                        click.clear()
+                        click.echo(format_status_output(status_data))
+                        click.echo(f"\nLast checked: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+                        click.echo(f"Watching every {interval}s... (Ctrl+C to stop)")
+
+                        # Check if complete
+                        if current_status in ['completed', 'succeeded', 'success', 'failed', 'error', 'cancelled']:
+                            click.echo(f"\n✅ Pipeline run finished with status: {current_status}")
+                            break
+
+                        last_status = current_status
+                    except Exception as e:
+                        click.echo(f"Error parsing status: {e}", err=True)
+                else:
+                    click.echo(f"Error getting status: {result.stderr}", err=True)
+
+                time.sleep(interval)
 
         except KeyboardInterrupt:
-            click.echo("\n👋 Watch mode stopped.")
+            click.echo("\n⏸️  Stopped watching")
+            return
+
+    # Non-watch mode
+    else:
+        # Set output format
+        if output_format == 'json':
+            cmd.extend(['--output', 'json'])
+        elif output_format == 'table':
+            cmd.extend(['--output', 'table'])
+        else:
+            # For summary format, get JSON and format it ourselves
+            cmd.extend(['--output', 'json'])
+
+        # Execute command
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=False
+        )
+
+        if result.returncode != 0:
+            raise click.ClickException(f"Failed to get status: {result.stderr}")
+
+        # Handle output based on format
+        if output_format == 'summary':
+            status_data = parse_prax_response(result.stdout)
+            click.echo(format_status_output(status_data))
+        else:
+            # For JSON and table, output as-is
+            click.echo(result.stdout)
