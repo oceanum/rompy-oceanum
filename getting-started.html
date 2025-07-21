@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Getting Started" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/getting-started.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="This guide will help you get started with rompy-oceanum quickly and efficiently. Prerequisites: Before installing rompy-oceanum, ensure you have: Python 3.8 or higher, Access to Oceanum platform (f..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="This guide will help you get started with rompy-oceanum quickly and efficiently. Prerequisites: Before installing rompy-oceanum, ensure you have: Python 3.8 or higher, Access to Oceanum platform (f..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/getting-started.html" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=30646c52"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="rompy-oceanum Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            rompy-oceanum
+              <img src="_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authentication-setup">Authentication Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start-example">Quick Start Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-cli">Using the CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-your-pipeline">Monitoring Your Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-options">Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-workflow">Common Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-help">Getting Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
+<p>This guide will help you get started with rompy-oceanum quickly and efficiently.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<p>Before installing rompy-oceanum, ensure you have:</p>
+<ul class="simple">
+<li><p>Python 3.8 or higher</p></li>
+<li><p>Access to Oceanum platform (for authentication and remote execution)</p></li>
+<li><p>Basic familiarity with rompy wave modeling framework</p></li>
+<li><p>oceanum CLI installed and configured</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>Install rompy-oceanum and oceanum CLI using pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+<p>Verify the integration works:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>--help
+</pre></div>
+</div>
+<p>For development installation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/rom-py/rompy-oceanum
+<span class="nb">cd</span><span class="w"> </span>rompy-oceanum
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev,docs]&quot;</span>
+pip<span class="w"> </span>install<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+<section id="authentication-setup">
+<h2>Authentication Setup<a class="headerlink" href="#authentication-setup" title="Link to this heading"></a></h2>
+<p>rompy-oceanum uses oceanum’s built-in authentication system. Set up authentication once:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Login to oceanum platform</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+</pre></div>
+</div>
+<p>This will authenticate you with all oceanum services, including Prax. No manual token management is required.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The authentication session persists across terminal sessions. You only need to login once
+or when your session expires.</p>
+</div>
+</section>
+<section id="quick-start-example">
+<h2>Quick Start Example<a class="headerlink" href="#quick-start-example" title="Link to this heading"></a></h2>
+<p>Here’s a minimal example using the oceanum CLI integration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Authenticate with oceanum</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+
+<span class="c1"># 2. Create optimized rompy configuration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>swan<span class="w"> </span>--template<span class="w"> </span>basic<span class="w"> </span>--domain<span class="w"> </span><span class="s2">&quot;my_domain&quot;</span>
+
+<span class="c1"># 3. Execute model via Prax pipeline</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>swan<span class="w"> </span>--pipeline-name<span class="w"> </span>my-pipeline
+
+<span class="c1"># 4. Monitor execution</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>&lt;run-id&gt;
+
+<span class="c1"># 5. Download results when complete</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>./outputs<span class="w"> </span>--organize
+</pre></div>
+</div>
+<p>For programmatic usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rompy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy.swan</span><span class="w"> </span><span class="kn">import</span> <span class="n">SwanConfig</span>
+
+<span class="c1"># Create a basic SWAN configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SwanConfig</span><span class="p">(</span>
+    <span class="c1"># Your SWAN model configuration here</span>
+    <span class="c1"># See rompy documentation for details</span>
+<span class="p">)</span>
+
+<span class="c1"># Create a ModelRun instance</span>
+<span class="n">model_run</span> <span class="o">=</span> <span class="n">rompy</span><span class="o">.</span><span class="n">ModelRun</span><span class="p">(</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./outputs&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Execute using Prax pipeline backend</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">pipeline_backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;swan-from-rompy&quot;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pipeline submitted with Run ID: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">run_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="using-the-cli">
+<h2>Using the CLI<a class="headerlink" href="#using-the-cli" title="Link to this heading"></a></h2>
+<p>rompy-oceanum is integrated with the oceanum CLI as the <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span></code> command group:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create optimized configuration templates</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>swan<span class="w"> </span>--template<span class="w"> </span>basic<span class="w"> </span>--domain<span class="w"> </span><span class="s2">&quot;my_domain&quot;</span>
+
+<span class="c1"># Submit a pipeline from a rompy configuration file</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>swan<span class="w"> </span>--pipeline-name<span class="w"> </span>my-pipeline
+
+<span class="c1"># Check pipeline status</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>&lt;run-id&gt;
+
+<span class="c1"># View pipeline logs with filtering</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>--follow
+
+<span class="c1"># Download organized pipeline outputs</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>./outputs<span class="w"> </span>--organize
+</pre></div>
+</div>
+</section>
+<section id="monitoring-your-pipeline">
+<h2>Monitoring Your Pipeline<a class="headerlink" href="#monitoring-your-pipeline" title="Link to this heading"></a></h2>
+<p>Once submitted, you can monitor your pipeline execution:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check status</span>
+<span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pipeline status: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Wait for completion</span>
+<span class="n">result</span><span class="o">.</span><span class="n">wait_for_completion</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>  <span class="c1"># 1 hour timeout</span>
+
+<span class="c1"># Download outputs when complete</span>
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">is_complete</span><span class="p">():</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">download_outputs</span><span class="p">(</span><span class="s2">&quot;./outputs&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloaded outputs to: </span><span class="si">{</span><span class="n">outputs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-options">
+<h2>Configuration Options<a class="headerlink" href="#configuration-options" title="Link to this heading"></a></h2>
+<p>rompy-oceanum leverages oceanum’s configuration system and supports:</p>
+<ol class="arabic simple">
+<li><p><strong>Oceanum Authentication</strong> (via <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">auth</span> <span class="pre">login</span></code>)</p></li>
+<li><p><strong>Template-based Configuration</strong> (via <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span> <span class="pre">init</span></code>)</p></li>
+<li><p><strong>Command-line Parameters</strong> (for pipeline execution)</p></li>
+<li><p><strong>Programmatic Configuration</strong> (for advanced usage)</p></li>
+</ol>
+<p>Generate optimized configuration templates:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic SWAN configuration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>swan<span class="w"> </span>--template<span class="w"> </span>basic<span class="w"> </span>--domain<span class="w"> </span><span class="s2">&quot;my_domain&quot;</span>
+
+<span class="c1"># Advanced configuration with validation</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>schism<span class="w"> </span>--template<span class="w"> </span>advanced<span class="w"> </span>--interactive
+
+<span class="c1"># WaveWatch III configuration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>ww3<span class="w"> </span>--bbox<span class="w"> </span><span class="s2">&quot;-180,-90,180,90&quot;</span><span class="w"> </span>--grid-resolution<span class="w"> </span><span class="m">0</span>.1
+</pre></div>
+</div>
+<p>Available template types:
+* <code class="docutils literal notranslate"><span class="pre">basic</span></code>: Essential model physics and standard outputs
+* <code class="docutils literal notranslate"><span class="pre">advanced</span></code>: Additional physics, validation, and diagnostics
+* <code class="docutils literal notranslate"><span class="pre">research</span></code>: Comprehensive analysis and statistics
+* <code class="docutils literal notranslate"><span class="pre">operational</span></code>: Optimized for speed and monitoring</p>
+</section>
+<section id="common-workflow">
+<h2>Common Workflow<a class="headerlink" href="#common-workflow" title="Link to this heading"></a></h2>
+<p>A typical rompy-oceanum workflow using the oceanum CLI:</p>
+<ol class="arabic simple">
+<li><p><strong>Authentication</strong>: Login to oceanum platform once</p></li>
+<li><p><strong>Configuration</strong>: Generate optimized rompy configuration from templates</p></li>
+<li><p><strong>Execution</strong>: Submit model to Prax for remote execution</p></li>
+<li><p><strong>Monitoring</strong>: Track pipeline progress and view logs</p></li>
+<li><p><strong>Result Management</strong>: Download organized outputs and metadata</p></li>
+</ol>
+<p><strong>Workflow Steps:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>oceanum auth login ──► oceanum rompy init ──► oceanum rompy run
+                                                     │
+                                                     ▼
+oceanum rompy sync ◄── oceanum rompy logs ◄── oceanum rompy status
+</pre></div>
+</div>
+<p><strong>Complete Example:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># One-time authentication setup</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+
+<span class="c1"># Create optimized configuration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>swan<span class="w"> </span>--template<span class="w"> </span>basic<span class="w"> </span>--domain<span class="w"> </span><span class="s2">&quot;perth_coast&quot;</span>
+
+<span class="c1"># Execute model</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>swan<span class="w"> </span>--pipeline-name<span class="w"> </span>swan-operational
+
+<span class="c1"># Monitor execution (get run-id from previous command)</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>&lt;run-id&gt;
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>--follow
+
+<span class="c1"># Download organized results</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>./outputs<span class="w"> </span>--organize
+</pre></div>
+</div>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<p>Now that you have rompy-oceanum up and running:</p>
+<ul class="simple">
+<li><p>Read the <a class="reference internal" href="user-guide/basic-usage.html"><span class="doc">Basic Usage</span></a> for detailed usage patterns</p></li>
+<li><p>Explore <a class="reference internal" href="examples/swan-workflow.html"><span class="doc">SWAN Workflow Example</span></a> for a complete SWAN modeling example</p></li>
+<li><p>Check the <a class="reference internal" href="user-guide/configuration.html"><span class="doc">Configuration</span></a> guide for advanced configuration options</p></li>
+<li><p>Review the <a class="reference internal" href="api/index.html"><span class="doc">API Reference</span></a> for complete API documentation</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<p>If you encounter issues:</p>
+<ol class="arabic simple">
+<li><p><strong>Authentication Errors</strong>: Run <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">auth</span> <span class="pre">login</span></code> to refresh your session</p></li>
+<li><p><strong>Plugin Loading Issues</strong>: Ensure oceanum CLI can find the plugin with <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span> <span class="pre">--help</span></code></p></li>
+<li><p><strong>Pipeline Failures</strong>: Check logs using <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span> <span class="pre">logs</span> <span class="pre">&lt;run-id&gt;</span> <span class="pre">--follow</span></code></p></li>
+<li><p><strong>Network Issues</strong>: Ensure you have internet connectivity and access to Oceanum services</p></li>
+<li><p><strong>Configuration Problems</strong>: Use <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span> <span class="pre">init</span></code> to generate valid templates</p></li>
+</ol>
+<p>Common solutions:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Refresh authentication</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span><span class="nb">logout</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+
+<span class="c1"># Verify plugin integration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>--help
+
+<span class="c1"># Test with basic configuration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>swan<span class="w"> </span>--template<span class="w"> </span>basic<span class="w"> </span>--domain<span class="w"> </span><span class="s2">&quot;test&quot;</span>
+</pre></div>
+</div>
+<p>For more detailed troubleshooting, see <a class="reference internal" href="user-guide/troubleshooting.html"><span class="doc">Troubleshooting</span></a>.</p>
+</section>
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/rom-py/rompy-oceanum/issues">GitHub Issues</a> - Report bugs or request features</p></li>
+<li><p><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a> - Learn about the underlying framework</p></li>
+<li><p><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a> - Platform documentation and support</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="rompy-oceanum Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

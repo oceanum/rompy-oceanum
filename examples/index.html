@@ -1,0 +1,476 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Examples" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/examples/index.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="This section provides practical examples and tutorials for using rompy-oceanum effectively. The examples progress from basic usage patterns to advanced operational workflows, demonstrating real-wor..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="This section provides practical examples and tutorials for using rompy-oceanum effectively. The examples progress from basic usage patterns to advanced operational workflows, demonstrating real-wor..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="../_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/examples/index.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SWAN Workflow Example" href="swan-workflow.html" />
+    <link rel="prev" title="Troubleshooting" href="../user-guide/troubleshooting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rompy-oceanum
+              <img src="../_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup-for-examples">Setup for Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-data">Example Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-categories">Example Categories</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-workflows">Basic Workflows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-specific-examples">Model-Specific Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operational-patterns">Operational Patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-examples">Integration Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#code-organization">Code Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-examples">Running Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#validation-and-testing">Validation and Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting-examples">Troubleshooting Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing-examples">Contributing Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html">Batch Processing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Examples</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
+<p>This section provides practical examples and tutorials for using rompy-oceanum effectively. The examples progress from basic usage patterns to advanced operational workflows, demonstrating real-world applications of wave modeling with Oceanum Prax integration.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-zap" viewBox="0 0 16 16" aria-hidden="true"><path d="M9.504.43a1.516 1.516 0 0 1 2.437 1.713L10.415 5.5h2.123c1.57 0 2.346 1.909 1.22 3.004l-7.34 7.142a1.249 1.249 0 0 1-.871.354h-.302a1.25 1.25 0 0 1-1.157-1.723L5.633 10.5H3.462c-1.57 0-2.346-1.909-1.22-3.004L9.503.429Zm1.047 1.074L3.286 8.571A.25.25 0 0 0 3.462 9H6.75a.75.75 0 0 1 .694 1.034l-1.713 4.188 6.982-6.793A.25.25 0 0 0 12.538 7H9.25a.75.75 0 0 1-.683-1.06l2.008-4.418.003-.006a.036.036 0 0 0-.004-.009l-.006-.006-.008-.001c-.003 0-.006.002-.009.004Z"></path></svg> Quick Start</div>
+<p class="sd-card-text">Complete SWAN wave model workflow from configuration to results.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="swan-workflow.html"><span class="doc">SWAN Workflow Example</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-gear" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.224a5.738 5.738 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.211-.224l.29-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.105c-.147.561-.549.967-.998 1.189-.173.086-.34.183-.5.29-.417.278-.97.423-1.529.27l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.411.406.562.957.53 1.456a4.709 4.709 0 0 0 0 .582c.032.499-.119 1.05-.53 1.456l-.815.806c-.081.08-.073.159-.059.19.162.346.353.677.573.989.02.03.085.076.195.046l1.102-.303c.56-.153 1.113-.008 1.53.27.161.107.328.204.501.29.447.222.85.629.997 1.189l.289 1.105c.029.109.101.143.137.146a6.6 6.6 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.105c.147-.561.549-.967.998-1.189.173-.086.34-.183.5-.29.417-.278.97-.423 1.529-.27l1.103.303c.109.029.175-.016.195-.045.22-.313.411-.644.573-.99.014-.031.021-.11-.059-.19l-.815-.806c-.411-.406-.562-.957-.53-1.456a4.709 4.709 0 0 0 0-.582c-.032-.499.119-1.05.53-1.456l.815-.806c.081-.08.073-.159.059-.19a6.464 6.464 0 0 0-.573-.989c-.02-.03-.085-.076-.195-.046l-1.102.303c-.56.153-1.113.008-1.53-.27a4.44 4.44 0 0 0-.501-.29c-.447-.222-.85-.629-.997-1.189l-.289-1.105c-.029-.11-.101-.143-.137-.146a6.6 6.6 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9.5 8a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"></path></svg> Advanced Configuration</div>
+<p class="sd-card-text">Complex configuration patterns and optimization techniques.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="advanced-configuration.html"><span class="doc">Advanced Configuration</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-stack" viewBox="0 0 16 16" aria-hidden="true"><path d="M7.122.392a1.75 1.75 0 0 1 1.756 0l5.003 2.902c.83.481.83 1.68 0 2.162L8.878 8.358a1.75 1.75 0 0 1-1.756 0L2.119 5.456a1.251 1.251 0 0 1 0-2.162ZM8.125 1.69a.248.248 0 0 0-.25 0l-4.63 2.685 4.63 2.685a.248.248 0 0 0 .25 0l4.63-2.685ZM1.601 7.789a.75.75 0 0 1 1.025-.273l5.249 3.044a.248.248 0 0 0 .25 0l5.249-3.044a.75.75 0 0 1 .752 1.298l-5.248 3.044a1.75 1.75 0 0 1-1.756 0L1.874 8.814A.75.75 0 0 1 1.6 7.789Zm0 3.5a.75.75 0 0 1 1.025-.273l5.249 3.044a.248.248 0 0 0 .25 0l5.249-3.044a.75.75 0 0 1 .752 1.298l-5.248 3.044a1.75 1.75 0 0 1-1.756 0l-5.248-3.044a.75.75 0 0 1-.273-1.025Z"></path></svg> Batch Processing</div>
+<p class="sd-card-text">Execute multiple models efficiently with batch processing.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="batch-processing.html"><span class="doc">Batch Processing</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm sd-text-muted docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-workflow" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.75C0 .784.784 0 1.75 0h3.5C6.216 0 7 .784 7 1.75v3.5A1.75 1.75 0 0 1 5.25 7H4v4a1 1 0 0 0 1 1h4v-1.25C9 9.784 9.784 9 10.75 9h3.5c.966 0 1.75.784 1.75 1.75v3.5A1.75 1.75 0 0 1 14.25 16h-3.5A1.75 1.75 0 0 1 9 14.25v-.75H5A2.5 2.5 0 0 1 2.5 11V7h-.75A1.75 1.75 0 0 1 0 5.25Zm1.75-.25a.25.25 0 0 0-.25.25v3.5c0 .138.112.25.25.25h3.5a.25.25 0 0 0 .25-.25v-3.5a.25.25 0 0 0-.25-.25Zm9 9a.25.25 0 0 0-.25.25v3.5c0 .138.112.25.25.25h3.5a.25.25 0 0 0 .25-.25v-3.5a.25.25 0 0 0-.25-.25Z"></path></svg> Operational Workflows</div>
+<p class="sd-card-text">Production-ready forecasting and monitoring systems (coming soon).</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The examples are organized by complexity and use case:</p>
+<dl class="simple">
+<dt><strong>Getting Started Examples</strong></dt><dd><p>Simple, focused examples for learning core concepts and basic workflows.</p>
+</dd>
+<dt><strong>Operational Examples</strong></dt><dd><p>Production-ready patterns for automated forecasting and monitoring systems.</p>
+</dd>
+<dt><strong>Integration Examples</strong></dt><dd><p>Demonstrations of rompy-oceanum integration with external systems and workflows.</p>
+</dd>
+<dt><strong>Advanced Examples</strong></dt><dd><p>Complex scenarios including ensemble modeling, uncertainty quantification, and custom backends.</p>
+</dd>
+</dl>
+</section>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<p>Before working through these examples, ensure you have:</p>
+<ol class="arabic simple">
+<li><p><strong>rompy-oceanum installed</strong> with all dependencies</p></li>
+<li><p><strong>Oceanum CLI configured</strong> and authenticated</p></li>
+<li><p><strong>Access to Prax pipeline system</strong> through your organization</p></li>
+<li><p><strong>Basic familiarity</strong> with rompy and wave modeling concepts</p></li>
+</ol>
+</section>
+<section id="setup-for-examples">
+<h2>Setup for Examples<a class="headerlink" href="#setup-for-examples" title="Link to this heading"></a></h2>
+<p>Most examples assume a common setup:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Authenticate with Oceanum</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+
+<span class="c1"># Set environment variables</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_ORG</span><span class="o">=</span><span class="s2">&quot;your-organization&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_PROJECT</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_USER</span><span class="o">=</span><span class="s2">&quot;your-username&quot;</span>
+
+<span class="c1"># Create working directory</span>
+mkdir<span class="w"> </span>rompy-oceanum-examples
+<span class="nb">cd</span><span class="w"> </span>rompy-oceanum-examples
+</pre></div>
+</div>
+</section>
+<section id="example-data">
+<h2>Example Data<a class="headerlink" href="#example-data" title="Link to this heading"></a></h2>
+<p>Many examples use sample datasets available in the rompy-oceanum repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download example data</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/rom-py/rompy-oceanum-examples.git
+<span class="nb">cd</span><span class="w"> </span>rompy-oceanum-examples/data
+</pre></div>
+</div>
+<p>Available datasets include:</p>
+<ul class="simple">
+<li><p><strong>Sample grids</strong>: Pre-configured computational grids for different regions</p></li>
+<li><p><strong>Forcing data</strong>: Sample wind and wave boundary condition files</p></li>
+<li><p><strong>Configuration templates</strong>: Ready-to-use model configuration files</p></li>
+<li><p><strong>Expected outputs</strong>: Reference results for validation</p></li>
+</ul>
+</section>
+<section id="example-categories">
+<h2>Example Categories<a class="headerlink" href="#example-categories" title="Link to this heading"></a></h2>
+<section id="basic-workflows">
+<h3>Basic Workflows<a class="headerlink" href="#basic-workflows" title="Link to this heading"></a></h3>
+<p>Learn fundamental concepts through simple, focused examples:</p>
+<ul class="simple">
+<li><p><strong>Hello World</strong>: Your first rompy-oceanum model run</p></li>
+<li><p><strong>Configuration Basics</strong>: Understanding configuration patterns</p></li>
+<li><p><strong>Result Management</strong>: Working with model outputs</p></li>
+<li><p><strong>CLI Usage</strong>: Command-line interface examples</p></li>
+</ul>
+</section>
+<section id="model-specific-examples">
+<h3>Model-Specific Examples<a class="headerlink" href="#model-specific-examples" title="Link to this heading"></a></h3>
+<p>Examples tailored for specific wave models:</p>
+<ul class="simple">
+<li><p><strong>SWAN Workflows</strong>: Complete SWAN modeling examples</p></li>
+<li><p><strong>WAVEWATCH III</strong>: WW3 configuration and execution</p></li>
+<li><p><strong>Multi-model Comparison</strong>: Running different models on the same domain</p></li>
+</ul>
+</section>
+<section id="operational-patterns">
+<h3>Operational Patterns<a class="headerlink" href="#operational-patterns" title="Link to this heading"></a></h3>
+<p>Production-ready examples for operational use:</p>
+<ul class="simple">
+<li><p><strong>Automated Forecasting</strong>: Scheduled model execution</p></li>
+<li><p><strong>Monitoring and Alerting</strong>: Real-time system monitoring</p></li>
+<li><p><strong>Error Recovery</strong>: Robust error handling patterns</p></li>
+<li><p><strong>Performance Optimization</strong>: Resource usage optimization</p></li>
+</ul>
+</section>
+<section id="integration-examples">
+<h3>Integration Examples<a class="headerlink" href="#integration-examples" title="Link to this heading"></a></h3>
+<p>Demonstrations of rompy-oceanum integration:</p>
+<ul class="simple">
+<li><p><strong>Data Pipeline Integration</strong>: Apache Airflow and Prefect workflows</p></li>
+<li><p><strong>Custom Backends</strong>: Implementing custom execution backends</p></li>
+<li><p><strong>External API Integration</strong>: Connecting to external data sources</p></li>
+<li><p><strong>Result Publishing</strong>: Automated result dissemination</p></li>
+</ul>
+</section>
+</section>
+<section id="code-organization">
+<h2>Code Organization<a class="headerlink" href="#code-organization" title="Link to this heading"></a></h2>
+<p>Each example follows a consistent structure:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>example-name/
+├── README.rst          # Example overview and instructions
+├── config/             # Configuration files
+│   ├── model.yml       # Model configuration
+│   └── backend.yml     # Backend configuration
+├── scripts/            # Execution scripts
+│   ├── run.py          # Main execution script
+│   └── utils.py        # Helper functions
+├── data/               # Input data files
+├── outputs/            # Expected output directory
+└── tests/              # Validation tests
+</pre></div>
+</div>
+</section>
+<section id="running-examples">
+<h2>Running Examples<a class="headerlink" href="#running-examples" title="Link to this heading"></a></h2>
+<p>Each example can be executed in multiple ways:</p>
+<p><strong>Interactive Execution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Navigate to example directory</span>
+<span class="nb">cd</span><span class="w"> </span>swan-workflow
+
+<span class="c1"># Run interactively</span>
+python<span class="w"> </span>scripts/run.py
+</pre></div>
+</div>
+<p><strong>CLI Execution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using oceanum CLI</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config/model.yml<span class="w"> </span>swan<span class="w"> </span>--pipeline-name<span class="w"> </span>example-run
+</pre></div>
+</div>
+<p><strong>Jupyter Notebooks:</strong></p>
+<p>Many examples include Jupyter notebooks for interactive exploration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start Jupyter</span>
+jupyter<span class="w"> </span>lab
+
+<span class="c1"># Open example notebook</span>
+<span class="c1"># Navigate to example-name/notebook.ipynb</span>
+</pre></div>
+</div>
+</section>
+<section id="validation-and-testing">
+<h2>Validation and Testing<a class="headerlink" href="#validation-and-testing" title="Link to this heading"></a></h2>
+<p>Each example includes validation to ensure correct execution:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run example tests</span>
+<span class="nb">cd</span><span class="w"> </span>example-name
+pytest<span class="w"> </span>tests/
+
+<span class="c1"># Validate outputs</span>
+python<span class="w"> </span>scripts/validate.py
+</pre></div>
+</div>
+<p>Expected outputs and reference results are provided for comparison.</p>
+</section>
+<section id="troubleshooting-examples">
+<h2>Troubleshooting Examples<a class="headerlink" href="#troubleshooting-examples" title="Link to this heading"></a></h2>
+<p>If you encounter issues running examples:</p>
+<ol class="arabic simple">
+<li><p><strong>Check authentication</strong>: Ensure you’re properly authenticated with Oceanum</p></li>
+<li><p><strong>Verify environment</strong>: Check that all required environment variables are set</p></li>
+<li><p><strong>Review logs</strong>: Examine execution logs for detailed error information</p></li>
+<li><p><strong>Check resources</strong>: Ensure sufficient computational resources are available</p></li>
+</ol>
+<p>Common issues and solutions:</p>
+<p><strong>Authentication Errors:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Refresh authentication</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login<span class="w"> </span>--refresh
+</pre></div>
+</div>
+<p><strong>Resource Limitations:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check available resources</span>
+oceanum<span class="w"> </span>status<span class="w"> </span>resources
+</pre></div>
+</div>
+<p><strong>Configuration Issues:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate configuration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>validate<span class="w"> </span>config/model.yml
+</pre></div>
+</div>
+</section>
+<section id="contributing-examples">
+<h2>Contributing Examples<a class="headerlink" href="#contributing-examples" title="Link to this heading"></a></h2>
+<p>We welcome contributions of new examples! To contribute:</p>
+<ol class="arabic simple">
+<li><p><strong>Follow the standard structure</strong> outlined above</p></li>
+<li><p><strong>Include comprehensive documentation</strong> and comments</p></li>
+<li><p><strong>Provide validation tests</strong> to ensure correctness</p></li>
+<li><p><strong>Use realistic, educational scenarios</strong> that demonstrate best practices</p></li>
+</ol>
+<p>See the <a class="reference internal" href="../development/contributing.html"><span class="doc">Contributing</span></a> guide for detailed contribution instructions.</p>
+</section>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="swan-workflow.html">SWAN Workflow Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#basic-configuration">Basic Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#execution-with-cli">Execution with CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#programmatic-execution">Programmatic Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#monitoring-progress">Monitoring Progress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#result-management">Result Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swan-workflow.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-configuration.html">Advanced Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced-configuration.html#coming-soon">Coming Soon</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="batch-processing.html">Batch Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="batch-processing.html#coming-soon">Coming Soon</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="quick-reference">
+<h2>Quick Reference<a class="headerlink" href="#quick-reference" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Most Popular Examples:</strong></p></li>
+<li><p><a class="reference internal" href="swan-workflow.html"><span class="doc">SWAN Workflow Example</span></a> - Complete SWAN modeling workflow</p></li>
+<li><p><a class="reference internal" href="batch-processing.html"><span class="doc">Batch Processing</span></a> - Parallel model execution patterns</p></li>
+<li><p>Operational workflows - Production forecasting systems (coming soon)</p></li>
+</ul>
+<p><strong>By Difficulty Level:</strong></p>
+<ul class="simple">
+<li><p><strong>Beginner</strong>: <a class="reference internal" href="swan-workflow.html"><span class="doc">SWAN Workflow Example</span></a></p></li>
+<li><p><strong>Intermediate</strong>: <a class="reference internal" href="advanced-configuration.html"><span class="doc">Advanced Configuration</span></a>, <a class="reference internal" href="batch-processing.html"><span class="doc">Batch Processing</span></a></p></li>
+<li><p><strong>Advanced</strong>: Operational workflows (coming soon)</p></li>
+</ul>
+<p><strong>By Use Case:</strong></p>
+<ul class="simple">
+<li><p><strong>Research</strong>: Configuration optimization, sensitivity analysis</p></li>
+<li><p><strong>Operations</strong>: Automated forecasting, monitoring, alerting (coming soon)</p></li>
+<li><p><strong>Development</strong>: Custom backends, integration patterns</p></li>
+</ul>
+</section>
+<section id="additional-resources">
+<h2>Additional Resources<a class="headerlink" href="#additional-resources" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../user-guide/index.html"><span class="doc">User Guide</span></a> - Comprehensive user documentation</p></li>
+<li><p><a class="reference internal" href="../api/index.html"><span class="doc">API Reference</span></a> - Complete API reference</p></li>
+<li><p><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a> - Core framework documentation</p></li>
+<li><p><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a> - Platform documentation and tutorials</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../user-guide/troubleshooting.html" class="btn btn-neutral float-left" title="Troubleshooting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="swan-workflow.html" class="btn btn-neutral float-right" title="SWAN Workflow Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

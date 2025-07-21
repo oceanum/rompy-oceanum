@@ -1,0 +1,901 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Configuration" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/user-guide/configuration.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="This guide covers all aspects of configuring rompy-oceanum for your environment and use cases. Learn how to set up authentication, configure backends, and customize behavior for optimal performance..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="This guide covers all aspects of configuring rompy-oceanum for your environment and use cases. Learn how to set up authentication, configure backends, and customize behavior for optimal performance..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="../_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/user-guide/configuration.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pipeline Backends" href="pipeline-backends.html" />
+    <link rel="prev" title="Basic Usage" href="basic-usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rompy-oceanum
+              <img src="../_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quick-navigation">Quick Navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#plugin-architecture">Plugin Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#environment-setup">Environment Setup</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#table-of-contents">Table of Contents</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#authentication-configuration">Authentication Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#backend-configuration">Backend Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configuration-files">Configuration Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#programmatic-configuration">Programmatic Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#runtime-configuration">Runtime Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#security-configuration">Security Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Configuration Validation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#troubleshooting-configuration">Troubleshooting Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-configurations">Example Configurations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="advanced-workflows.html">Advanced Workflows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-hierarchy">Configuration Hierarchy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#authentication-configuration">Authentication Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prax-authentication">Prax Authentication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datamesh-authentication">DataMesh Authentication</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-configuration">Backend Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prax-pipeline-backend">Prax Pipeline Backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datamesh-configuration">DataMesh Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-files">Configuration Files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#global-configuration">Global Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#project-specific-configuration">Project-Specific Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment Variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#complete-environment-variable-reference">Complete Environment Variable Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#programmatic-configuration">Programmatic Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dynamic-configuration">Dynamic Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-validation">Configuration Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#runtime-configuration">Runtime Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-overrides">Command-Line Overrides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipeline-specific-parameters">Pipeline-Specific Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#security-configuration">Security Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#token-management">Token Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ssl-tls-configuration">SSL/TLS Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Configuration Validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#validation-schema">Validation Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-testing">Configuration Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cli-configuration-commands">CLI Configuration Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting-configuration">Troubleshooting Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug-configuration-loading">Debug Configuration Loading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-best-practices">Performance Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#maintenance-best-practices">Maintenance Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example-configurations">Example Configurations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#development-environment">Development Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#production-environment">Production Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-environment">Testing Environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Configuration</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
+<p>This guide covers all aspects of configuring rompy-oceanum for your environment and use cases. Learn how to set up authentication, configure backends, and customize behavior for optimal performance.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>rompy-oceanum supports multiple configuration methods to provide flexibility for different deployment scenarios:</p>
+<ul class="simple">
+<li><p><strong>Environment Variables</strong>: Secure authentication and default settings</p></li>
+<li><p><strong>Configuration Files</strong>: Reusable settings and complex configurations</p></li>
+<li><p><strong>Programmatic Configuration</strong>: Dynamic settings for automated workflows</p></li>
+<li><p><strong>Runtime Parameters</strong>: Override settings for specific operations</p></li>
+</ul>
+<section id="configuration-hierarchy">
+<h3>Configuration Hierarchy<a class="headerlink" href="#configuration-hierarchy" title="Link to this heading"></a></h3>
+<p>Settings are applied in the following order (later sources override earlier ones):</p>
+<ol class="arabic simple">
+<li><p>Default values</p></li>
+<li><p>Configuration files (<code class="docutils literal notranslate"><span class="pre">~/.rompy-oceanum/config.yaml</span></code>)</p></li>
+<li><p>Environment variables</p></li>
+<li><p>Command-line arguments</p></li>
+<li><p>Programmatic parameters</p></li>
+</ol>
+</section>
+</section>
+<section id="authentication-configuration">
+<h2>Authentication Configuration<a class="headerlink" href="#authentication-configuration" title="Link to this heading"></a></h2>
+<section id="prax-authentication">
+<h3>Prax Authentication<a class="headerlink" href="#prax-authentication" title="Link to this heading"></a></h3>
+<p>Configure authentication for Oceanum Prax services:</p>
+<p><strong>Environment Variables (Recommended):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Required authentication token</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_TOKEN</span><span class="o">=</span><span class="s2">&quot;your-authentication-token&quot;</span>
+
+<span class="c1"># API endpoint</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_BASE_URL</span><span class="o">=</span><span class="s2">&quot;https://prax.oceanum.science&quot;</span>
+
+<span class="c1"># Organization and project</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_ORG</span><span class="o">=</span><span class="s2">&quot;your-organization&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_PROJECT</span><span class="o">=</span><span class="s2">&quot;your-project&quot;</span>
+
+<span class="c1"># Deployment stage</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_STAGE</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="w">  </span><span class="c1"># or &quot;prod&quot;</span>
+</pre></div>
+</div>
+<p><strong>Configuration File:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ~/.rompy-oceanum/config.yaml</span>
+<span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${PRAX_TOKEN}&quot;</span><span class="w">  </span><span class="c1"># Use environment variable</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prax.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">org</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-organization&quot;</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;wave-modeling&quot;</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev&quot;</span>
+</pre></div>
+</div>
+<p><strong>Programmatic Configuration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxConfig</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="n">token</span><span class="o">=</span><span class="s2">&quot;your-token&quot;</span><span class="p">,</span>  <span class="c1"># Better to use environment variable</span>
+    <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://prax.oceanum.science&quot;</span><span class="p">,</span>
+    <span class="n">org</span><span class="o">=</span><span class="s2">&quot;my-organization&quot;</span><span class="p">,</span>
+    <span class="n">project</span><span class="o">=</span><span class="s2">&quot;wave-modeling&quot;</span><span class="p">,</span>
+    <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="datamesh-authentication">
+<h3>DataMesh Authentication<a class="headerlink" href="#datamesh-authentication" title="Link to this heading"></a></h3>
+<p>Configure DataMesh integration for output registration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># DataMesh API endpoint</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DATAMESH_BASE_URL</span><span class="o">=</span><span class="s2">&quot;https://datamesh.oceanum.science&quot;</span>
+
+<span class="c1"># Authentication token (may be same as Prax)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DATAMESH_TOKEN</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PRAX_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="backend-configuration">
+<h2>Backend Configuration<a class="headerlink" href="#backend-configuration" title="Link to this heading"></a></h2>
+<section id="prax-pipeline-backend">
+<h3>Prax Pipeline Backend<a class="headerlink" href="#prax-pipeline-backend" title="Link to this heading"></a></h3>
+<p>Configure the Prax pipeline backend for remote execution:</p>
+<p><strong>Basic Configuration:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Connection settings</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prax.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span><span class="w">  </span><span class="c1"># 1 hour timeout</span>
+<span class="w">  </span><span class="nt">retry_attempts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">retry_delay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">  </span><span class="c1"># seconds</span>
+
+<span class="w">  </span><span class="c1"># Default pipeline settings</span>
+<span class="w">  </span><span class="nt">default_pipeline</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;swan-from-rompy&quot;</span>
+<span class="w">  </span><span class="nt">default_stage</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev&quot;</span>
+
+<span class="w">  </span><span class="c1"># Resource requirements</span>
+<span class="w">  </span><span class="nt">cpu_limit</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2&quot;</span>
+<span class="w">  </span><span class="nt">memory_limit</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;4Gi&quot;</span>
+<span class="w">  </span><span class="nt">storage_limit</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10Gi&quot;</span>
+</pre></div>
+</div>
+<p><strong>Advanced Configuration:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Pipeline-specific settings</span>
+<span class="w">  </span><span class="nt">pipelines</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">swan-from-rompy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7200</span><span class="w">  </span><span class="c1"># 2 hours for SWAN models</span>
+<span class="w">      </span><span class="nt">cpu_limit</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;4&quot;</span>
+<span class="w">      </span><span class="nt">memory_limit</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8Gi&quot;</span>
+
+<span class="w">    </span><span class="nt">schism-from-rompy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14400</span><span class="w">  </span><span class="c1"># 4 hours for SCHISM models</span>
+<span class="w">      </span><span class="nt">cpu_limit</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8&quot;</span>
+<span class="w">      </span><span class="nt">memory_limit</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;16Gi&quot;</span>
+
+<span class="w">  </span><span class="c1"># Monitoring settings</span>
+<span class="w">  </span><span class="nt">status_check_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w">  </span><span class="c1"># seconds</span>
+<span class="w">  </span><span class="nt">log_level</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;INFO&quot;</span>
+
+<span class="w">  </span><span class="c1"># Output settings</span>
+<span class="w">  </span><span class="nt">auto_download</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">download_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span><span class="w">  </span><span class="c1"># 10 minutes</span>
+<span class="w">  </span><span class="nt">cleanup_on_success</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</pre></div>
+</div>
+</section>
+<section id="datamesh-configuration">
+<h3>DataMesh Configuration<a class="headerlink" href="#datamesh-configuration" title="Link to this heading"></a></h3>
+<p>Configure output registration and data management:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">datamesh</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Connection settings</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://datamesh.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">register_outputs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="w">  </span><span class="c1"># Default metadata</span>
+<span class="w">  </span><span class="nt">default_tags</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;wave-model&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;rompy&quot;</span>
+
+<span class="w">  </span><span class="c1"># Dataset configuration</span>
+<span class="w">  </span><span class="nt">dataset_naming</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{model_type}_{run_id}_{timestamp}&quot;</span>
+<span class="w">  </span><span class="nt">description_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Wave</span><span class="nv"> </span><span class="s">model</span><span class="nv"> </span><span class="s">output</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">{model_type}&quot;</span>
+
+<span class="w">  </span><span class="c1"># File handling</span>
+<span class="w">  </span><span class="nt">supported_formats</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.nc&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.zarr&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.txt&quot;</span>
+
+<span class="w">  </span><span class="c1"># Registration settings</span>
+<span class="w">  </span><span class="nt">auto_register</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;private&quot;</span><span class="w">  </span><span class="c1"># or &quot;public&quot;, &quot;organization&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="configuration-files">
+<h2>Configuration Files<a class="headerlink" href="#configuration-files" title="Link to this heading"></a></h2>
+<section id="global-configuration">
+<h3>Global Configuration<a class="headerlink" href="#global-configuration" title="Link to this heading"></a></h3>
+<p>Create a global configuration file at <code class="docutils literal notranslate"><span class="pre">~/.rompy-oceanum/config.yaml</span></code>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Global rompy-oceanum configuration</span>
+
+<span class="c1"># Default backend settings</span>
+<span class="nt">default_backend</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;prax&quot;</span>
+
+<span class="c1"># Prax configuration</span>
+<span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prax.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">org</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-organization&quot;</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;wave-modeling&quot;</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev&quot;</span>
+<span class="w">  </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span>
+
+<span class="w">  </span><span class="c1"># Default pipeline per model type</span>
+<span class="w">  </span><span class="nt">model_pipelines</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">swan</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;swan-from-rompy&quot;</span>
+<span class="w">    </span><span class="nt">schism</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;schism-from-rompy&quot;</span>
+<span class="w">    </span><span class="nt">ww3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ww3-from-rompy&quot;</span>
+
+<span class="c1"># DataMesh configuration</span>
+<span class="nt">datamesh</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://datamesh.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">register_outputs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">default_tags</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;wave-model&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{model_type}}&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{org}}&quot;</span>
+
+<span class="c1"># Logging configuration</span>
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;INFO&quot;</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;%(asctime)s</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">%(name)s</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">%(levelname)s</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">%(message)s&quot;</span>
+<span class="w">  </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;~/.rompy-oceanum/logs/rompy-oceanum.log&quot;</span>
+
+<span class="c1"># Default directories</span>
+<span class="nt">directories</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./outputs&quot;</span>
+<span class="w">  </span><span class="nt">config</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;./configs&quot;</span>
+<span class="w">  </span><span class="nt">cache</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;~/.rompy-oceanum/cache&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="project-specific-configuration">
+<h3>Project-Specific Configuration<a class="headerlink" href="#project-specific-configuration" title="Link to this heading"></a></h3>
+<p>Create project-specific configurations:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># project-config.yaml</span>
+
+<span class="c1"># Project metadata</span>
+<span class="nt">project</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;australia-wave-forecast&quot;</span>
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Operational</span><span class="nv"> </span><span class="s">wave</span><span class="nv"> </span><span class="s">forecasting</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">Australian</span><span class="nv"> </span><span class="s">waters&quot;</span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span>
+
+<span class="c1"># Model configurations</span>
+<span class="nt">models</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">operational_swan</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;swan-operational&quot;</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;prod&quot;</span>
+<span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span>
+<span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*/6</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">  </span><span class="c1"># Every 6 hours</span>
+
+<span class="w">  </span><span class="nt">research_swan</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;swan-research&quot;</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev&quot;</span>
+<span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span>
+
+<span class="c1"># Output configuration</span>
+<span class="nt">outputs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">register_in_datamesh</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;australia&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;operational&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;wave-forecast&quot;</span>
+<span class="w">  </span><span class="nt">retention_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="environment-variables">
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading"></a></h2>
+<section id="complete-environment-variable-reference">
+<h3>Complete Environment Variable Reference<a class="headerlink" href="#complete-environment-variable-reference" title="Link to this heading"></a></h3>
+<p><strong>Authentication:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Prax authentication</span>
+<span class="nv">PRAX_TOKEN</span><span class="o">=</span><span class="s2">&quot;your-prax-token&quot;</span>
+<span class="nv">PRAX_BASE_URL</span><span class="o">=</span><span class="s2">&quot;https://prax.oceanum.science&quot;</span>
+<span class="nv">PRAX_ORG</span><span class="o">=</span><span class="s2">&quot;your-organization&quot;</span>
+<span class="nv">PRAX_PROJECT</span><span class="o">=</span><span class="s2">&quot;your-project&quot;</span>
+<span class="nv">PRAX_STAGE</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span>
+
+<span class="c1"># DataMesh authentication</span>
+<span class="nv">DATAMESH_TOKEN</span><span class="o">=</span><span class="s2">&quot;your-datamesh-token&quot;</span>
+<span class="nv">DATAMESH_BASE_URL</span><span class="o">=</span><span class="s2">&quot;https://datamesh.oceanum.science&quot;</span>
+</pre></div>
+</div>
+<p><strong>Behavior Control:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Logging</span>
+<span class="nv">ROMPY_OCEANUM_LOG_LEVEL</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span>
+<span class="nv">ROMPY_OCEANUM_LOG_FILE</span><span class="o">=</span><span class="s2">&quot;/var/log/rompy-oceanum.log&quot;</span>
+
+<span class="c1"># Timeouts</span>
+<span class="nv">PRAX_TIMEOUT</span><span class="o">=</span><span class="s2">&quot;3600&quot;</span>
+<span class="nv">PRAX_STATUS_CHECK_INTERVAL</span><span class="o">=</span><span class="s2">&quot;30&quot;</span>
+
+<span class="c1"># Directories</span>
+<span class="nv">ROMPY_OCEANUM_OUTPUT_DIR</span><span class="o">=</span><span class="s2">&quot;./outputs&quot;</span>
+<span class="nv">ROMPY_OCEANUM_CONFIG_DIR</span><span class="o">=</span><span class="s2">&quot;./configs&quot;</span>
+<span class="nv">ROMPY_OCEANUM_CACHE_DIR</span><span class="o">=</span><span class="s2">&quot;~/.cache/rompy-oceanum&quot;</span>
+</pre></div>
+</div>
+<p><strong>Development/Debug:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Debug mode</span>
+<span class="nv">ROMPY_OCEANUM_DEBUG</span><span class="o">=</span><span class="s2">&quot;true&quot;</span>
+
+<span class="c1"># Skip SSL verification (development only)</span>
+<span class="nv">PRAX_VERIFY_SSL</span><span class="o">=</span><span class="s2">&quot;false&quot;</span>
+
+<span class="c1"># Mock mode for testing</span>
+<span class="nv">ROMPY_OCEANUM_MOCK_MODE</span><span class="o">=</span><span class="s2">&quot;true&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="programmatic-configuration">
+<h2>Programmatic Configuration<a class="headerlink" href="#programmatic-configuration" title="Link to this heading"></a></h2>
+<section id="dynamic-configuration">
+<h3>Dynamic Configuration<a class="headerlink" href="#dynamic-configuration" title="Link to this heading"></a></h3>
+<p>Configure settings programmatically for automated workflows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxConfig</span><span class="p">,</span> <span class="n">DataMeshConfig</span><span class="p">,</span> <span class="n">RompyOceanumConfig</span>
+
+<span class="c1"># Create configuration objects</span>
+<span class="n">prax_config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://prax.oceanum.science&quot;</span><span class="p">,</span>
+    <span class="n">org</span><span class="o">=</span><span class="s2">&quot;my-organization&quot;</span><span class="p">,</span>
+    <span class="n">project</span><span class="o">=</span><span class="s2">&quot;wave-modeling&quot;</span><span class="p">,</span>
+    <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span>
+<span class="p">)</span>
+
+<span class="n">datamesh_config</span> <span class="o">=</span> <span class="n">DataMeshConfig</span><span class="p">(</span>
+    <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://datamesh.oceanum.science&quot;</span><span class="p">,</span>
+    <span class="n">register_outputs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">default_tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;wave-model&quot;</span><span class="p">,</span> <span class="s2">&quot;automated&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Combine into main configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">RompyOceanumConfig</span><span class="p">(</span>
+    <span class="n">prax</span><span class="o">=</span><span class="n">prax_config</span><span class="p">,</span>
+    <span class="n">datamesh</span><span class="o">=</span><span class="n">datamesh_config</span><span class="p">,</span>
+    <span class="n">default_backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Use configuration</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">pipeline_backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-validation">
+<h3>Configuration Validation<a class="headerlink" href="#configuration-validation" title="Link to this heading"></a></h3>
+<p>Validate configurations before use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_configuration</span>
+
+<span class="c1"># Validate configuration file</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">validate_configuration</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+
+<span class="c1"># Validate programmatic configuration</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">prax_config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+        <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;invalid-url&quot;</span><span class="p">,</span>
+        <span class="n">org</span><span class="o">=</span><span class="s2">&quot;test-org&quot;</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="runtime-configuration">
+<h2>Runtime Configuration<a class="headerlink" href="#runtime-configuration" title="Link to this heading"></a></h2>
+<section id="command-line-overrides">
+<h3>Command-Line Overrides<a class="headerlink" href="#command-line-overrides" title="Link to this heading"></a></h3>
+<p>Override configuration values from the command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Override organization and project</span>
+rompy-oceanum<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--config<span class="w"> </span>swan_config.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--prax-org<span class="w"> </span><span class="s2">&quot;different-org&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--prax-project<span class="w"> </span><span class="s2">&quot;different-project&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--prax-stage<span class="w"> </span><span class="s2">&quot;prod&quot;</span>
+
+<span class="c1"># Override timeout and pipeline</span>
+rompy-oceanum<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--config<span class="w"> </span>swan_config.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pipeline<span class="w"> </span><span class="s2">&quot;custom-swan-pipeline&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--timeout<span class="w"> </span><span class="m">7200</span>
+</pre></div>
+</div>
+</section>
+<section id="pipeline-specific-parameters">
+<h3>Pipeline-Specific Parameters<a class="headerlink" href="#pipeline-specific-parameters" title="Link to this heading"></a></h3>
+<p>Pass parameters specific to individual pipeline runs:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Runtime parameter override</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">pipeline_backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;swan-from-rompy&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Override default settings</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">7200</span><span class="p">,</span>
+    <span class="n">cpu_limit</span><span class="o">=</span><span class="s2">&quot;4&quot;</span><span class="p">,</span>
+    <span class="n">memory_limit</span><span class="o">=</span><span class="s2">&quot;8Gi&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Pipeline-specific parameters</span>
+    <span class="n">custom_parameters</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;use_gpu&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;mpi_processes&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s2">&quot;debug_mode&quot;</span><span class="p">:</span> <span class="kc">False</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="security-configuration">
+<h2>Security Configuration<a class="headerlink" href="#security-configuration" title="Link to this heading"></a></h2>
+<section id="token-management">
+<h3>Token Management<a class="headerlink" href="#token-management" title="Link to this heading"></a></h3>
+<p>Best practices for secure token management:</p>
+<p><strong>1. Use Environment Variables:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Store in secure environment</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_TOKEN</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>cat<span class="w"> </span>/secure/path/prax-token<span class="k">)</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p><strong>2. Use Secret Management Systems:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxConfig</span>
+
+<span class="c1"># AWS Secrets Manager example</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">boto3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_secret</span><span class="p">(</span><span class="n">secret_name</span><span class="p">):</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;secretsmanager&#39;</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_secret_value</span><span class="p">(</span><span class="n">SecretId</span><span class="o">=</span><span class="n">secret_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;SecretString&#39;</span><span class="p">]</span>
+
+<span class="c1"># Use secret in configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="n">token</span><span class="o">=</span><span class="n">get_secret</span><span class="p">(</span><span class="s2">&quot;prax-token&quot;</span><span class="p">),</span>
+    <span class="n">org</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PRAX_ORG&quot;</span><span class="p">],</span>
+    <span class="n">project</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PRAX_PROJECT&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>3. File Permissions:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Secure configuration files</span>
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>~/.rompy-oceanum/config.yaml
+chown<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>~/.rompy-oceanum/config.yaml
+</pre></div>
+</div>
+</section>
+<section id="ssl-tls-configuration">
+<h3>SSL/TLS Configuration<a class="headerlink" href="#ssl-tls-configuration" title="Link to this heading"></a></h3>
+<p>Configure SSL verification and certificates:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prax.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">verify_ssl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">ca_bundle</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/ca-bundle.crt&quot;</span>
+<span class="w">  </span><span class="nt">client_cert</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/client.crt&quot;</span>
+<span class="w">  </span><span class="nt">client_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/path/to/client.key&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id1">
+<h2>Configuration Validation<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="validation-schema">
+<h3>Validation Schema<a class="headerlink" href="#validation-schema" title="Link to this heading"></a></h3>
+<p>rompy-oceanum validates all configuration using Pydantic models:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+        <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://prax.oceanum.science&quot;</span><span class="p">,</span>
+        <span class="n">org</span><span class="o">=</span><span class="s2">&quot;my-org&quot;</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="s2">&quot;invalid&quot;</span>  <span class="c1"># Should be int</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Configuration errors:&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;loc&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error</span><span class="p">[</span><span class="s1">&#39;msg&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-testing">
+<h3>Configuration Testing<a class="headerlink" href="#configuration-testing" title="Link to this heading"></a></h3>
+<p>Test your configuration before deployment:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_configuration</span>
+
+<span class="c1"># Load and test configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">load_configuration</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+
+<span class="c1"># Test connection</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">PraxClient</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">prax</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">health_check</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection successful: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="cli-configuration-commands">
+<h3>CLI Configuration Commands<a class="headerlink" href="#cli-configuration-commands" title="Link to this heading"></a></h3>
+<p>Use CLI commands to validate and manage configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate configuration file</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>validate<span class="w"> </span>config.yaml
+
+<span class="c1"># Show current configuration</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>show
+
+<span class="c1"># Test connection</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>test-connection
+
+<span class="c1"># Initialize default configuration</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>init
+</pre></div>
+</div>
+</section>
+</section>
+<section id="troubleshooting-configuration">
+<h2>Troubleshooting Configuration<a class="headerlink" href="#troubleshooting-configuration" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<p><strong>1. Authentication Failures:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check token validity</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>test-connection
+
+<span class="c1"># Verify environment variables</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$PRAX_TOKEN</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-c<span class="w"> </span><span class="m">20</span><span class="w">  </span><span class="c1"># Show first 20 chars</span>
+</pre></div>
+</div>
+<p><strong>2. Configuration File Errors:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate YAML syntax</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import yaml; yaml.safe_load(open(&#39;config.yaml&#39;))&quot;</span>
+
+<span class="c1"># Validate rompy-oceanum configuration</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>validate<span class="w"> </span>config.yaml
+</pre></div>
+</div>
+<p><strong>3. Permission Issues:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check file permissions</span>
+ls<span class="w"> </span>-la<span class="w"> </span>~/.rompy-oceanum/config.yaml
+
+<span class="c1"># Fix permissions</span>
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>~/.rompy-oceanum/config.yaml
+</pre></div>
+</div>
+</section>
+<section id="debug-configuration-loading">
+<h3>Debug Configuration Loading<a class="headerlink" href="#debug-configuration-loading" title="Link to this heading"></a></h3>
+<p>Enable debug mode to troubleshoot configuration issues:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_configuration</span>
+
+<span class="c1"># Enable debug logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="c1"># Load configuration with debug info</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">load_configuration</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="security-best-practices">
+<h3>Security Best Practices<a class="headerlink" href="#security-best-practices" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Never hardcode tokens</strong> in configuration files or code</p></li>
+<li><p><strong>Use environment variables</strong> for sensitive information</p></li>
+<li><p><strong>Secure configuration files</strong> with appropriate permissions</p></li>
+<li><p><strong>Rotate tokens regularly</strong> and update configurations</p></li>
+<li><p><strong>Use least privilege</strong> principle for service accounts</p></li>
+</ol>
+</section>
+<section id="performance-best-practices">
+<h3>Performance Best Practices<a class="headerlink" href="#performance-best-practices" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Set appropriate timeouts</strong> based on model complexity</p></li>
+<li><p><strong>Configure retry logic</strong> for transient failures</p></li>
+<li><p><strong>Use connection pooling</strong> for high-frequency operations</p></li>
+<li><p><strong>Cache configuration</strong> to avoid repeated file reads</p></li>
+<li><p><strong>Monitor resource usage</strong> and adjust limits accordingly</p></li>
+</ol>
+</section>
+<section id="maintenance-best-practices">
+<h3>Maintenance Best Practices<a class="headerlink" href="#maintenance-best-practices" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Version control</strong> configuration files</p></li>
+<li><p><strong>Document configuration changes</strong> and rationale</p></li>
+<li><p><strong>Test configurations</strong> in development before production</p></li>
+<li><p><strong>Monitor configuration drift</strong> in deployed systems</p></li>
+<li><p><strong>Regularly review</strong> and update configurations</p></li>
+</ol>
+</section>
+</section>
+<section id="example-configurations">
+<h2>Example Configurations<a class="headerlink" href="#example-configurations" title="Link to this heading"></a></h2>
+<section id="development-environment">
+<h3>Development Environment<a class="headerlink" href="#development-environment" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># dev-config.yaml</span>
+<span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prax-dev.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">org</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;development&quot;</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;wave-models-dev&quot;</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev&quot;</span>
+<span class="w">  </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span>
+<span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">datamesh</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">register_outputs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># Skip registration in dev</span>
+
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;DEBUG&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="production-environment">
+<h3>Production Environment<a class="headerlink" href="#production-environment" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># prod-config.yaml</span>
+<span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prax.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">org</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;production&quot;</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;operational-forecasting&quot;</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;prod&quot;</span>
+<span class="w">  </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span>
+<span class="w">  </span><span class="nt">retry_attempts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+
+<span class="nt">datamesh</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">register_outputs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">default_tags</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;operational&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;production&quot;</span>
+
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;INFO&quot;</span>
+<span class="w">  </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/log/rompy-oceanum/production.log&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="testing-environment">
+<h3>Testing Environment<a class="headerlink" href="#testing-environment" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># test-config.yaml</span>
+<span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prax-test.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">org</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;testing&quot;</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;automated-tests&quot;</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;test&quot;</span>
+<span class="w">  </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span><span class="w">  </span><span class="c1"># Shorter timeout for tests</span>
+<span class="w">  </span><span class="nt">mock_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Use mocked responses</span>
+
+<span class="nt">datamesh</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">register_outputs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;DEBUG&quot;</span>
+<span class="w">  </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/tmp/rompy-oceanum-test.log&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<p>Now that you understand configuration:</p>
+<ul class="simple">
+<li><p>Review <a class="reference internal" href="pipeline-backends.html"><span class="doc">Pipeline Backends</span></a> for backend-specific settings</p></li>
+<li><p>Explore <a class="reference internal" href="cli-reference.html"><span class="doc">CLI Reference</span></a> for command-line configuration options</p></li>
+<li><p>Check <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting</span></a> for configuration-related issues</p></li>
+<li><p>See <a class="reference internal" href="../examples/advanced-configuration.html"><span class="doc">Advanced Configuration</span></a> for complex scenarios</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basic-usage.html" class="btn btn-neutral float-left" title="Basic Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pipeline-backends.html" class="btn btn-neutral float-right" title="Pipeline Backends" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

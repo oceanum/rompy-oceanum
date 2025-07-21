@@ -1,0 +1,528 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Pipeline Backends" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/user-guide/pipeline-backends.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="rompy-oceanum supports multiple pipeline execution backends, allowing you to choose the most appropriate execution environment for your wave modeling workflows. This guide covers the available back..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="rompy-oceanum supports multiple pipeline execution backends, allowing you to choose the most appropriate execution environment for your wave modeling workflows. This guide covers the available back..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipeline Backends &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="../_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/user-guide/pipeline-backends.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CLI Reference" href="cli-reference.html" />
+    <link rel="prev" title="Configuration" href="configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rompy-oceanum
+              <img src="../_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quick-navigation">Quick Navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#plugin-architecture">Plugin Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#environment-setup">Environment Setup</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#table-of-contents">Table of Contents</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Pipeline Backends</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#backend-selection">Backend Selection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prax-backend">Prax Backend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model-specific-backends">Model-Specific Backends</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="advanced-workflows.html">Advanced Workflows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pipeline Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-selection">Backend Selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prax-backend">Prax Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#authentication">Authentication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#resource-requirements">Resource Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-specific-backends">Model-Specific Backends</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#swan-backend">SWAN Backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wavewatch-iii-backend">WAVEWATCH III Backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#backend-selection-guidelines">Backend Selection Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-optimization">Performance Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#custom-pipeline-templates">Custom Pipeline Templates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-stage-pipelines">Multi-Stage Pipelines</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug-mode">Debug Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Pipeline Backends</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pipeline-backends">
+<h1>Pipeline Backends<a class="headerlink" href="#pipeline-backends" title="Link to this heading"></a></h1>
+<p>rompy-oceanum supports multiple pipeline execution backends, allowing you to choose the most appropriate execution environment for your wave modeling workflows. This guide covers the available backends, their configuration, and best practices for each.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>Pipeline backends determine where and how your rompy model configurations are executed. rompy-oceanum currently supports:</p>
+<ul class="simple">
+<li><p><strong>Prax Backend</strong>: Cloud-native execution via Oceanum’s Prax pipeline system</p></li>
+<li><p><strong>Local Backend</strong>: Direct execution on your local machine (inherited from rompy)</p></li>
+</ul>
+</section>
+<section id="backend-selection">
+<h2>Backend Selection<a class="headerlink" href="#backend-selection" title="Link to this heading"></a></h2>
+<p>You can specify the backend when running your model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rompy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxPipelineBackend</span>
+
+<span class="c1"># Create your model configuration</span>
+<span class="n">model_run</span> <span class="o">=</span> <span class="n">rompy</span><span class="o">.</span><span class="n">ModelRun</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">your_config</span><span class="p">)</span>
+
+<span class="c1"># Execute using Prax backend</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;my-wave-model&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">backend_config</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Or via the CLI:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using Prax backend</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>swan<span class="w"> </span>--pipeline-name<span class="w"> </span>my-model
+
+<span class="c1"># Using local backend (standard rompy)</span>
+rompy<span class="w"> </span>run<span class="w"> </span>config.yml
+</pre></div>
+</div>
+</section>
+<section id="prax-backend">
+<h2>Prax Backend<a class="headerlink" href="#prax-backend" title="Link to this heading"></a></h2>
+<p>The Prax backend enables cloud-native execution of wave models through Oceanum’s Prax pipeline system.</p>
+<section id="features">
+<h3>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Scalable Execution</strong>: Automatic resource allocation based on model requirements</p></li>
+<li><p><strong>Monitoring</strong>: Real-time progress tracking and logging</p></li>
+<li><p><strong>Result Management</strong>: Automatic output organization and DataMesh registration</p></li>
+<li><p><strong>Fault Tolerance</strong>: Built-in retry mechanisms and error recovery</p></li>
+<li><p><strong>Authentication</strong>: Seamless integration with Oceanum authentication</p></li>
+</ul>
+</section>
+<section id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
+<p>The Prax backend requires several configuration parameters:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxConfig</span>
+
+<span class="n">prax_config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="c1"># Required parameters</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;my-wave-model&quot;</span><span class="p">,</span>
+    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;your-username&quot;</span><span class="p">,</span>
+    <span class="n">org</span><span class="o">=</span><span class="s2">&quot;your-organization&quot;</span><span class="p">,</span>
+    <span class="n">project</span><span class="o">=</span><span class="s2">&quot;your-project&quot;</span><span class="p">,</span>
+    <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>  <span class="c1"># or &quot;prod&quot;</span>
+
+    <span class="c1"># Optional parameters</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Wave model run description&quot;</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;wave-modeling&quot;</span><span class="p">,</span> <span class="s2">&quot;swan&quot;</span><span class="p">],</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>  <span class="c1"># 1 hour timeout</span>
+
+    <span class="c1"># DataMesh configuration</span>
+    <span class="n">datamesh_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">datamesh_dataset_name</span><span class="o">=</span><span class="s2">&quot;wave-model-outputs&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Use with ModelRun</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">prax_config</span><span class="o">.</span><span class="n">dict</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="environment-variables">
+<h3>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading"></a></h3>
+<p>Common configuration can be set via environment variables:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_BASE_URL</span><span class="o">=</span><span class="s2">&quot;https://prax.oceanum.science&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_TOKEN</span><span class="o">=</span><span class="s2">&quot;your-authentication-token&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_ORG</span><span class="o">=</span><span class="s2">&quot;your-organization&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_PROJECT</span><span class="o">=</span><span class="s2">&quot;your-project&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_USER</span><span class="o">=</span><span class="s2">&quot;your-username&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="authentication">
+<h3>Authentication<a class="headerlink" href="#authentication" title="Link to this heading"></a></h3>
+<p>The Prax backend uses Oceanum’s authentication system:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Login via oceanum CLI</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+
+<span class="c1"># Or set token directly</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_TOKEN</span><span class="o">=</span><span class="s2">&quot;your-token&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="resource-requirements">
+<h3>Resource Requirements<a class="headerlink" href="#resource-requirements" title="Link to this heading"></a></h3>
+<p>Specify computational resources for your models:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">prax_config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="c1"># ... other config ...</span>
+    <span class="n">resources</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="s2">&quot;2000m&quot;</span><span class="p">,</span>      <span class="c1"># 2 CPU cores</span>
+        <span class="s2">&quot;memory&quot;</span><span class="p">:</span> <span class="s2">&quot;4Gi&quot;</span><span class="p">,</span>     <span class="c1"># 4GB RAM</span>
+        <span class="s2">&quot;storage&quot;</span><span class="p">:</span> <span class="s2">&quot;10Gi&quot;</span>    <span class="c1"># 10GB storage</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="model-specific-backends">
+<h2>Model-Specific Backends<a class="headerlink" href="#model-specific-backends" title="Link to this heading"></a></h2>
+<p>Different wave models may have optimized backend configurations:</p>
+<section id="swan-backend">
+<h3>SWAN Backend<a class="headerlink" href="#swan-backend" title="Link to this heading"></a></h3>
+<p>SWAN models benefit from specific optimizations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">swan_config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;swan-forecast&quot;</span><span class="p">,</span>
+    <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;swan&quot;</span><span class="p">,</span>
+    <span class="n">resources</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="s2">&quot;4000m&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;memory&quot;</span><span class="p">:</span> <span class="s2">&quot;8Gi&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;storage&quot;</span><span class="p">:</span> <span class="s2">&quot;20Gi&quot;</span>
+    <span class="p">},</span>
+    <span class="c1"># SWAN-specific optimizations</span>
+    <span class="n">parallel_execution</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">mpi_processes</span><span class="o">=</span><span class="mi">4</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="wavewatch-iii-backend">
+<h3>WAVEWATCH III Backend<a class="headerlink" href="#wavewatch-iii-backend" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ww3_config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;ww3-hindcast&quot;</span><span class="p">,</span>
+    <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;wavewatch3&quot;</span><span class="p">,</span>
+    <span class="n">resources</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="s2">&quot;8000m&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;memory&quot;</span><span class="p">:</span> <span class="s2">&quot;16Gi&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;storage&quot;</span><span class="p">:</span> <span class="s2">&quot;50Gi&quot;</span>
+    <span class="p">},</span>
+    <span class="c1"># WW3-specific optimizations</span>
+    <span class="n">grid_decomposition</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="backend-selection-guidelines">
+<h3>Backend Selection Guidelines<a class="headerlink" href="#backend-selection-guidelines" title="Link to this heading"></a></h3>
+<p>Choose your backend based on:</p>
+<p><strong>Use Prax Backend When:</strong></p>
+<ul class="simple">
+<li><p>Running production forecasts</p></li>
+<li><p>Processing large datasets</p></li>
+<li><p>Need scalable compute resources</p></li>
+<li><p>Require result archival and sharing</p></li>
+<li><p>Working in collaborative environments</p></li>
+</ul>
+<p><strong>Use Local Backend When:</strong></p>
+<ul class="simple">
+<li><p>Developing and testing configurations</p></li>
+<li><p>Working with small test cases</p></li>
+<li><p>Have specific local dependencies</p></li>
+<li><p>Need immediate interactive access</p></li>
+</ul>
+</section>
+<section id="performance-optimization">
+<h3>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading"></a></h3>
+<p><strong>Resource Sizing:</strong></p>
+<ul class="simple">
+<li><p>Start with conservative resource estimates</p></li>
+<li><p>Monitor actual usage and adjust</p></li>
+<li><p>Consider model grid size and complexity</p></li>
+<li><p>Account for input data processing overhead</p></li>
+</ul>
+<p><strong>Pipeline Naming:</strong></p>
+<ul class="simple">
+<li><p>Use descriptive, unique pipeline names</p></li>
+<li><p>Include model type and purpose</p></li>
+<li><p>Follow organizational naming conventions</p></li>
+<li><p>Avoid special characters and spaces</p></li>
+</ul>
+</section>
+<section id="error-handling">
+<h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
+<p><strong>Timeout Configuration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set appropriate timeouts based on model complexity</span>
+<span class="n">prax_config</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">7200</span><span class="p">,</span>  <span class="c1"># 2 hours for complex models</span>
+    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">retry_delay</span><span class="o">=</span><span class="mi">300</span>  <span class="c1"># 5 minutes between retries</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Monitoring:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Monitor pipeline progress</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Check status periodically</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">is_complete</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Status: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Progress: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">progress</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-configuration">
+<h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
+<section id="custom-pipeline-templates">
+<h3>Custom Pipeline Templates<a class="headerlink" href="#custom-pipeline-templates" title="Link to this heading"></a></h3>
+<p>Create reusable pipeline configurations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># templates/swan_operational.py</span>
+<span class="n">SWAN_OPERATIONAL</span> <span class="o">=</span> <span class="n">PraxConfig</span><span class="p">(</span>
+    <span class="n">resources</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cpu&quot;</span><span class="p">:</span> <span class="s2">&quot;4000m&quot;</span><span class="p">,</span> <span class="s2">&quot;memory&quot;</span><span class="p">:</span> <span class="s2">&quot;8Gi&quot;</span><span class="p">},</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
+    <span class="n">datamesh_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;operational&quot;</span><span class="p">,</span> <span class="s2">&quot;swan&quot;</span><span class="p">,</span> <span class="s2">&quot;forecast&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Use template</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SWAN_OPERATIONAL</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;pipeline_name&quot;</span><span class="p">:</span> <span class="s2">&quot;daily-forecast&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Daily operational wave forecast&quot;</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="multi-stage-pipelines">
+<h3>Multi-Stage Pipelines<a class="headerlink" href="#multi-stage-pipelines" title="Link to this heading"></a></h3>
+<p>Configure pipelines that run across multiple environments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Development stage</span>
+<span class="n">dev_result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+    <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;model-development&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Promote to production after validation</span>
+<span class="k">if</span> <span class="n">dev_result</span><span class="o">.</span><span class="n">is_successful</span><span class="p">():</span>
+    <span class="n">prod_result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span>
+        <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+        <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;prod&quot;</span><span class="p">,</span>
+        <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;operational-forecast&quot;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<p><strong>Authentication Failures:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Refresh authentication</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login<span class="w"> </span>--refresh
+
+<span class="c1"># Verify token</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>status
+</pre></div>
+</div>
+<p><strong>Resource Limitations:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check resource quotas</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxClient</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">PraxClient</span><span class="p">()</span>
+<span class="n">quotas</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_resource_quotas</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available CPU: </span><span class="si">{</span><span class="n">quotas</span><span class="p">[</span><span class="s1">&#39;cpu&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available Memory: </span><span class="si">{</span><span class="n">quotas</span><span class="p">[</span><span class="s1">&#39;memory&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Pipeline Failures:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get detailed error information</span>
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">has_failed</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Logs: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">get_logs</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="debug-mode">
+<h3>Debug Mode<a class="headerlink" href="#debug-mode" title="Link to this heading"></a></h3>
+<p>Enable detailed logging for troubleshooting:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;rompy_oceanum&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="c1"># Run with debug output</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="basic-usage.html"><span class="doc">Basic Usage</span></a> - Getting started with rompy-oceanum</p></li>
+<li><p><a class="reference internal" href="configuration.html"><span class="doc">Configuration</span></a> - Environment and authentication setup</p></li>
+<li><p><a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting</span></a> - Debugging common issues</p></li>
+<li><p><a class="reference internal" href="../api/index.html"><span class="doc">API Reference</span></a> - API reference documentation</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="configuration.html" class="btn btn-neutral float-left" title="Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cli-reference.html" class="btn btn-neutral float-right" title="CLI Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,911 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="CLI Reference" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/user-guide/cli-reference.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="This guide provides comprehensive documentation for the rompy-oceanum integration with the oceanum CLI. The integration is available as the oceanum rompy command group, providing seamless ocean mod..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="This guide provides comprehensive documentation for the rompy-oceanum integration with the oceanum CLI. The integration is available as the oceanum rompy command group, providing seamless ocean mod..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLI Reference &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="../_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/user-guide/cli-reference.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Advanced Workflows" href="advanced-workflows.html" />
+    <link rel="prev" title="Pipeline Backends" href="pipeline-backends.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rompy-oceanum
+              <img src="../_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quick-navigation">Quick Navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#plugin-architecture">Plugin Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#environment-setup">Environment Setup</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#table-of-contents">Table of Contents</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CLI Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#installation-and-setup">Installation and Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#global-options">Global Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#commands-reference">Commands Reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#output-formats">Output Formats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exit-codes">Exit Codes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scripting-and-automation">Scripting and Automation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="advanced-workflows.html">Advanced Workflows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CLI Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-and-setup">Installation and Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#global-options">Global Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#commands-reference">Commands Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#init">init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run">run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#status">status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logs">logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sync">sync</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#output-formats">Output Formats</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#json-output">JSON Output</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exit-codes">Exit Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scripting-and-automation">Scripting and Automation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bash-script-example">Bash Script Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-script-example">Python Script Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug-mode">Debug Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-help">Getting Help</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">CLI Reference</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cli-reference">
+<h1>CLI Reference<a class="headerlink" href="#cli-reference" title="Link to this heading"></a></h1>
+<p>This guide provides comprehensive documentation for the rompy-oceanum integration with the oceanum CLI. The integration is available as the <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span></code> command group, providing seamless ocean model execution through the Oceanum Prax platform.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The oceanum rompy CLI integration provides the following capabilities:</p>
+<ul class="simple">
+<li><p><strong>Configuration Management</strong>: Generate optimized rompy configurations from templates</p></li>
+<li><p><strong>Pipeline Execution</strong>: Submit models to Prax for remote execution with enhanced monitoring</p></li>
+<li><p><strong>Status Monitoring</strong>: Real-time pipeline status tracking with rich terminal output</p></li>
+<li><p><strong>Log Management</strong>: View and filter pipeline logs with rompy-specific enhancements</p></li>
+<li><p><strong>Result Management</strong>: Download and organize pipeline outputs automatically</p></li>
+<li><p><strong>Authentication Integration</strong>: Seamless integration with oceanum’s unified authentication</p></li>
+</ul>
+</section>
+<section id="installation-and-setup">
+<h2>Installation and Setup<a class="headerlink" href="#installation-and-setup" title="Link to this heading"></a></h2>
+<p>The CLI is installed automatically with rompy-oceanum and oceanum:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+<p>Verify installation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>--help
+</pre></div>
+</div>
+<p>Authentication:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>auth<span class="w"> </span>login
+</pre></div>
+</div>
+</section>
+<section id="global-options">
+<h2>Global Options<a class="headerlink" href="#global-options" title="Link to this heading"></a></h2>
+<p>The oceanum rompy commands inherit global options from the oceanum CLI:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span><span class="o">[</span>GLOBAL_OPTIONS<span class="o">]</span><span class="w"> </span>rompy<span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>COMMAND_OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Global Options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show help message and exit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--version</span></code>: Show oceanum CLI version information</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--verbose,</span> <span class="pre">-v</span></code>: Enable verbose output</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--quiet,</span> <span class="pre">-q</span></code>: Suppress non-essential output</p></li>
+</ul>
+</section>
+<section id="commands-reference">
+<h2>Commands Reference<a class="headerlink" href="#commands-reference" title="Link to this heading"></a></h2>
+<section id="init">
+<h3>init<a class="headerlink" href="#init" title="Link to this heading"></a></h3>
+<p>Generate optimized rompy configuration files from templates.</p>
+<p><strong>Syntax:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>MODEL<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Required Arguments:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MODEL</span></code>: Model type (<code class="docutils literal notranslate"><span class="pre">swan</span></code>, <code class="docutils literal notranslate"><span class="pre">schism</span></code>, <code class="docutils literal notranslate"><span class="pre">ww3</span></code>)</p></li>
+</ul>
+<p><strong>Options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--template</span> <span class="pre">{basic,advanced,research,operational}</span></code>: Configuration template type (default: basic)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--domain</span> <span class="pre">TEXT</span></code>: Domain identifier for the configuration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--bbox</span> <span class="pre">TEXT</span></code>: Bounding box as “west,south,east,north” coordinates</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--grid-resolution</span> <span class="pre">FLOAT</span></code>: Grid resolution for spatial discretization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--output</span> <span class="pre">PATH</span></code>: Output configuration file path (default: config.yml)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--interactive</span></code>: Interactive configuration setup</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--overwrite</span></code>: Overwrite existing configuration file</p></li>
+</ul>
+<p><strong>Template Types:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">basic</span></code>: Essential model physics and standard outputs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">advanced</span></code>: Additional physics, validation, and diagnostics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">research</span></code>: Comprehensive analysis and statistics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">operational</span></code>: Optimized for speed and monitoring</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create basic SWAN configuration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>swan<span class="w"> </span>--template<span class="w"> </span>basic<span class="w"> </span>--domain<span class="w"> </span><span class="s2">&quot;perth_coast&quot;</span>
+
+<span class="c1"># Create advanced SCHISM configuration interactively</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>schism<span class="w"> </span>--template<span class="w"> </span>advanced<span class="w"> </span>--interactive
+
+<span class="c1"># Create WW3 configuration with custom grid</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>ww3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--template<span class="w"> </span>operational<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--bbox<span class="w"> </span><span class="s2">&quot;110,-35,120,-25&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--grid-resolution<span class="w"> </span><span class="m">0</span>.05<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output<span class="w"> </span>ww3_config.yml
+
+<span class="c1"># Create research configuration with custom domain</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>swan<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--template<span class="w"> </span>research<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain<span class="w"> </span><span class="s2">&quot;great_barrier_reef&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output<span class="w"> </span>research_config.yml
+</pre></div>
+</div>
+</section>
+<section id="run">
+<h3>run<a class="headerlink" href="#run" title="Link to this heading"></a></h3>
+<p>Execute rompy configurations via Oceanum Prax pipeline.</p>
+<p><strong>Syntax:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>CONFIG<span class="w"> </span>MODEL<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Required Arguments:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CONFIG</span></code>: Path to rompy configuration file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MODEL</span></code>: Model type (<code class="docutils literal notranslate"><span class="pre">swan</span></code>, <code class="docutils literal notranslate"><span class="pre">schism</span></code>, <code class="docutils literal notranslate"><span class="pre">ww3</span></code>)</p></li>
+</ul>
+<p><strong>Required Options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--pipeline-name</span> <span class="pre">TEXT</span></code>: Name of the Prax pipeline template</p></li>
+</ul>
+<p><strong>Optional Options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--project</span> <span class="pre">TEXT</span></code>: Prax project name (overrides oceanum context)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--stage</span> <span class="pre">{dev,prod}</span></code>: Deployment stage (default: dev)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--template</span> <span class="pre">PATH</span></code>: Custom pipeline template file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--deploy/--no-deploy</span></code>: Deploy pipeline if needed (default: –deploy)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--wait/--no-wait</span></code>: Wait for pipeline completion (default: –no-wait)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--timeout</span> <span class="pre">INTEGER</span></code>: Execution timeout in seconds</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tags</span> <span class="pre">TEXT</span></code>: Comma-separated tags for metadata</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic execution</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>swan<span class="w"> </span>--pipeline-name<span class="w"> </span>swan-operational
+
+<span class="c1"># Execute with custom project and wait for completion</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>swan<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pipeline-name<span class="w"> </span>swan-research<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--project<span class="w"> </span>wave-forecasting<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--wait<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--timeout<span class="w"> </span><span class="m">3600</span>
+
+<span class="c1"># Execute in production with tags</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>schism<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pipeline-name<span class="w"> </span>schism-operational<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--stage<span class="w"> </span>prod<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tags<span class="w"> </span><span class="s2">&quot;australia,operational,storm-surge&quot;</span>
+
+<span class="c1"># Execute with custom pipeline template</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>ww3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pipeline-name<span class="w"> </span>custom-ww3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--template<span class="w"> </span>./custom_pipeline.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--deploy
+</pre></div>
+</div>
+<p><strong>Output:</strong></p>
+<p>The command returns rich terminal output with execution details:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>🚀 Executing pipeline: swan-operational
+📊 Model: swan, Run ID: perth_coast_swan_basic
+🏢 Org: oceanum, Project: wave-forecasting, Stage: dev
+✅ Pipeline executed successfully!
+🆔 Prax run ID: prax-perth_coast_swan_basic
+💡 Monitor with: oceanum rompy status prax-perth_coast_swan_basic
+</pre></div>
+</div>
+</section>
+<section id="status">
+<h3>status<a class="headerlink" href="#status" title="Link to this heading"></a></h3>
+<p>Monitor pipeline execution status with real-time updates.</p>
+<p><strong>Syntax:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>RUN_ID<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Required Arguments:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RUN_ID</span></code>: Prax run identifier</p></li>
+</ul>
+<p><strong>Options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--watch/--no-watch</span></code>: Continuously monitor status updates (default: –no-watch)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--interval</span> <span class="pre">INTEGER</span></code>: Update interval for watch mode in seconds (default: 10)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--json</span></code>: Output status in JSON format</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--detailed</span></code>: Show detailed execution information</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check current status</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>prax-perth_coast_swan_basic
+
+<span class="c1"># Monitor status with real-time updates</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>--watch
+
+<span class="c1"># Get detailed status information</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>--detailed
+
+<span class="c1"># Export status as JSON</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>--json
+</pre></div>
+</div>
+<p><strong>Output Examples:</strong></p>
+<p>Basic status output:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>📊 Pipeline Status: prax-perth_coast_swan_basic
+🔄 Status: RUNNING
+⏱️  Started: 2024-01-15 10:30:45 UTC
+⏳ Duration: 0:15:23
+📈 Progress: Stage 2/4 (Executing model)
+</pre></div>
+</div>
+<p>Watch mode output:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>🔄 Monitoring pipeline: prax-perth_coast_swan_basic
+📊 Status: RUNNING → COMPLETED ✅
+⏱️  Total duration: 0:23:15
+📁 Outputs: 15 files (245.7 MB)
+💡 Download with: oceanum rompy sync prax-perth_coast_swan_basic ./outputs
+</pre></div>
+</div>
+</section>
+<section id="logs">
+<h3>logs<a class="headerlink" href="#logs" title="Link to this heading"></a></h3>
+<p>View and filter pipeline execution logs.</p>
+<p><strong>Syntax:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>RUN_ID<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Required Arguments:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RUN_ID</span></code>: Prax run identifier</p></li>
+</ul>
+<p><strong>Options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--follow,</span> <span class="pre">-f</span></code>: Follow log output in real-time</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tail</span> <span class="pre">INTEGER</span></code>: Show last N lines (default: 100)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--stage</span> <span class="pre">TEXT</span></code>: Filter logs by pipeline stage</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--level</span> <span class="pre">{DEBUG,INFO,WARNING,ERROR}</span></code>: Filter by log level</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--grep</span> <span class="pre">TEXT</span></code>: Filter logs by text pattern</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--since</span> <span class="pre">TEXT</span></code>: Show logs since timestamp (ISO format)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--output</span> <span class="pre">PATH</span></code>: Save logs to file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--no-color</span></code>: Disable colored log output</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View recent logs</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>prax-perth_coast_swan_basic
+
+<span class="c1"># Follow logs in real-time</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>--follow
+
+<span class="c1"># View logs for specific stage</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>--stage<span class="w"> </span>model-execution
+
+<span class="c1"># Filter error logs and save to file</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--level<span class="w"> </span>ERROR<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output<span class="w"> </span>error_logs.txt
+
+<span class="c1"># Filter logs by pattern</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--grep<span class="w"> </span><span class="s2">&quot;wave height&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tail<span class="w"> </span><span class="m">200</span>
+
+<span class="c1"># Show logs since specific time</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--since<span class="w"> </span><span class="s2">&quot;2024-01-15T10:30:00Z&quot;</span>
+</pre></div>
+</div>
+<p><strong>Output:</strong></p>
+<p>Logs are displayed with color coding and timestamps:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>📋 Pipeline Logs: prax-perth_coast_swan_basic
+════════════════════════════════════════════
+[10:30:45] 🔄 INIT    Starting SWAN model execution
+[10:30:46] ℹ️  INFO    Grid: 100x80, Resolution: 0.05°
+[10:31:15] ✅ INFO    Model initialization complete
+[10:31:16] 🌊 INFO    Processing wave conditions...
+[10:35:22] ⚠️  WARN    High wave heights detected in domain
+[10:42:18] ✅ INFO    Model execution completed successfully
+</pre></div>
+</div>
+</section>
+<section id="sync">
+<h3>sync<a class="headerlink" href="#sync" title="Link to this heading"></a></h3>
+<p>Download and organize pipeline outputs with automatic file management.</p>
+<p><strong>Syntax:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>RUN_ID<span class="w"> </span>OUTPUT_DIR<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p><strong>Required Arguments:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RUN_ID</span></code>: Prax run identifier</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OUTPUT_DIR</span></code>: Local directory for downloaded files</p></li>
+</ul>
+<p><strong>Options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--organize/--no-organize</span></code>: Organize files by stage and type (default: –organize)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--include</span> <span class="pre">TEXT</span></code>: Include only files matching pattern (e.g., “<em>.nc,</em>.txt”)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--exclude</span> <span class="pre">TEXT</span></code>: Exclude files matching pattern</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--stage</span> <span class="pre">TEXT</span></code>: Download files from specific pipeline stage only</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--verify/--no-verify</span></code>: Verify file integrity after download (default: –verify)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--overwrite/--no-overwrite</span></code>: Overwrite existing files (default: –no-overwrite)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--metadata/--no-metadata</span></code>: Include run metadata file (default: –metadata)</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download all outputs with organization</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>./outputs
+
+<span class="c1"># Download only NetCDF files</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>./netcdf_data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--include<span class="w"> </span><span class="s2">&quot;*.nc&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--no-organize
+
+<span class="c1"># Download from specific stage</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>./model_outputs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--stage<span class="w"> </span>postprocess<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--verify
+
+<span class="c1"># Download without file organization</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>./raw_outputs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--no-organize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--no-metadata
+
+<span class="c1"># Download excluding log files</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>prax-perth_coast_swan_basic<span class="w"> </span>./outputs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--exclude<span class="w"> </span><span class="s2">&quot;*.log,*.tmp&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--overwrite
+</pre></div>
+</div>
+<p><strong>Output:</strong></p>
+<p>The command provides detailed download progress:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>📁 Syncing outputs: prax-perth_coast_swan_basic
+🔍 Found 15 files (245.7 MB total)
+📊 Downloading: ████████████████████ 100%
+
+📂 Files organized by stage and type:
+  outputs/
+  ├── postprocess/
+  │   ├── netcdf/
+  │   │   ├── wave_height.nc (125.3 MB)
+  │   │   └── wave_period.nc (89.4 MB)
+  │   └── plots/
+  │       ├── wave_field.png (2.1 MB)
+  │       └── time_series.png (1.8 MB)
+  ├── run/
+  │   ├── logs/
+  │   │   └── model.log (15.2 MB)
+  │   └── input/
+  │       └── config.yml (2.3 KB)
+  └── run_metadata.json (1.8 KB)
+
+✅ Downloaded 15 files successfully
+📋 Run metadata saved to: outputs/run_metadata.json
+</pre></div>
+</div>
+</section>
+</section>
+<section id="output-formats">
+<h2>Output Formats<a class="headerlink" href="#output-formats" title="Link to this heading"></a></h2>
+<section id="json-output">
+<h3>JSON Output<a class="headerlink" href="#json-output" title="Link to this heading"></a></h3>
+<p>Several commands support JSON output for programmatic use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get status as JSON</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>--json
+</pre></div>
+</div>
+<p>Example JSON output:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;run_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prax-perth_coast_swan_basic&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;COMPLETED&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;pipeline&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;swan-operational&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;swan&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;researcher&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;org&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceanum&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;project&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wave-forecasting&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:30:45Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;completed_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-01-15T10:53:58Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;execution_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0:23:13&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;total_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;245.7 MB&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;stages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;postprocess&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;run&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;perth_coast&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;grid_resolution&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;template&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;basic&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="environment-variables">
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading"></a></h2>
+<p>The oceanum rompy commands use oceanum’s authentication system and don’t require manual environment variable configuration. Authentication is handled via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>auth<span class="w"> </span>login
+</pre></div>
+</div>
+<p>However, some optional environment variables can be used:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ROMPY_CONFIG</span></code>: Default configuration file path</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ROMPY_MODEL</span></code>: Default model type</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PRAX_PROJECT</span></code>: Default project name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PRAX_STAGE</span></code>: Default deployment stage</p></li>
+</ul>
+</section>
+<section id="exit-codes">
+<h2>Exit Codes<a class="headerlink" href="#exit-codes" title="Link to this heading"></a></h2>
+<p>All commands return standard exit codes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: Success</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: General error (authentication, network, validation)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: Command usage error (missing arguments, invalid options)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code>: Pipeline execution error</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code>: File operation error (download, upload, organization)</p></li>
+</ul>
+</section>
+<section id="scripting-and-automation">
+<h2>Scripting and Automation<a class="headerlink" href="#scripting-and-automation" title="Link to this heading"></a></h2>
+<p>The oceanum rompy CLI is designed for automation and scripting. Here are common patterns:</p>
+<section id="bash-script-example">
+<h3>Bash Script Example<a class="headerlink" href="#bash-script-example" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1"># automated_modeling.sh - Automated rompy modeling workflow</span>
+
+<span class="nb">set</span><span class="w"> </span>-e<span class="w">  </span><span class="c1"># Exit on any error</span>
+
+<span class="c1"># Configuration</span>
+<span class="nv">DOMAIN</span><span class="o">=</span><span class="s2">&quot;perth_coast&quot;</span>
+<span class="nv">MODEL</span><span class="o">=</span><span class="s2">&quot;swan&quot;</span>
+<span class="nv">TEMPLATE</span><span class="o">=</span><span class="s2">&quot;operational&quot;</span>
+<span class="nv">PIPELINE</span><span class="o">=</span><span class="s2">&quot;swan-operational&quot;</span>
+<span class="nv">OUTPUT_DIR</span><span class="o">=</span><span class="s2">&quot;./results/</span><span class="k">$(</span>date<span class="w"> </span>+%Y%m%d_%H%M%S<span class="k">)</span><span class="s2">&quot;</span>
+
+<span class="c1"># Ensure authentication</span>
+<span class="k">if</span><span class="w"> </span>!<span class="w"> </span>oceanum<span class="w"> </span>auth<span class="w"> </span>status<span class="w"> </span><span class="p">&amp;</span>&gt;/dev/null<span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Not authenticated. Please run: oceanum auth login&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;🚀 Starting automated modeling workflow&quot;</span>
+
+<span class="c1"># Generate configuration</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;📝 Generating </span><span class="si">${</span><span class="nv">MODEL</span><span class="si">}</span><span class="s2"> configuration...&quot;</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span><span class="si">${</span><span class="nv">MODEL</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--template<span class="w"> </span><span class="si">${</span><span class="nv">TEMPLATE</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--domain<span class="w"> </span><span class="si">${</span><span class="nv">DOMAIN</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output<span class="w"> </span>config.yml
+
+<span class="c1"># Execute model</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;🎯 Executing </span><span class="si">${</span><span class="nv">MODEL</span><span class="si">}</span><span class="s2"> model via Prax...&quot;</span>
+<span class="nv">RUN_OUTPUT</span><span class="o">=</span><span class="k">$(</span>oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span><span class="si">${</span><span class="nv">MODEL</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pipeline-name<span class="w"> </span><span class="si">${</span><span class="nv">PIPELINE</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--wait<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--timeout<span class="w"> </span><span class="m">3600</span><span class="k">)</span>
+
+<span class="c1"># Extract run ID from output</span>
+<span class="nv">RUN_ID</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$RUN_OUTPUT</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;🆔 Prax run ID:&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">&#39; &#39;</span><span class="w"> </span>-f4<span class="k">)</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$RUN_ID</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Failed to get run ID&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ Model execution completed: </span><span class="nv">$RUN_ID</span><span class="s2">&quot;</span>
+
+<span class="c1"># Download results</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;📁 Downloading results...&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="si">${</span><span class="nv">OUTPUT_DIR</span><span class="si">}</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span><span class="si">${</span><span class="nv">RUN_ID</span><span class="si">}</span><span class="w"> </span><span class="si">${</span><span class="nv">OUTPUT_DIR</span><span class="si">}</span><span class="w"> </span>--organize
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;🎉 Workflow completed successfully!&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;📂 Results available in: </span><span class="si">${</span><span class="nv">OUTPUT_DIR</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="python-script-example">
+<h3>Python Script Example<a class="headerlink" href="#python-script-example" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;automated_modeling.py - Automated rompy modeling with Python&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run shell command and return result.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="n">capture_output</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">capture_output</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Command failed: </span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">submit_pipeline</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">pipeline_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Submit pipeline and return run ID.&quot;&quot;&quot;</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;oceanum rompy run </span><span class="si">{</span><span class="n">config_file</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2"> --pipeline-name </span><span class="si">{</span><span class="n">pipeline_name</span><span class="si">}</span><span class="s2"> --wait&quot;</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+    <span class="c1"># Extract run ID from output</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;🆔 Prax run ID:&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Could not extract run ID from output&quot;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wait_for_completion</span><span class="p">(</span><span class="n">run_id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait for pipeline completion.&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&lt;</span> <span class="n">timeout</span><span class="p">:</span>
+        <span class="n">status_json</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;oceanum rompy status </span><span class="si">{</span><span class="n">run_id</span><span class="si">}</span><span class="s2"> --json&quot;</span><span class="p">)</span>
+        <span class="n">status_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">status_json</span><span class="p">)</span>
+
+        <span class="n">current_status</span> <span class="o">=</span> <span class="n">status_data</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🔄 Status: </span><span class="si">{</span><span class="n">current_status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">current_status</span> <span class="o">==</span> <span class="s1">&#39;COMPLETED&#39;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ Pipeline completed successfully!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">current_status</span> <span class="o">==</span> <span class="s1">&#39;FAILED&#39;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Pipeline execution failed!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>  <span class="c1"># Check every 30 seconds</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;⏰ Pipeline execution timed out!&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main execution workflow.&quot;&quot;&quot;</span>
+    <span class="c1"># Configuration</span>
+    <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;perth_coast&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;swan&quot;</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;operational&quot;</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="s2">&quot;swan-operational&quot;</span>
+
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./results/</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🚀 Starting automated modeling workflow&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check authentication</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_command</span><span class="p">(</span><span class="s2">&quot;oceanum auth status&quot;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Not authenticated. Please run: oceanum auth login&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Generate configuration</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📝 Generating </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2"> configuration...&quot;</span><span class="p">)</span>
+    <span class="n">run_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;oceanum rompy init </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2"> --template </span><span class="si">{</span><span class="n">template</span><span class="si">}</span><span class="s2"> --domain </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Submit pipeline</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🎯 Executing </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2"> model via Prax...&quot;</span><span class="p">)</span>
+    <span class="n">run_id</span> <span class="o">=</span> <span class="n">submit_pipeline</span><span class="p">(</span><span class="s2">&quot;config.yml&quot;</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📋 Run ID: </span><span class="si">{</span><span class="n">run_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Wait for completion</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">wait_for_completion</span><span class="p">(</span><span class="n">run_id</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Download results</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;📁 Downloading results...&quot;</span><span class="p">)</span>
+    <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">run_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;oceanum rompy sync </span><span class="si">{</span><span class="n">run_id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2"> --organize&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;🎉 Workflow completed successfully!&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📂 Results available in: </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<p><strong>Plugin Not Found</strong></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span></code> commands are not available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify oceanum CLI installation</span>
+oceanum<span class="w"> </span>--version
+
+<span class="c1"># Reinstall rompy-oceanum to ensure plugin registration</span>
+pip<span class="w"> </span>install<span class="w"> </span>--force-reinstall<span class="w"> </span>rompy-oceanum
+
+<span class="c1"># Check if plugin is loaded</span>
+oceanum<span class="w"> </span>--help<span class="w">  </span><span class="c1"># Should show &#39;rompy&#39; in command list</span>
+</pre></div>
+</div>
+<p><strong>Authentication Errors</strong></p>
+<p>If you get authentication errors:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check authentication status</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>status
+
+<span class="c1"># Re-authenticate if needed</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span><span class="nb">logout</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+
+<span class="c1"># Verify access to required services</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>status<span class="w"> </span>--verbose
+</pre></div>
+</div>
+<p><strong>Pipeline Execution Failures</strong></p>
+<p>If pipeline execution fails:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check detailed logs</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>--level<span class="w"> </span>ERROR
+
+<span class="c1"># Verify configuration file</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import yaml; yaml.safe_load(open(&#39;config.yml&#39;))&quot;</span>
+
+<span class="c1"># Check pipeline template availability</span>
+oceanum<span class="w"> </span>prax<span class="w"> </span>pipelines<span class="w"> </span>list
+</pre></div>
+</div>
+<p><strong>Download Issues</strong></p>
+<p>If file downloads fail:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check available outputs</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>--detailed
+
+<span class="c1"># Try downloading specific files</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>./outputs<span class="w"> </span>--include<span class="w"> </span><span class="s2">&quot;*.nc&quot;</span><span class="w"> </span>--verify
+
+<span class="c1"># Check disk space and permissions</span>
+df<span class="w"> </span>-h
+ls<span class="w"> </span>-la<span class="w"> </span>./outputs
+</pre></div>
+</div>
+</section>
+<section id="debug-mode">
+<h3>Debug Mode<a class="headerlink" href="#debug-mode" title="Link to this heading"></a></h3>
+<p>Enable verbose output for troubleshooting:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use oceanum&#39;s verbose flag</span>
+oceanum<span class="w"> </span>--verbose<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>swan<span class="w"> </span>--pipeline-name<span class="w"> </span><span class="nb">test</span>
+
+<span class="c1"># Check oceanum CLI debug information</span>
+oceanum<span class="w"> </span>--help
+
+<span class="c1"># Verify plugin loading</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from rompy_oceanum.cli.main import main; print(&#39;Plugin loaded successfully&#39;)&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="getting-help">
+<h3>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">--help</span></code> with any command for detailed usage information</p></li>
+<li><p>Check the <a class="reference external" href="https://github.com/rom-py/rompy-oceanum/issues">GitHub Issues</a> for known issues</p></li>
+<li><p>Review the oceanum CLI documentation for platform-specific issues</p></li>
+<li><p>Contact support through the oceanum platform for authentication or service issues</p></li>
+</ul>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<p><strong>Configuration Management</strong></p>
+<ul class="simple">
+<li><p>Use version control for configuration files</p></li>
+<li><p>Generate configurations from templates rather than manual editing</p></li>
+<li><p>Validate configurations before submission</p></li>
+<li><p>Use meaningful domain names for organization</p></li>
+</ul>
+<p><strong>Pipeline Execution</strong></p>
+<ul class="simple">
+<li><p>Set appropriate timeouts for your model complexity</p></li>
+<li><p>Use descriptive pipeline names for easier tracking</p></li>
+<li><p>Monitor resource usage and optimize configurations</p></li>
+<li><p>Implement retry logic for transient failures</p></li>
+</ul>
+<p><strong>Output Management</strong></p>
+<ul class="simple">
+<li><p>Download outputs promptly to avoid storage limits</p></li>
+<li><p>Use organized downloads to maintain file structure</p></li>
+<li><p>Include metadata for provenance tracking</p></li>
+<li><p>Clean up local files when no longer needed</p></li>
+</ul>
+<p><strong>Automation</strong></p>
+<ul class="simple">
+<li><p>Check authentication status before starting workflows</p></li>
+<li><p>Implement proper error handling and logging</p></li>
+<li><p>Use JSON output for programmatic processing</p></li>
+<li><p>Set up monitoring for long-running batch operations</p></li>
+</ul>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<p>After mastering the CLI:</p>
+<ul class="simple">
+<li><p>Explore <a class="reference internal" href="basic-usage.html"><span class="doc">Basic Usage</span></a> for programmatic integration</p></li>
+<li><p>Learn about <a class="reference internal" href="configuration.html"><span class="doc">Configuration</span></a> for advanced model setup</p></li>
+<li><p>Try <a class="reference internal" href="../examples/swan-workflow.html"><span class="doc">SWAN Workflow Example</span></a> for complete workflows</p></li>
+<li><p>Review <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting</span></a> for common issues and solutions</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pipeline-backends.html" class="btn btn-neutral float-left" title="Pipeline Backends" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="advanced-workflows.html" class="btn btn-neutral float-right" title="Advanced Workflows" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

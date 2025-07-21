@@ -1,0 +1,852 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Troubleshooting" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/user-guide/troubleshooting.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="This guide helps you diagnose and resolve common issues when using rompy-oceanum. It covers authentication problems, configuration errors, pipeline failures, and performance issues. Quick Diagnosti..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="This guide helps you diagnose and resolve common issues when using rompy-oceanum. It covers authentication problems, configuration errors, pipeline failures, and performance issues. Quick Diagnosti..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Troubleshooting &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="../_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/user-guide/troubleshooting.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Examples" href="../examples/index.html" />
+    <link rel="prev" title="Advanced Workflows" href="advanced-workflows.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rompy-oceanum
+              <img src="../_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quick-navigation">Quick Navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#plugin-architecture">Plugin Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#environment-setup">Environment Setup</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#table-of-contents">Table of Contents</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="advanced-workflows.html">Advanced Workflows</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Troubleshooting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#quick-diagnostics">Quick Diagnostics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#performance-issues">Performance Issues</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#debugging-techniques">Debugging Techniques</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#error-codes-reference">Error Codes Reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-troubleshooting">Advanced Troubleshooting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#getting-support">Getting Support</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quick-reference">Quick Reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prevention-tips">Prevention Tips</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-diagnostics">Quick Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-issues">Common Issues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#authentication-problems">Authentication Problems</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-errors">Configuration Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipeline-submission-failures">Pipeline Submission Failures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipeline-execution-failures">Pipeline Execution Failures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#network-and-connectivity-issues">Network and Connectivity Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#output-download-issues">Output Download Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-issues">Performance Issues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#slow-pipeline-execution">Slow Pipeline Execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#high-memory-usage">High Memory Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging-techniques">Debugging Techniques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enable-debug-mode">Enable Debug Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verbose-logging">Verbose Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inspect-api-requests">Inspect API Requests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-with-mock-mode">Test with Mock Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-codes-reference">Error Codes Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#exit-codes">Exit Codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#http-status-codes">HTTP Status Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-troubleshooting">Advanced Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#memory-dumps">Memory Dumps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#network-debugging">Network Debugging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#system-information-collection">System Information Collection</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-support">Getting Support</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#before-contacting-support">Before Contacting Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-to-include-in-support-requests">What to Include in Support Requests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#support-channels">Support Channels</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-reference">Quick Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#diagnostic-commands">Diagnostic Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-fixes">Common Fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#prevention-tips">Prevention Tips</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Troubleshooting</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h1>
+<p>This guide helps you diagnose and resolve common issues when using rompy-oceanum. It covers authentication problems, configuration errors, pipeline failures, and performance issues.</p>
+<section id="quick-diagnostics">
+<h2>Quick Diagnostics<a class="headerlink" href="#quick-diagnostics" title="Link to this heading"></a></h2>
+<p>If you’re experiencing issues, start with these diagnostic commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check version and installation</span>
+rompy-oceanum<span class="w"> </span>--version
+
+<span class="c1"># Validate configuration</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>validate
+
+<span class="c1"># Test connectivity</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>test-connection
+
+<span class="c1"># Check current configuration</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>show<span class="w"> </span>--hide-secrets
+</pre></div>
+</div>
+</section>
+<section id="common-issues">
+<h2>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h2>
+<section id="authentication-problems">
+<h3>Authentication Problems<a class="headerlink" href="#authentication-problems" title="Link to this heading"></a></h3>
+<p><strong>Symptoms:</strong>
+- “Authentication failed” errors
+- “Invalid token” messages
+- 401/403 HTTP errors</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Verify Token Format:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check if token is set</span>
+<span class="nb">echo</span><span class="w"> </span><span class="si">${</span><span class="nv">PRAX_TOKEN</span><span class="p">:</span><span class="nv">0</span><span class="p">:</span><span class="nv">20</span><span class="si">}</span>...<span class="w">  </span><span class="c1"># Show first 20 characters</span>
+
+<span class="c1"># Token should be a long alphanumeric string</span>
+<span class="c1"># If empty or wrong format, obtain new token</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check Token Validity:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test connection with current token</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>test-connection
+
+<span class="c1"># If fails, token may be expired or invalid</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Verify Environment Variables:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check all required variables</span>
+env<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>PRAX_
+
+<span class="c1"># Should show:</span>
+<span class="c1"># PRAX_TOKEN=your-token</span>
+<span class="c1"># PRAX_ORG=your-org</span>
+<span class="c1"># PRAX_PROJECT=your-project</span>
+<span class="c1"># PRAX_BASE_URL=https://prax.oceanum.science</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Common Token Issues:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Wrong variable name</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_TOKEN</span><span class="o">=</span><span class="s2">&quot;your-token&quot;</span><span class="w">  </span><span class="c1"># Not PRAX_API_TOKEN</span>
+
+<span class="c1"># Extra whitespace (common copy-paste error)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_TOKEN</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;your-token&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="k">)</span><span class="s2">&quot;</span>
+
+<span class="c1"># Wrong base URL</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_BASE_URL</span><span class="o">=</span><span class="s2">&quot;https://prax.oceanum.science&quot;</span><span class="w">  </span><span class="c1"># Not .com</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="configuration-errors">
+<h3>Configuration Errors<a class="headerlink" href="#configuration-errors" title="Link to this heading"></a></h3>
+<p><strong>Symptoms:</strong>
+- “Configuration validation failed”
+- YAML syntax errors
+- Missing required fields</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Validate YAML Syntax:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check YAML is valid</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import yaml; yaml.safe_load(open(&#39;config.yaml&#39;))&quot;</span>
+
+<span class="c1"># Common YAML issues:</span>
+<span class="c1"># - Inconsistent indentation</span>
+<span class="c1"># - Missing quotes around special characters</span>
+<span class="c1"># - Incorrect nesting</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Validate rompy-oceanum Configuration:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use built-in validation</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>validate<span class="w"> </span>config.yaml
+
+<span class="c1"># Fix reported errors one by one</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check File Permissions:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration file should be readable</span>
+ls<span class="w"> </span>-la<span class="w"> </span>~/.rompy-oceanum/config.yaml
+
+<span class="c1"># Fix permissions if needed</span>
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>~/.rompy-oceanum/config.yaml
+</pre></div>
+</div>
+</li>
+<li><p><strong>Common Configuration Issues:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Incorrect (missing required fields):</span>
+<span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">org</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-org&quot;</span>
+
+<span class="c1"># Correct:</span>
+<span class="nt">prax</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://prax.oceanum.science&quot;</span>
+<span class="w">  </span><span class="nt">org</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-org&quot;</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-project&quot;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="pipeline-submission-failures">
+<h3>Pipeline Submission Failures<a class="headerlink" href="#pipeline-submission-failures" title="Link to this heading"></a></h3>
+<p><strong>Symptoms:</strong>
+- “Pipeline not found” errors
+- Submission timeouts
+- “Invalid pipeline configuration”</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Verify Pipeline Exists:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List available pipelines</span>
+rompy-oceanum<span class="w"> </span>pipelines<span class="w"> </span>--org<span class="w"> </span>your-org<span class="w"> </span>--project<span class="w"> </span>your-project
+
+<span class="c1"># Check exact pipeline name (case-sensitive)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check Model Configuration:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate rompy configuration first</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">import rompy</span>
+<span class="s2">config = rompy.ModelRun.from_file(&#39;your-config.yaml&#39;)</span>
+<span class="s2">print(&#39;Configuration valid&#39;)</span>
+<span class="s2">&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Verify Resource Requirements:</strong></p>
+<ul class="simple">
+<li><p>Check if your model requires more resources than pipeline allows</p></li>
+<li><p>Large models may need special pipeline templates</p></li>
+<li><p>Contact admin for resource limit increases</p></li>
+</ul>
+</li>
+<li><p><strong>Debug Submission:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable debug mode for detailed error info</span>
+rompy-oceanum<span class="w"> </span>--debug<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>your-config.yaml<span class="w"> </span>--pipeline<span class="w"> </span>your-pipeline
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="pipeline-execution-failures">
+<h3>Pipeline Execution Failures<a class="headerlink" href="#pipeline-execution-failures" title="Link to this heading"></a></h3>
+<p><strong>Symptoms:</strong>
+- Pipeline status shows “failed”
+- Unexpected termination
+- Resource limit errors</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Check Pipeline Logs:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View all logs</span>
+rompy-oceanum<span class="w"> </span>logs<span class="w"> </span>your-run-id
+
+<span class="c1"># Search for errors</span>
+rompy-oceanum<span class="w"> </span>logs<span class="w"> </span>your-run-id<span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;ERROR\|FAILED\|Exception&quot;</span>
+
+<span class="c1"># Check specific stages</span>
+rompy-oceanum<span class="w"> </span>logs<span class="w"> </span>your-run-id<span class="w"> </span>--stage<span class="w"> </span>model-execution
+</pre></div>
+</div>
+</li>
+<li><p><strong>Common Execution Issues:</strong></p>
+<p><strong>Memory Errors:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Look for &quot;Out of memory&quot; or &quot;OOMKilled&quot;</span>
+rompy-oceanum<span class="w"> </span>logs<span class="w"> </span>your-run-id<span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;memory\|OOM&quot;</span>
+
+<span class="c1"># Solution: Use pipeline with more memory or optimize model</span>
+</pre></div>
+</div>
+<p><strong>Timeout Errors:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check for timeout messages</span>
+rompy-oceanum<span class="w"> </span>logs<span class="w"> </span>your-run-id<span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;timeout\|exceeded&quot;</span>
+
+<span class="c1"># Solution: Increase timeout or optimize model</span>
+</pre></div>
+</div>
+<p><strong>Input Data Issues:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check for file not found errors</span>
+rompy-oceanum<span class="w"> </span>logs<span class="w"> </span>your-run-id<span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;No such file\|FileNotFound&quot;</span>
+
+<span class="c1"># Solution: Verify input data paths and availability</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Resource Monitoring:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get detailed status including resource usage</span>
+rompy-oceanum<span class="w"> </span>status<span class="w"> </span>your-run-id<span class="w"> </span>--json
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="network-and-connectivity-issues">
+<h3>Network and Connectivity Issues<a class="headerlink" href="#network-and-connectivity-issues" title="Link to this heading"></a></h3>
+<p><strong>Symptoms:</strong>
+- Connection timeouts
+- “Network unreachable” errors
+- Intermittent failures</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Check Network Connectivity:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test basic connectivity</span>
+curl<span class="w"> </span>-I<span class="w"> </span>https://prax.oceanum.science
+
+<span class="c1"># Test with authentication</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$PRAX_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>https://prax.oceanum.science/health
+</pre></div>
+</div>
+</li>
+<li><p><strong>Increase Timeouts:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use longer timeout for unstable connections</span>
+rompy-oceanum<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--config<span class="w"> </span>your-config.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--pipeline<span class="w"> </span>your-pipeline<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--timeout<span class="w"> </span><span class="m">7200</span><span class="w">  </span><span class="c1"># 2 hours</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check Firewall/Proxy:</strong></p>
+<ul class="simple">
+<li><p>Ensure HTTPS (port 443) access to oceanum.science domains</p></li>
+<li><p>Configure proxy settings if behind corporate firewall</p></li>
+<li><p>Whitelist Oceanum IP ranges if needed</p></li>
+</ul>
+</li>
+<li><p><strong>Retry Logic:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># rompy-oceanum has built-in retry logic</span>
+<span class="c1"># For additional reliability, use wrapper script:</span>
+
+<span class="c1">#!/bin/bash</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..3<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span>rompy-oceanum<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>config.yaml<span class="w"> </span>--pipeline<span class="w"> </span>pipeline<span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Attempt </span><span class="nv">$i</span><span class="s2"> failed, retrying...&quot;</span>
+<span class="w">    </span>sleep<span class="w"> </span><span class="m">60</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="output-download-issues">
+<h3>Output Download Issues<a class="headerlink" href="#output-download-issues" title="Link to this heading"></a></h3>
+<p><strong>Symptoms:</strong>
+- Download timeouts
+- Partial downloads
+- “File not found” errors</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Check Pipeline Completion:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ensure pipeline completed successfully</span>
+rompy-oceanum<span class="w"> </span>status<span class="w"> </span>your-run-id
+
+<span class="c1"># Only download from completed pipelines</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Verify Output Files:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check what outputs are available</span>
+rompy-oceanum<span class="w"> </span>status<span class="w"> </span>your-run-id<span class="w"> </span>--json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.outputs&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Resume Interrupted Downloads:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use --force to overwrite partial downloads</span>
+rompy-oceanum<span class="w"> </span>download<span class="w"> </span>your-run-id<span class="w"> </span>--force<span class="w"> </span>--verify
+</pre></div>
+</div>
+</li>
+<li><p><strong>Download Specific Files:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download only needed files to save time/space</span>
+rompy-oceanum<span class="w"> </span>download<span class="w"> </span>your-run-id<span class="w"> </span>--files<span class="w"> </span><span class="s2">&quot;*.nc&quot;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="performance-issues">
+<h2>Performance Issues<a class="headerlink" href="#performance-issues" title="Link to this heading"></a></h2>
+<section id="slow-pipeline-execution">
+<h3>Slow Pipeline Execution<a class="headerlink" href="#slow-pipeline-execution" title="Link to this heading"></a></h3>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Monitor execution progress</span>
+rompy-oceanum<span class="w"> </span>status<span class="w"> </span>your-run-id<span class="w"> </span>--watch
+
+<span class="c1"># Check resource usage in logs</span>
+rompy-oceanum<span class="w"> </span>logs<span class="w"> </span>your-run-id<span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;CPU\|Memory\|Progress&quot;</span>
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Optimize Model Configuration:</strong>
+- Reduce grid resolution for testing
+- Simplify physics options
+- Use shorter simulation periods</p></li>
+<li><p><strong>Use Appropriate Pipeline:</strong>
+- Choose pipeline templates matching your resource needs
+- Use GPU-enabled pipelines for supported models
+- Consider parallel execution options</p></li>
+<li><p><strong>Monitor Resource Usage:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add resource monitoring to your workflow</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxClient</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">PraxClient</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_run_status</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+
+<span class="k">while</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">is_complete</span><span class="p">():</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get_detailed_status</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CPU: </span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cpu_usage&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory: </span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;memory_usage&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="high-memory-usage">
+<h3>High Memory Usage<a class="headerlink" href="#high-memory-usage" title="Link to this heading"></a></h3>
+<p><strong>Symptoms:</strong>
+- “Out of memory” errors
+- Pipeline termination
+- Slow execution</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Reduce Model Size:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reduce grid resolution</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">SwanGrid</span><span class="p">(</span>
+    <span class="n">x0</span><span class="o">=</span><span class="mf">115.0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=-</span><span class="mf">35.0</span><span class="p">,</span>
+    <span class="n">dx</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># Increase from 0.05</span>
+    <span class="n">dy</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># Increase from 0.05</span>
+    <span class="n">nx</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>   <span class="c1"># Reduce from 100</span>
+    <span class="n">ny</span><span class="o">=</span><span class="mi">40</span>    <span class="c1"># Reduce from 80</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use Memory-Efficient Options:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># In SWAN configuration</span>
+<span class="nt">physics</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">whitecapping</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">breaking</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">memory_optimization</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># If available</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Request More Memory:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use high-memory pipeline if available</span>
+rompy-oceanum<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--config<span class="w"> </span>config.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--pipeline<span class="w"> </span>swan-highmem-from-rompy
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="debugging-techniques">
+<h2>Debugging Techniques<a class="headerlink" href="#debugging-techniques" title="Link to this heading"></a></h2>
+<section id="enable-debug-mode">
+<h3>Enable Debug Mode<a class="headerlink" href="#enable-debug-mode" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Global debug flag</span>
+rompy-oceanum<span class="w"> </span>--debug<span class="w"> </span><span class="nb">command</span><span class="w"> </span>args
+
+<span class="c1"># Environment variable</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">ROMPY_OCEANUM_DEBUG</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Configuration file</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;debug: true&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.rompy-oceanum/config.yaml
+</pre></div>
+</div>
+</section>
+<section id="verbose-logging">
+<h3>Verbose Logging<a class="headerlink" href="#verbose-logging" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">configure_logging</span>
+
+<span class="c1"># Enable detailed logging</span>
+<span class="n">configure_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="c1"># Your rompy-oceanum code here</span>
+</pre></div>
+</div>
+</section>
+<section id="inspect-api-requests">
+<h3>Inspect API Requests<a class="headerlink" href="#inspect-api-requests" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable HTTP request logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">http.client</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">http_client</span>
+
+<span class="n">http_client</span><span class="o">.</span><span class="n">HTTPConnection</span><span class="o">.</span><span class="n">debuglevel</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="c1"># Now run your rompy-oceanum code</span>
+</pre></div>
+</div>
+</section>
+<section id="test-with-mock-mode">
+<h3>Test with Mock Mode<a class="headerlink" href="#test-with-mock-mode" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use mock mode for testing without actual API calls</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">ROMPY_OCEANUM_MOCK_MODE</span><span class="o">=</span><span class="m">1</span>
+rompy-oceanum<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>test-config.yaml<span class="w"> </span>--pipeline<span class="w"> </span>test-pipeline
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-codes-reference">
+<h2>Error Codes Reference<a class="headerlink" href="#error-codes-reference" title="Link to this heading"></a></h2>
+<section id="exit-codes">
+<h3>Exit Codes<a class="headerlink" href="#exit-codes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>0</strong>: Success</p></li>
+<li><p><strong>1</strong>: General error</p></li>
+<li><p><strong>2</strong>: Command line usage error</p></li>
+<li><p><strong>3</strong>: Authentication error</p></li>
+<li><p><strong>4</strong>: Configuration error</p></li>
+<li><p><strong>5</strong>: Network error</p></li>
+<li><p><strong>6</strong>: Pipeline error</p></li>
+<li><p><strong>7</strong>: File system error</p></li>
+</ul>
+</section>
+<section id="http-status-codes">
+<h3>HTTP Status Codes<a class="headerlink" href="#http-status-codes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>400</strong>: Bad request (check configuration)</p></li>
+<li><p><strong>401</strong>: Unauthorized (check token)</p></li>
+<li><p><strong>403</strong>: Forbidden (check permissions)</p></li>
+<li><p><strong>404</strong>: Not found (check pipeline/run ID)</p></li>
+<li><p><strong>429</strong>: Rate limited (wait and retry)</p></li>
+<li><p><strong>500</strong>: Server error (contact support)</p></li>
+<li><p><strong>503</strong>: Service unavailable (try later)</p></li>
+</ul>
+</section>
+</section>
+<section id="advanced-troubleshooting">
+<h2>Advanced Troubleshooting<a class="headerlink" href="#advanced-troubleshooting" title="Link to this heading"></a></h2>
+<section id="memory-dumps">
+<h3>Memory Dumps<a class="headerlink" href="#memory-dumps" title="Link to this heading"></a></h3>
+<p>For severe issues, collect memory dumps:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tracemalloc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+
+<span class="c1"># Start tracing</span>
+<span class="n">tracemalloc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<span class="c1"># Your problematic code</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="c1"># Get memory usage</span>
+    <span class="n">current</span><span class="p">,</span> <span class="n">peak</span> <span class="o">=</span> <span class="n">tracemalloc</span><span class="o">.</span><span class="n">get_traced_memory</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current memory: </span><span class="si">{</span><span class="n">current</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Peak memory: </span><span class="si">{</span><span class="n">peak</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Force garbage collection</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+
+    <span class="k">raise</span>
+</pre></div>
+</div>
+</section>
+<section id="network-debugging">
+<h3>Network Debugging<a class="headerlink" href="#network-debugging" title="Link to this heading"></a></h3>
+<p>Capture network traffic for debugging:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install mitmproxy</span>
+pip<span class="w"> </span>install<span class="w"> </span>mitmproxy
+
+<span class="c1"># Start proxy</span>
+mitmdump<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span><span class="w"> </span>--save-stream-file<span class="w"> </span>traffic.log<span class="w"> </span><span class="p">&amp;</span>
+
+<span class="c1"># Configure rompy-oceanum to use proxy</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://localhost:8080
+rompy-oceanum<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>config.yaml<span class="w"> </span>--pipeline<span class="w"> </span>pipeline
+
+<span class="c1"># Stop proxy and analyze traffic.log</span>
+</pre></div>
+</div>
+</section>
+<section id="system-information-collection">
+<h3>System Information Collection<a class="headerlink" href="#system-information-collection" title="Link to this heading"></a></h3>
+<p>Collect system information for support:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create diagnostic report</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>diagnostic_report.txt<span class="w"> </span><span class="s">&lt;&lt; EOF</span>
+<span class="s"># rompy-oceanum Diagnostic Report</span>
+<span class="s">Date: $(date)</span>
+
+<span class="s">## System Information</span>
+<span class="s">OS: $(uname -a)</span>
+<span class="s">Python: $(python --version)</span>
+
+<span class="s">## Package Versions</span>
+<span class="s">$(pip list | grep -E &quot;(rompy|oceanum|pydantic)&quot;)</span>
+
+<span class="s">## Configuration</span>
+<span class="s">$(rompy-oceanum config show --hide-secrets)</span>
+
+<span class="s">## Environment Variables</span>
+<span class="s">$(env | grep -E &quot;(PRAX|DATAMESH|ROMPY)&quot;)</span>
+
+<span class="s">## Recent Logs</span>
+<span class="s">$(tail -50 ~/.rompy-oceanum/logs/rompy-oceanum.log)</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="getting-support">
+<h2>Getting Support<a class="headerlink" href="#getting-support" title="Link to this heading"></a></h2>
+<section id="before-contacting-support">
+<h3>Before Contacting Support<a class="headerlink" href="#before-contacting-support" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Check this troubleshooting guide</strong></p></li>
+<li><p><strong>Search existing GitHub issues</strong></p></li>
+<li><p><strong>Enable debug mode</strong> and collect error messages</p></li>
+<li><p><strong>Test with minimal configuration</strong></p></li>
+<li><p><strong>Verify network connectivity</strong></p></li>
+</ol>
+</section>
+<section id="what-to-include-in-support-requests">
+<h3>What to Include in Support Requests<a class="headerlink" href="#what-to-include-in-support-requests" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Error messages</strong> (full text, not screenshots)</p></li>
+<li><p><strong>Configuration files</strong> (with secrets redacted)</p></li>
+<li><p><strong>System information</strong> (OS, Python version, package versions)</p></li>
+<li><p><strong>Steps to reproduce</strong> the issue</p></li>
+<li><p><strong>Expected vs actual behavior</strong></p></li>
+<li><p><strong>Debug logs</strong> if available</p></li>
+</ul>
+</section>
+<section id="support-channels">
+<h3>Support Channels<a class="headerlink" href="#support-channels" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>GitHub Issues</strong>: <a class="reference external" href="https://github.com/rom-py/rompy-oceanum/issues">https://github.com/rom-py/rompy-oceanum/issues</a></p></li>
+<li><p><strong>Documentation</strong>: <a class="reference external" href="https://rompy-oceanum.readthedocs.io/">https://rompy-oceanum.readthedocs.io/</a></p></li>
+<li><p><strong>rompy Community</strong>: <a class="reference external" href="https://rompy.readthedocs.io/">https://rompy.readthedocs.io/</a></p></li>
+</ul>
+</section>
+</section>
+<section id="quick-reference">
+<h2>Quick Reference<a class="headerlink" href="#quick-reference" title="Link to this heading"></a></h2>
+<section id="diagnostic-commands">
+<h3>Diagnostic Commands<a class="headerlink" href="#diagnostic-commands" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Quick health check</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>test-connection
+
+<span class="c1"># Validate configuration</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>validate
+
+<span class="c1"># Check recent runs</span>
+rompy-oceanum<span class="w"> </span>list<span class="w"> </span>--limit<span class="w"> </span><span class="m">5</span>
+
+<span class="c1"># Monitor active run</span>
+rompy-oceanum<span class="w"> </span>status<span class="w"> </span>--watch<span class="w"> </span>run-id
+
+<span class="c1"># View error logs</span>
+rompy-oceanum<span class="w"> </span>logs<span class="w"> </span>run-id<span class="w"> </span>--grep<span class="w"> </span>ERROR
+</pre></div>
+</div>
+</section>
+<section id="common-fixes">
+<h3>Common Fixes<a class="headerlink" href="#common-fixes" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fix authentication</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PRAX_TOKEN</span><span class="o">=</span><span class="s2">&quot;your-new-token&quot;</span>
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>test-connection
+
+<span class="c1"># Reset configuration</span>
+rm<span class="w"> </span>~/.rompy-oceanum/config.yaml
+rompy-oceanum<span class="w"> </span>config<span class="w"> </span>init
+
+<span class="c1"># Clean cache</span>
+rompy-oceanum<span class="w"> </span>clean<span class="w"> </span>--all
+
+<span class="c1"># Force download</span>
+rompy-oceanum<span class="w"> </span>download<span class="w"> </span>run-id<span class="w"> </span>--force
+</pre></div>
+</div>
+</section>
+</section>
+<section id="prevention-tips">
+<h2>Prevention Tips<a class="headerlink" href="#prevention-tips" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Regular Testing</strong>: Test configurations in development before production</p></li>
+<li><p><strong>Monitor Resources</strong>: Track memory and CPU usage patterns</p></li>
+<li><p><strong>Update Regularly</strong>: Keep rompy-oceanum and dependencies updated</p></li>
+<li><p><strong>Backup Configurations</strong>: Version control your configuration files</p></li>
+<li><p><strong>Document Changes</strong>: Keep track of configuration modifications</p></li>
+<li><p><strong>Monitor Logs</strong>: Set up log monitoring for early issue detection</p></li>
+</ol>
+<p>Remember: Most issues are configuration-related and can be resolved by carefully checking authentication, network connectivity, and configuration syntax.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="advanced-workflows.html" class="btn btn-neutral float-left" title="Advanced Workflows" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../examples/index.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

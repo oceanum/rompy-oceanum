@@ -1,0 +1,532 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Installation" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/installation.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="This guide covers different installation methods for rompy-oceanum and its integration with the oceanum CLI, from basic pip installation to development setup. Requirements: System Requirements: Pyt..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="This guide covers different installation methods for rompy-oceanum and its integration with the oceanum CLI, from basic pip installation to development setup. Requirements: System Requirements: Pyt..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/installation.html" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=30646c52"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User Guide" href="user-guide/index.html" />
+    <link rel="prev" title="Getting Started" href="getting-started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            rompy-oceanum
+              <img src="_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#system-requirements">System Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-dependencies">Python Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-dependencies">Optional Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-methods">Installation Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#method-1-standard-installation-recommended">Method 1: Standard Installation (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-2-development-installation">Method 2: Development Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-3-specific-version-installation">Method 3: Specific Version Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-4-from-source-latest">Method 4: From Source (Latest)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#virtual-environment-setup">Virtual Environment Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-venv-python-3-3">Using venv (Python 3.3+)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-conda">Using conda</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-pipenv">Using pipenv</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#docker-installation">Docker Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#post-installation-setup">Post-Installation Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#authentication-setup">Authentication Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-verification">Plugin Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-installation-issues">Common Installation Issues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#permission-errors">Permission Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependency-conflicts">Dependency Conflicts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#network-issues">Network Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#missing-system-dependencies">Missing System Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#windows-specific-issues">Windows-Specific Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#upgrading">Upgrading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#uninstallation">Uninstallation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#support">Support</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<p>This guide covers different installation methods for rompy-oceanum and its integration with the oceanum CLI, from basic pip installation to development setup.</p>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<section id="system-requirements">
+<h3>System Requirements<a class="headerlink" href="#system-requirements" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Python</strong>: 3.8 or higher</p></li>
+<li><p><strong>Operating System</strong>: Linux, macOS, or Windows</p></li>
+<li><p><strong>Memory</strong>: Minimum 4GB RAM (8GB+ recommended for large models)</p></li>
+<li><p><strong>Storage</strong>: At least 1GB free space for installation and temporary files</p></li>
+<li><p><strong>oceanum CLI</strong>: Required for the plugin integration</p></li>
+</ul>
+</section>
+<section id="python-dependencies">
+<h3>Python Dependencies<a class="headerlink" href="#python-dependencies" title="Link to this heading"></a></h3>
+<p>rompy-oceanum automatically installs the following core dependencies:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rompy[swan,schism]&gt;=0.5.1</span></code> - Core wave modeling framework</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pydantic&gt;=2.0.0</span></code> - Data validation and settings management</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyyaml&gt;=6.0</span></code> - YAML configuration file support</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">requests&gt;=2.25.0</span></code> - HTTP client for API interactions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tenacity&gt;=9.0.0</span></code> - Retry logic for robust API calls</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">click&gt;=8.0.0</span></code> - Command-line interface framework</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rich&gt;=10.11.0</span></code> - Enhanced terminal output formatting</p></li>
+</ul>
+<p>Required for oceanum CLI integration:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">oceanum</span></code> - Oceanum platform SDK and CLI</p></li>
+</ul>
+</section>
+<section id="optional-dependencies">
+<h3>Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Link to this heading"></a></h3>
+<p>For development and documentation:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest&gt;=6.0.0</span></code> - Testing framework</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest-cov&gt;=2.12.0</span></code> - Coverage reporting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pytest-mock&gt;=3.6.0</span></code> - Mocking for tests</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sphinx&gt;=7.0.0</span></code> - Documentation generation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sphinx-rtd-theme&gt;=1.3.0</span></code> - Read the Docs theme</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">myst-parser&gt;=2.0.0</span></code> - Markdown support in Sphinx</p></li>
+</ul>
+</section>
+</section>
+<section id="installation-methods">
+<h2>Installation Methods<a class="headerlink" href="#installation-methods" title="Link to this heading"></a></h2>
+<section id="method-1-standard-installation-recommended">
+<h3>Method 1: Standard Installation (Recommended)<a class="headerlink" href="#method-1-standard-installation-recommended" title="Link to this heading"></a></h3>
+<p>Install rompy-oceanum and oceanum CLI from PyPI using pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+<p>This installs the latest stable version with all required dependencies and enables the oceanum CLI plugin integration.</p>
+<p>Verify the installation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>--help
+</pre></div>
+</div>
+</section>
+<section id="method-2-development-installation">
+<h3>Method 2: Development Installation<a class="headerlink" href="#method-2-development-installation" title="Link to this heading"></a></h3>
+<p>For contributing to rompy-oceanum or accessing the latest features:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone the repository</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/rom-py/rompy-oceanum.git
+<span class="nb">cd</span><span class="w"> </span>rompy-oceanum
+
+<span class="c1"># Install in development mode with all optional dependencies</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev,docs]&quot;</span>
+
+<span class="c1"># Install oceanum CLI for plugin integration</span>
+pip<span class="w"> </span>install<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+<section id="method-3-specific-version-installation">
+<h3>Method 3: Specific Version Installation<a class="headerlink" href="#method-3-specific-version-installation" title="Link to this heading"></a></h3>
+<p>To install a specific version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="o">==</span><span class="m">0</span>.1.0
+</pre></div>
+</div>
+</section>
+<section id="method-4-from-source-latest">
+<h3>Method 4: From Source (Latest)<a class="headerlink" href="#method-4-from-source-latest" title="Link to this heading"></a></h3>
+<p>To install the latest development version directly from GitHub:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/rom-py/rompy-oceanum.git<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+</section>
+<section id="virtual-environment-setup">
+<h2>Virtual Environment Setup<a class="headerlink" href="#virtual-environment-setup" title="Link to this heading"></a></h2>
+<p>It’s strongly recommended to use a virtual environment to avoid dependency conflicts:</p>
+<section id="using-venv-python-3-3">
+<h3>Using venv (Python 3.3+)<a class="headerlink" href="#using-venv-python-3-3" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create virtual environment</span>
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>rompy-oceanum-env
+
+<span class="c1"># Activate (Linux/macOS)</span>
+<span class="nb">source</span><span class="w"> </span>rompy-oceanum-env/bin/activate
+
+<span class="c1"># Activate (Windows)</span>
+rompy-oceanum-env<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+
+<span class="c1"># Install rompy-oceanum and oceanum CLI</span>
+pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+<section id="using-conda">
+<h3>Using conda<a class="headerlink" href="#using-conda" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create conda environment</span>
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>rompy-oceanum<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
+
+<span class="c1"># Activate environment</span>
+conda<span class="w"> </span>activate<span class="w"> </span>rompy-oceanum
+
+<span class="c1"># Install rompy-oceanum and oceanum CLI</span>
+pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+<section id="using-pipenv">
+<h3>Using pipenv<a class="headerlink" href="#using-pipenv" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create Pipfile and install</span>
+pipenv<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+
+<span class="c1"># Activate shell</span>
+pipenv<span class="w"> </span>shell
+</pre></div>
+</div>
+</section>
+</section>
+<section id="docker-installation">
+<h2>Docker Installation<a class="headerlink" href="#docker-installation" title="Link to this heading"></a></h2>
+<p>For containerized environments:</p>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.9-slim</span>
+
+<span class="c"># Install system dependencies</span>
+<span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>git<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*
+
+<span class="c"># Install rompy-oceanum and oceanum CLI</span>
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+
+<span class="c"># Set working directory</span>
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+
+<span class="c"># Copy your configuration files</span>
+<span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.
+
+<span class="c"># Default command</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;oceanum&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rompy&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--help&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Build and run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>rompy-oceanum<span class="w"> </span>.
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>rompy-oceanum
+</pre></div>
+</div>
+</section>
+<section id="post-installation-setup">
+<h2>Post-Installation Setup<a class="headerlink" href="#post-installation-setup" title="Link to this heading"></a></h2>
+<section id="authentication-setup">
+<h3>Authentication Setup<a class="headerlink" href="#authentication-setup" title="Link to this heading"></a></h3>
+<p>After installation, set up authentication with the oceanum platform:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Authenticate with oceanum (one-time setup)</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+</pre></div>
+</div>
+<p>This will authenticate you with all oceanum services, including Prax. No manual token management is required.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The authentication session persists across terminal sessions. You only need to login once
+or when your session expires.</p>
+</div>
+</section>
+<section id="plugin-verification">
+<h3>Plugin Verification<a class="headerlink" href="#plugin-verification" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Verify oceanum CLI Integration</strong>: Test that the rompy plugin is properly loaded:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>--help
+</pre></div>
+</div>
+</li>
+<li><p><strong>Test Plugin Commands</strong>: Verify all commands are available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>--help
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>--help
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>--help
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>--help
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>--help
+</pre></div>
+</div>
+</li>
+<li><p><strong>Test Authentication</strong>: Verify you can authenticate:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>auth<span class="w"> </span>status
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="verification">
+<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading"></a></h2>
+<p>Verify your installation works correctly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check oceanum CLI integration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>--help
+
+<span class="c1"># List available rompy commands</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>--help
+
+<span class="c1"># Verify dependencies</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import rompy_oceanum; print(&#39;Installation successful!&#39;)&quot;</span>
+
+<span class="c1"># Test authentication status</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>status
+</pre></div>
+</div>
+</section>
+<section id="common-installation-issues">
+<h2>Common Installation Issues<a class="headerlink" href="#common-installation-issues" title="Link to this heading"></a></h2>
+<section id="permission-errors">
+<h3>Permission Errors<a class="headerlink" href="#permission-errors" title="Link to this heading"></a></h3>
+<p>If you encounter permission errors during installation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use --user flag to install in user directory</span>
+pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+
+<span class="c1"># Or use sudo (not recommended)</span>
+sudo<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+<section id="dependency-conflicts">
+<h3>Dependency Conflicts<a class="headerlink" href="#dependency-conflicts" title="Link to this heading"></a></h3>
+<p>If you have conflicting dependencies:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a fresh virtual environment</span>
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>fresh-env
+<span class="nb">source</span><span class="w"> </span>fresh-env/bin/activate<span class="w">  </span><span class="c1"># Linux/macOS</span>
+pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum
+</pre></div>
+</div>
+</section>
+<section id="network-issues">
+<h3>Network Issues<a class="headerlink" href="#network-issues" title="Link to this heading"></a></h3>
+<p>If installation fails due to network issues:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use a different index</span>
+pip<span class="w"> </span>install<span class="w"> </span>--index-url<span class="w"> </span>https://pypi.org/simple/<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+
+<span class="c1"># Or increase timeout</span>
+pip<span class="w"> </span>install<span class="w"> </span>--timeout<span class="w"> </span><span class="m">1000</span><span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+<section id="missing-system-dependencies">
+<h3>Missing System Dependencies<a class="headerlink" href="#missing-system-dependencies" title="Link to this heading"></a></h3>
+<p>On some systems, you may need to install additional system packages:</p>
+<p><strong>Ubuntu/Debian:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>python3-dev<span class="w"> </span>build-essential
+</pre></div>
+</div>
+<p><strong>CentOS/RHEL:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>python3-devel<span class="w"> </span>gcc
+</pre></div>
+</div>
+<p><strong>macOS:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install Xcode command line tools</span>
+xcode-select<span class="w"> </span>--install
+</pre></div>
+</div>
+</section>
+<section id="windows-specific-issues">
+<h3>Windows-Specific Issues<a class="headerlink" href="#windows-specific-issues" title="Link to this heading"></a></h3>
+<p>On Windows, you may need:</p>
+<ol class="arabic simple">
+<li><p><strong>Microsoft C++ Build Tools</strong>: Download and install from Microsoft</p></li>
+<li><p><strong>Git for Windows</strong>: Required for development installation</p></li>
+<li><p><strong>PowerShell</strong>: Use PowerShell instead of Command Prompt for better compatibility</p></li>
+</ol>
+</section>
+</section>
+<section id="upgrading">
+<h2>Upgrading<a class="headerlink" href="#upgrading" title="Link to this heading"></a></h2>
+<p>To upgrade to the latest version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Upgrade from PyPI</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+
+<span class="c1"># Force reinstall if needed</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>--force-reinstall<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+<p>For development installations:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>rompy-oceanum
+git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev,docs]&quot;</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+<section id="uninstallation">
+<h2>Uninstallation<a class="headerlink" href="#uninstallation" title="Link to this heading"></a></h2>
+<p>To remove rompy-oceanum:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>uninstall<span class="w"> </span>rompy-oceanum
+</pre></div>
+</div>
+<p>To remove both rompy-oceanum and oceanum CLI:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>uninstall<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This only removes the specified packages. Other dependencies installed automatically
+may remain. Use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">list</span></code> to see all installed packages.</p>
+</div>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<p>After successful installation:</p>
+<ol class="arabic simple">
+<li><p>Read the <a class="reference internal" href="getting-started.html"><span class="doc">Getting Started</span></a> guide</p></li>
+<li><p>Configure your <a class="reference internal" href="user-guide/configuration.html"><span class="doc">Configuration</span></a></p></li>
+<li><p>Try the <a class="reference internal" href="examples/swan-workflow.html"><span class="doc">SWAN Workflow Example</span></a> tutorial</p></li>
+<li><p>Explore the <a class="reference internal" href="user-guide/cli-reference.html"><span class="doc">CLI Reference</span></a></p></li>
+</ol>
+</section>
+<section id="support">
+<h2>Support<a class="headerlink" href="#support" title="Link to this heading"></a></h2>
+<p>If you continue to experience installation issues:</p>
+<ul class="simple">
+<li><p>Check the <a class="reference external" href="https://github.com/rom-py/rompy-oceanum/issues">GitHub Issues</a></p></li>
+<li><p>Review the <a class="reference internal" href="user-guide/troubleshooting.html"><span class="doc">Troubleshooting</span></a> guide</p></li>
+<li><p>Contact the development team through GitHub</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting-started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="user-guide/index.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

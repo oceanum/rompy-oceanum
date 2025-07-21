@@ -1,0 +1,530 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="rompy-oceanum Documentation" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/index.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="Welcome to the documentation for rompy-oceanum, a Python library that extends rompy with Oceanum Prax pipeline integration capabilities through the oceanum CLI plugin system. This library provides ..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="Welcome to the documentation for rompy-oceanum, a Python library that extends rompy with Oceanum Prax pipeline integration capabilities through the oceanum CLI plugin system. This library provides ..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rompy-oceanum Documentation &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/index.html" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=30646c52"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Started" href="getting-started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            rompy-oceanum
+              <img src="_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">rompy-oceanum Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rompy-oceanum-documentation">
+<h1>rompy-oceanum Documentation<a class="headerlink" href="#rompy-oceanum-documentation" title="Link to this heading"></a></h1>
+<p>Welcome to the documentation for <strong>rompy-oceanum</strong>, a Python library that extends <a class="reference external" href="https://github.com/rom-py/rompy">rompy</a> with Oceanum Prax pipeline integration capabilities through the oceanum CLI plugin system.</p>
+<p>This library provides seamless integration with the oceanum CLI, enabling submission of rompy model configurations to Oceanum’s Prax pipeline system for remote execution, monitoring, and result management through the unified <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span></code> command interface.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-rocket" viewBox="0 0 16 16" aria-hidden="true"><path d="M14.064 0h.186C15.216 0 16 .784 16 1.75v.186a8.752 8.752 0 0 1-2.564 6.186l-.458.459c-.314.314-.641.616-.979.904v3.207c0 .608-.315 1.172-.833 1.49l-2.774 1.707a.749.749 0 0 1-1.11-.418l-.954-3.102a1.214 1.214 0 0 1-.145-.125L3.754 9.816a1.218 1.218 0 0 1-.124-.145L.528 8.717a.749.749 0 0 1-.418-1.11l1.71-2.774A1.748 1.748 0 0 1 3.31 4h3.204c.288-.338.59-.665.904-.979l.459-.458A8.749 8.749 0 0 1 14.064 0ZM8.938 3.623h-.002l-.458.458c-.76.76-1.437 1.598-2.02 2.5l-1.5 2.317 2.143 2.143 2.317-1.5c.902-.583 1.74-1.26 2.499-2.02l.459-.458a7.25 7.25 0 0 0 2.123-5.127V1.75a.25.25 0 0 0-.25-.25h-.186a7.249 7.249 0 0 0-5.125 2.123ZM3.56 14.56c-.732.732-2.334 1.045-3.005 1.148a.234.234 0 0 1-.201-.064.234.234 0 0 1-.064-.201c.103-.671.416-2.273 1.15-3.003a1.502 1.502 0 1 1 2.12 2.12Zm6.94-3.935c-.088.06-.177.118-.266.175l-2.35 1.521.548 1.783 1.949-1.2a.25.25 0 0 0 .119-.213ZM3.678 8.116 5.2 5.766c.058-.09.117-.178.176-.266H3.309a.25.25 0 0 0-.213.119l-1.2 1.95ZM12 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg> Quick Start</div>
+<p class="sd-card-text">Get up and running with rompy-oceanum in minutes.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="getting-started.html"><span class="doc">Getting Started</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-book" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"></path></svg> User Guide</div>
+<p class="sd-card-text">Learn how to use rompy-oceanum effectively.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="user-guide/index.html"><span class="doc">User Guide</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-code" viewBox="0 0 16 16" aria-hidden="true"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg> API Reference</div>
+<p class="sd-card-text">Complete API documentation for all modules and classes.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="api/index.html"><span class="doc">API Reference</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-repo" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path></svg> Examples</div>
+<p class="sd-card-text">Practical examples and tutorials.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/index.html"><span class="doc">Examples</span></a></div>
+</div>
+</div>
+</div>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Oceanum CLI Integration</strong>: Seamlessly integrated as <code class="docutils literal notranslate"><span class="pre">oceanum</span> <span class="pre">rompy</span></code> command group</p></li>
+<li><p><strong>Unified Authentication</strong>: Uses oceanum’s built-in authentication system</p></li>
+<li><p><strong>Enhanced User Experience</strong>: Rich terminal output with progress indicators and organized file management</p></li>
+<li><p><strong>Plugin-Based Architecture</strong>: Uses oceanum’s plugin system for extensible command structure</p></li>
+<li><p><strong>Complete Workflow Support</strong>: From configuration generation to result management</p></li>
+<li><p><strong>Smart Configuration Templates</strong>: Automated rompy configuration generation optimized for Prax execution</p></li>
+<li><p><strong>Organized Output Management</strong>: Automatic file organization by stage and type</p></li>
+</ul>
+</section>
+<section id="architecture-overview">
+<h2>Architecture Overview<a class="headerlink" href="#architecture-overview" title="Link to this heading"></a></h2>
+<p>rompy-oceanum follows a modular architecture aligned with rompy’s plugin system:</p>
+<p><strong>Architecture Flow:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>rompy ModelRun
+     │
+     ▼
+PraxPipelineBackend ──────► PraxClient ──────► Oceanum Prax API
+     │
+     ▼
+DataMeshPostprocessor ──────► Oceanum DataMesh
+     │
+     ▲
+CLI Interface ──────────────┘
+     │
+Configuration Models
+</pre></div>
+</div>
+<p>Core Components:</p>
+<ul class="simple">
+<li><p><strong>PraxPipelineBackend</strong>: Main pipeline backend implementation for Prax integration</p></li>
+<li><p><strong>PraxClient</strong>: Low-level API client for Prax service interactions</p></li>
+<li><p><strong>Configuration Models</strong>: Pydantic models for backend configuration (PraxConfig, DataMeshConfig)</p></li>
+<li><p><strong>Result Management</strong>: PraxResult for status monitoring and output retrieval</p></li>
+<li><p><strong>CLI Integration</strong>: Command-line interface for pipeline operations</p></li>
+</ul>
+</section>
+<section id="quick-example">
+<h2>Quick Example<a class="headerlink" href="#quick-example" title="Link to this heading"></a></h2>
+<p>Here’s a simple example of using the oceanum rompy CLI integration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># First, authenticate with oceanum</span>
+oceanum<span class="w"> </span>auth<span class="w"> </span>login
+
+<span class="c1"># Create optimized rompy configuration</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>init<span class="w"> </span>swan<span class="w"> </span>--template<span class="w"> </span>basic<span class="w"> </span>--domain<span class="w"> </span><span class="s2">&quot;my_domain&quot;</span>
+
+<span class="c1"># Execute model via Prax pipeline</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>run<span class="w"> </span>config.yml<span class="w"> </span>swan<span class="w"> </span>--pipeline-name<span class="w"> </span>my-pipeline
+
+<span class="c1"># Monitor pipeline status</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>status<span class="w"> </span>&lt;run-id&gt;
+
+<span class="c1"># View real-time logs</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>logs<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>--follow
+
+<span class="c1"># Download organized results</span>
+oceanum<span class="w"> </span>rompy<span class="w"> </span>sync<span class="w"> </span>&lt;run-id&gt;<span class="w"> </span>./outputs<span class="w"> </span>--organize
+</pre></div>
+</div>
+<p>For programmatic usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rompy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxPipelineBackend</span>
+
+<span class="c1"># Create your rompy model configuration</span>
+<span class="n">model_run</span> <span class="o">=</span> <span class="n">rompy</span><span class="o">.</span><span class="n">ModelRun</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">swan_config</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+<span class="c1"># Execute using Prax pipeline backend</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model_run</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;swan-from-rompy&quot;</span><span class="p">,</span>
+    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">,</span>
+    <span class="n">org</span><span class="o">=</span><span class="s2">&quot;orgname&quot;</span><span class="p">,</span>
+    <span class="n">project</span><span class="o">=</span><span class="s2">&quot;project-name&quot;</span><span class="p">,</span>
+    <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Monitor the pipeline</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pipeline submitted with ID: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">run_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">wait_for_completion</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>Install rompy-oceanum and oceanum CLI using pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>rompy-oceanum<span class="w"> </span>oceanum
+</pre></div>
+</div>
+<p>Verify the integration works:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>oceanum<span class="w"> </span>rompy<span class="w"> </span>--help
+</pre></div>
+</div>
+<p>Or for development:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/rom-py/rompy-oceanum
+<span class="nb">cd</span><span class="w"> </span>rompy-oceanum
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev,docs]&quot;</span>
+pip<span class="w"> </span>install<span class="w"> </span>oceanum
+</pre></div>
+</div>
+</section>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#authentication-setup">Authentication Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#quick-start-example">Quick Start Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#using-the-cli">Using the CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#monitoring-your-pipeline">Monitoring Your Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#configuration-options">Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#common-workflow">Common Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#getting-help">Getting Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-methods">Installation Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#virtual-environment-setup">Virtual Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#docker-installation">Docker Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#post-installation-setup">Post-Installation Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verification">Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#common-installation-issues">Common Installation Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#upgrading">Upgrading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#uninstallation">Uninstallation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#support">Support</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/index.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/index.html#quick-navigation">Quick Navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/index.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/index.html#plugin-architecture">Plugin Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/index.html#environment-setup">Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/index.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/index.html#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/basic-usage.html">Basic Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/basic-usage.html#core-concepts">Core Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/basic-usage.html#basic-workflow">Basic Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/basic-usage.html#using-the-oceanum-cli-integration">Using the Oceanum CLI Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/basic-usage.html#configuration-patterns">Configuration Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/basic-usage.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/basic-usage.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/basic-usage.html#common-patterns">Common Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/basic-usage.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#authentication-configuration">Authentication Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#backend-configuration">Backend Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#configuration-files">Configuration Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#environment-variables">Environment Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#programmatic-configuration">Programmatic Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#runtime-configuration">Runtime Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#security-configuration">Security Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#id1">Configuration Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#troubleshooting-configuration">Troubleshooting Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#example-configurations">Example Configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/configuration.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/pipeline-backends.html">Pipeline Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/pipeline-backends.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/pipeline-backends.html#backend-selection">Backend Selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/pipeline-backends.html#prax-backend">Prax Backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/pipeline-backends.html#model-specific-backends">Model-Specific Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/pipeline-backends.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/pipeline-backends.html#advanced-configuration">Advanced Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/pipeline-backends.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/pipeline-backends.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/cli-reference.html">CLI Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#installation-and-setup">Installation and Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#global-options">Global Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#commands-reference">Commands Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#output-formats">Output Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#environment-variables">Environment Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#exit-codes">Exit Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#scripting-and-automation">Scripting and Automation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/cli-reference.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/troubleshooting.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#quick-diagnostics">Quick Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#common-issues">Common Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#performance-issues">Performance Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#debugging-techniques">Debugging Techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#error-codes-reference">Error Codes Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#advanced-troubleshooting">Advanced Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#getting-support">Getting Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/troubleshooting.html#prevention-tips">Prevention Tips</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#setup-for-examples">Setup for Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#example-data">Example Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#example-categories">Example Categories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#code-organization">Code Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#running-examples">Running Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#validation-and-testing">Validation and Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#troubleshooting-examples">Troubleshooting Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#contributing-examples">Contributing Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/swan-workflow.html">SWAN Workflow Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#basic-configuration">Basic Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#execution-with-cli">Execution with CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#programmatic-execution">Programmatic Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#monitoring-progress">Monitoring Progress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#result-management">Result Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/swan-workflow.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/advanced-configuration.html">Advanced Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/advanced-configuration.html#coming-soon">Coming Soon</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/batch-processing.html">Batch Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/batch-processing.html#coming-soon">Coming Soon</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#coming-soon">Coming Soon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#module-structure">Module Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development/index.html#coming-soon">Coming Soon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/index.html#quick-links">Quick Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development/contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#development-setup">Development Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#contribution-types">Contribution Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/contributing.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development/architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development/architecture.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/architecture.html#high-level-architecture">High-Level Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/architecture.html#key-components">Key Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/architecture.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development/testing.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development/testing.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/testing.html#test-structure">Test Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/testing.html#running-tests">Running Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/testing.html#test-categories">Test Categories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/testing.html#testing-guidelines">Testing Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/testing.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development/migration-guide.html">Migration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development/migration-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/migration-guide.html#coming-soon">Coming Soon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/migration-guide.html#current-status">Current Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/migration-guide.html#version-history">Version History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/migration-guide.html#upgrade-checklist">Upgrade Checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development/migration-guide.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

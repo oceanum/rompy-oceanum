@@ -1,0 +1,793 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Advanced Workflows" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rom-py.github.io/rompy-oceanum/user-guide/advanced-workflows.html" />
+<meta property="og:site_name" content="rompy-oceanum" />
+<meta property="og:description" content="This guide covers advanced patterns and techniques for implementing complex wave modeling workflows with rompy-oceanum. Learn how to automate model execution, implement batch processing, ensemble m..." />
+<meta property="og:image" content="https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg" />
+<meta property="og:image:alt" content="rompy-oceanum" />
+<meta name="description" content="This guide covers advanced patterns and techniques for implementing complex wave modeling workflows with rompy-oceanum. Learn how to automate model execution, implement batch processing, ensemble m..." />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Workflows &mdash; rompy-oceanum v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d310173d" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+    <link rel="shortcut icon" href="../_static/banner_light.svg"/>
+    <link rel="canonical" href="https://rom-py.github.io/rompy-oceanum/user-guide/advanced-workflows.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2caa9db7"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=30646c52"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Troubleshooting" href="troubleshooting.html" />
+    <link rel="prev" title="CLI Reference" href="cli-reference.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d2d3f" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            rompy-oceanum
+              <img src="../_static/banner_light.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quick-navigation">Quick Navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#plugin-architecture">Plugin Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#environment-setup">Environment Setup</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#table-of-contents">Table of Contents</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Advanced Workflows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#batch-processing">Batch Processing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ensemble-modeling">Ensemble Modeling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#operational-forecasting">Operational Forecasting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-pipeline-integration">Data Pipeline Integration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#error-handling-and-recovery">Error Handling and Recovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#performance-optimization">Performance Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basic-usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline-backends.html">Pipeline Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/swan-workflow.html">SWAN Workflow Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/advanced-configuration.html">Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/batch-processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/migration-guide.html">Migration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/rom-py/rompy-oceanum">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://rompy.readthedocs.io/">rompy Documentation</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://oceanum.science/">Oceanum Platform</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d2d3f" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">rompy-oceanum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Advanced Workflows</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="advanced-workflows">
+<h1>Advanced Workflows<a class="headerlink" href="#advanced-workflows" title="Link to this heading"></a></h1>
+<p>This guide covers advanced patterns and techniques for implementing complex wave modeling workflows with rompy-oceanum. Learn how to automate model execution, implement batch processing, ensemble modeling, and operational forecasting systems.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>Advanced workflows in rompy-oceanum enable sophisticated modeling patterns including:</p>
+<ul class="simple">
+<li><p><strong>Batch Processing</strong>: Execute multiple model configurations in parallel or sequence</p></li>
+<li><p><strong>Ensemble Modeling</strong>: Run multiple model variants with different parameters</p></li>
+<li><p><strong>Operational Forecasting</strong>: Automated model execution for real-time forecasting</p></li>
+<li><p><strong>Data Pipeline Integration</strong>: Seamless integration with data processing workflows</p></li>
+<li><p><strong>Conditional Execution</strong>: Dynamic workflow control based on results and conditions</p></li>
+</ul>
+</section>
+<section id="batch-processing">
+<h2>Batch Processing<a class="headerlink" href="#batch-processing" title="Link to this heading"></a></h2>
+<p>Execute multiple wave models efficiently using batch processing patterns.</p>
+<section id="basic-batch-execution">
+<h3>Basic Batch Execution<a class="headerlink" href="#basic-batch-execution" title="Link to this heading"></a></h3>
+<p>Process multiple configurations in parallel:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">BatchProcessor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">PraxConfig</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_batch_models</span><span class="p">():</span>
+    <span class="c1"># Define multiple model configurations</span>
+    <span class="n">configs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;grid&quot;</span><span class="p">:</span> <span class="s2">&quot;north_sea&quot;</span><span class="p">,</span> <span class="s2">&quot;forcing&quot;</span><span class="p">:</span> <span class="s2">&quot;era5&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;grid&quot;</span><span class="p">:</span> <span class="s2">&quot;atlantic&quot;</span><span class="p">,</span> <span class="s2">&quot;forcing&quot;</span><span class="p">:</span> <span class="s2">&quot;gfs&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;grid&quot;</span><span class="p">:</span> <span class="s2">&quot;pacific&quot;</span><span class="p">,</span> <span class="s2">&quot;forcing&quot;</span><span class="p">:</span> <span class="s2">&quot;ecmwf&quot;</span><span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Configure batch processor</span>
+    <span class="n">batch_processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span>
+        <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+        <span class="n">backend_config</span><span class="o">=</span><span class="n">PraxConfig</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">=</span><span class="s2">&quot;your-org&quot;</span><span class="p">,</span>
+            <span class="n">project</span><span class="o">=</span><span class="s2">&quot;wave-forecasting&quot;</span><span class="p">,</span>
+            <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;prod&quot;</span>
+        <span class="p">),</span>
+        <span class="n">max_concurrent</span><span class="o">=</span><span class="mi">3</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Execute batch</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">batch_processor</span><span class="o">.</span><span class="n">run_batch</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span>
+
+    <span class="c1"># Process results</span>
+    <span class="k">for</span> <span class="n">config</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">configs</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">is_successful</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✓ </span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> completed successfully&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✗ </span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Run the batch</span>
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run_batch_models</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="sequential-processing">
+<h3>Sequential Processing<a class="headerlink" href="#sequential-processing" title="Link to this heading"></a></h3>
+<p>When models depend on each other or resources are limited:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequentialProcessor</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run_sequential_workflow</span><span class="p">():</span>
+    <span class="c1"># Define workflow stages</span>
+    <span class="n">stages</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;preprocessing&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">preprocess_config</span><span class="p">,</span>
+            <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;coarse_grid&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">coarse_grid_config</span><span class="p">,</span>
+            <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;preprocessing&quot;</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fine_grid&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">fine_grid_config</span><span class="p">,</span>
+            <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;coarse_grid&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="n">processor</span> <span class="o">=</span> <span class="n">SequentialProcessor</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">run_workflow</span><span class="p">(</span><span class="n">stages</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+</pre></div>
+</div>
+</section>
+<section id="conditional-batch-processing">
+<h3>Conditional Batch Processing<a class="headerlink" href="#conditional-batch-processing" title="Link to this heading"></a></h3>
+<p>Execute batches based on conditions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionalBatch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run_conditional_forecast</span><span class="p">():</span>
+    <span class="c1"># Check if new forcing data is available</span>
+    <span class="n">forcing_check</span> <span class="o">=</span> <span class="n">check_latest_forcing_data</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">forcing_check</span><span class="o">.</span><span class="n">is_updated</span><span class="p">():</span>
+        <span class="c1"># Define forecast ensemble</span>
+        <span class="n">ensemble_configs</span> <span class="o">=</span> <span class="n">generate_ensemble_configs</span><span class="p">(</span>
+            <span class="n">base_config</span><span class="o">=</span><span class="n">operational_config</span><span class="p">,</span>
+            <span class="n">perturbations</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;wind_speed_factor&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;wind_speed_factor&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;wave_height_bias&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;wave_height_bias&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Execute ensemble</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">ConditionalBatch</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">forcing_check</span><span class="o">.</span><span class="n">is_updated</span><span class="p">(),</span>
+            <span class="n">retry_interval</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span>
+            <span class="n">max_retries</span><span class="o">=</span><span class="mi">4</span>
+        <span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">ensemble_configs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ensemble-modeling">
+<h2>Ensemble Modeling<a class="headerlink" href="#ensemble-modeling" title="Link to this heading"></a></h2>
+<p>Implement ensemble modeling for uncertainty quantification and improved forecasts.</p>
+<section id="parameter-ensemble">
+<h3>Parameter Ensemble<a class="headerlink" href="#parameter-ensemble" title="Link to this heading"></a></h3>
+<p>Vary model parameters systematically:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnsembleManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_parameter_ensemble</span><span class="p">():</span>
+    <span class="c1"># Define parameter ranges</span>
+    <span class="n">wind_factors</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">]</span>
+    <span class="n">friction_coeffs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.015</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">]</span>
+
+    <span class="c1"># Generate all combinations</span>
+    <span class="n">ensemble_configs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">wind_factor</span><span class="p">,</span> <span class="n">friction</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="n">wind_factors</span><span class="p">,</span> <span class="n">friction_coeffs</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">base_config</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s2">&quot;physics&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;wind_drag_coefficient&quot;</span><span class="p">:</span> <span class="n">wind_factor</span> <span class="o">*</span> <span class="n">base_wind_drag</span><span class="p">,</span>
+                <span class="s2">&quot;bottom_friction&quot;</span><span class="p">:</span> <span class="n">friction</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;ensemble_member&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;wind_</span><span class="si">{</span><span class="n">wind_factor</span><span class="si">}</span><span class="s2">_friction_</span><span class="si">{</span><span class="n">friction</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">})</span>
+        <span class="n">ensemble_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># Execute ensemble</span>
+    <span class="n">ensemble</span> <span class="o">=</span> <span class="n">EnsembleManager</span><span class="p">(</span>
+        <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+        <span class="n">ensemble_name</span><span class="o">=</span><span class="s2">&quot;parameter_sensitivity&quot;</span><span class="p">,</span>
+        <span class="n">max_concurrent</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ensemble_configs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">analyze_results</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="forcing-ensemble">
+<h3>Forcing Ensemble<a class="headerlink" href="#forcing-ensemble" title="Link to this heading"></a></h3>
+<p>Use multiple forcing datasets:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_forcing_ensemble</span><span class="p">():</span>
+    <span class="n">forcing_sources</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;era5&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;era5_winds.nc&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;gfs&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;gfs_winds.nc&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ecmwf&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;ecmwf_winds.nc&quot;</span><span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="n">ensemble_configs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">forcing</span> <span class="ow">in</span> <span class="n">forcing_sources</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">base_config</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;forcing&quot;</span><span class="p">][</span><span class="s2">&quot;wind_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">forcing</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;ensemble_member&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">forcing</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">ensemble_configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ensemble_configs</span>
+</pre></div>
+</div>
+</section>
+<section id="multi-model-ensemble">
+<h3>Multi-Model Ensemble<a class="headerlink" href="#multi-model-ensemble" title="Link to this heading"></a></h3>
+<p>Combine different wave models:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_multi_model_ensemble</span><span class="p">():</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;swan&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">swan_config</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;wavewatch3&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">ww3_config</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mike21&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">mike_config</span><span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="n">ensemble_results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">run_model</span><span class="p">(</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">model</span><span class="p">[</span><span class="s2">&quot;config&quot;</span><span class="p">],</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+            <span class="n">pipeline_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ensemble_</span><span class="si">{</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">ensemble_results</span><span class="p">[</span><span class="n">model</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">result</span>
+
+    <span class="c1"># Combine results</span>
+    <span class="n">combined_forecast</span> <span class="o">=</span> <span class="n">combine_ensemble_results</span><span class="p">(</span><span class="n">ensemble_results</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">combined_forecast</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="operational-forecasting">
+<h2>Operational Forecasting<a class="headerlink" href="#operational-forecasting" title="Link to this heading"></a></h2>
+<p>Implement automated operational forecasting systems.</p>
+<section id="scheduled-execution">
+<h3>Scheduled Execution<a class="headerlink" href="#scheduled-execution" title="Link to this heading"></a></h3>
+<p>Set up automated model runs:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScheduledForecaster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">crontab</span><span class="w"> </span><span class="kn">import</span> <span class="n">CronTab</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">OperationalForecaster</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forecaster</span> <span class="o">=</span> <span class="n">ScheduledForecaster</span><span class="p">(</span>
+            <span class="n">schedule</span><span class="o">=</span><span class="s2">&quot;0 */6 * * *&quot;</span><span class="p">,</span>  <span class="c1"># Every 6 hours</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;prax&quot;</span><span class="p">,</span>
+            <span class="n">backend_config</span><span class="o">=</span><span class="n">PraxConfig</span><span class="p">(</span>
+                <span class="n">org</span><span class="o">=</span><span class="s2">&quot;operational&quot;</span><span class="p">,</span>
+                <span class="n">project</span><span class="o">=</span><span class="s2">&quot;wave-forecast&quot;</span><span class="p">,</span>
+                <span class="n">stage</span><span class="o">=</span><span class="s2">&quot;prod&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_operational_forecast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Configure forecast chain</span>
+        <span class="n">forecast_chain</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;data_ingestion&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingest_latest_forcing</span><span class="p">,</span>
+                <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">1800</span>  <span class="c1"># 30 minutes</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;quality_control&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_forcing_data</span><span class="p">,</span>
+                <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;data_ingestion&quot;</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;wave_forecast&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_wave_model</span><span class="p">,</span>
+                <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;quality_control&quot;</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;post_processing&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_outputs</span><span class="p">,</span>
+                <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;wave_forecast&quot;</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;dissemination&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">publish_results</span><span class="p">,</span>
+                <span class="s2">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;post_processing&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">forecaster</span><span class="o">.</span><span class="n">register_workflow</span><span class="p">(</span><span class="n">forecast_chain</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ingest_latest_forcing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download latest forcing data.&quot;&quot;&quot;</span>
+        <span class="c1"># Implementation for data ingestion</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_forcing_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate forcing data quality.&quot;&quot;&quot;</span>
+        <span class="c1"># Implementation for QC</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_wave_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute wave model forecast.&quot;&quot;&quot;</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_forecast_config</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forecaster</span><span class="o">.</span><span class="n">submit_model</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post-process model outputs.&quot;&quot;&quot;</span>
+        <span class="c1"># Implementation for post-processing</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">publish_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Publish results to stakeholders.&quot;&quot;&quot;</span>
+        <span class="c1"># Implementation for dissemination</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="real-time-monitoring">
+<h3>Real-time Monitoring<a class="headerlink" href="#real-time-monitoring" title="Link to this heading"></a></h3>
+<p>Monitor operational forecasts in real-time:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">ForecastMonitor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">OperationalMonitor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">ForecastMonitor</span><span class="p">(</span>
+            <span class="n">check_interval</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>  <span class="c1"># 5 minutes</span>
+            <span class="n">alert_channels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;slack&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_monitoring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Define monitoring rules</span>
+        <span class="n">rules</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;forecast_delay&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;condition&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">run</span><span class="p">:</span> <span class="n">run</span><span class="o">.</span><span class="n">age_hours</span> <span class="o">&gt;</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;critical&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">alert_forecast_delay</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;model_failure&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;condition&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">run</span><span class="p">:</span> <span class="n">run</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_model_failure</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource_usage&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;condition&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">run</span><span class="p">:</span> <span class="n">run</span><span class="o">.</span><span class="n">cpu_usage</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">,</span>
+                <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;medium&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_resources</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">add_rules</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">alert_forecast_delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle forecast delays.&quot;&quot;&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Forecast </span><span class="si">{</span><span class="n">run</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> delayed by </span><span class="si">{</span><span class="n">run</span><span class="o">.</span><span class="n">age_hours</span><span class="si">}</span><span class="s2"> hours&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">send_alert</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;critical&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_model_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle model execution failures.&quot;&quot;&quot;</span>
+        <span class="c1"># Attempt automatic recovery</span>
+        <span class="k">if</span> <span class="n">run</span><span class="o">.</span><span class="n">retry_count</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">run</span><span class="o">.</span><span class="n">retry</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">send_alert</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Model </span><span class="si">{</span><span class="n">run</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> failed after 3 retries&quot;</span><span class="p">,</span>
+                <span class="n">severity</span><span class="o">=</span><span class="s2">&quot;high&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">scale_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scale resources for high-usage runs.&quot;&quot;&quot;</span>
+        <span class="n">run</span><span class="o">.</span><span class="n">scale_resources</span><span class="p">(</span><span class="n">cpu</span><span class="o">=</span><span class="s2">&quot;8000m&quot;</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="s2">&quot;16Gi&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="data-pipeline-integration">
+<h2>Data Pipeline Integration<a class="headerlink" href="#data-pipeline-integration" title="Link to this heading"></a></h2>
+<p>Integrate wave modeling with broader data processing pipelines.</p>
+<section id="apache-airflow-integration">
+<h3>Apache Airflow Integration<a class="headerlink" href="#apache-airflow-integration" title="Link to this heading"></a></h3>
+<p>Use Airflow for complex workflow orchestration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">airflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">DAG</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">airflow.operators.python_operator</span><span class="w"> </span><span class="kn">import</span> <span class="n">PythonOperator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.integrations.airflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">RompyOperator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="c1"># Define DAG</span>
+<span class="n">dag</span> <span class="o">=</span> <span class="n">DAG</span><span class="p">(</span>
+    <span class="s1">&#39;wave_forecast_pipeline&#39;</span><span class="p">,</span>
+    <span class="n">default_args</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;wave-team&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;depends_on_past&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;start_date&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2025</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;retries&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;retry_delay&#39;</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="n">schedule_interval</span><span class="o">=</span><span class="s1">&#39;0 */6 * * *&#39;</span><span class="p">,</span>  <span class="c1"># Every 6 hours</span>
+    <span class="n">catchup</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+
+<span class="c1"># Data ingestion task</span>
+<span class="n">ingest_forcing</span> <span class="o">=</span> <span class="n">PythonOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="s1">&#39;ingest_forcing_data&#39;</span><span class="p">,</span>
+    <span class="n">python_callable</span><span class="o">=</span><span class="n">download_forcing_data</span><span class="p">,</span>
+    <span class="n">dag</span><span class="o">=</span><span class="n">dag</span>
+<span class="p">)</span>
+
+<span class="c1"># Wave model execution</span>
+<span class="n">run_wave_model</span> <span class="o">=</span> <span class="n">RompyOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="s1">&#39;run_wave_forecast&#39;</span><span class="p">,</span>
+    <span class="n">config_template</span><span class="o">=</span><span class="s1">&#39;templates/operational_forecast.yml&#39;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;prax&#39;</span><span class="p">,</span>
+    <span class="n">pipeline_name</span><span class="o">=</span><span class="s1">&#39;airflow_wave_forecast&#39;</span><span class="p">,</span>
+    <span class="n">dag</span><span class="o">=</span><span class="n">dag</span>
+<span class="p">)</span>
+
+<span class="c1"># Post-processing</span>
+<span class="n">process_results</span> <span class="o">=</span> <span class="n">PythonOperator</span><span class="p">(</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="s1">&#39;process_results&#39;</span><span class="p">,</span>
+    <span class="n">python_callable</span><span class="o">=</span><span class="n">process_wave_outputs</span><span class="p">,</span>
+    <span class="n">dag</span><span class="o">=</span><span class="n">dag</span>
+<span class="p">)</span>
+
+<span class="c1"># Set dependencies</span>
+<span class="n">ingest_forcing</span> <span class="o">&gt;&gt;</span> <span class="n">run_wave_model</span> <span class="o">&gt;&gt;</span> <span class="n">process_results</span>
+</pre></div>
+</div>
+</section>
+<section id="prefect-integration">
+<h3>Prefect Integration<a class="headerlink" href="#prefect-integration" title="Link to this heading"></a></h3>
+<p>Use Prefect for modern workflow orchestration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">prefect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prefect</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flow</span><span class="p">,</span> <span class="n">task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum.integrations.prefect</span><span class="w"> </span><span class="kn">import</span> <span class="n">rompy_task</span>
+
+<span class="nd">@task</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_forcing_data</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare forcing data for wave model.&quot;&quot;&quot;</span>
+    <span class="c1"># Data preparation logic</span>
+    <span class="k">return</span> <span class="n">forcing_config</span>
+
+<span class="nd">@rompy_task</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_wave_forecast</span><span class="p">(</span><span class="n">forcing_config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute wave forecast model.&quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">generate_model_config</span><span class="p">(</span><span class="n">forcing_config</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">config</span>
+
+<span class="nd">@task</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_outputs</span><span class="p">(</span><span class="n">model_result</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate model outputs.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">model_result</span><span class="o">.</span><span class="n">is_successful</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model execution failed&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Validation logic</span>
+    <span class="k">return</span> <span class="n">model_result</span>
+
+<span class="c1"># Create flow</span>
+<span class="k">with</span> <span class="n">Flow</span><span class="p">(</span><span class="s2">&quot;Wave Forecast Pipeline&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">flow</span><span class="p">:</span>
+    <span class="n">forcing</span> <span class="o">=</span> <span class="n">prepare_forcing_data</span><span class="p">()</span>
+    <span class="n">forecast</span> <span class="o">=</span> <span class="n">run_wave_forecast</span><span class="p">(</span><span class="n">forcing</span><span class="p">)</span>
+    <span class="n">validated</span> <span class="o">=</span> <span class="n">validate_outputs</span><span class="p">(</span><span class="n">forecast</span><span class="p">)</span>
+
+<span class="c1"># Register and run</span>
+<span class="n">flow</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">project_name</span><span class="o">=</span><span class="s2">&quot;wave-forecasting&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling-and-recovery">
+<h2>Error Handling and Recovery<a class="headerlink" href="#error-handling-and-recovery" title="Link to this heading"></a></h2>
+<p>Implement robust error handling for production workflows.</p>
+<section id="retry-strategies">
+<h3>Retry Strategies<a class="headerlink" href="#retry-strategies" title="Link to this heading"></a></h3>
+<p>Configure intelligent retry mechanisms:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">RetryManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tenacity</span><span class="w"> </span><span class="kn">import</span> <span class="n">retry</span><span class="p">,</span> <span class="n">stop_after_attempt</span><span class="p">,</span> <span class="n">wait_exponential</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">RobustWorkflow</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retry_manager</span> <span class="o">=</span> <span class="n">RetryManager</span><span class="p">(</span>
+            <span class="n">max_attempts</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">backoff_strategy</span><span class="o">=</span><span class="s2">&quot;exponential&quot;</span><span class="p">,</span>
+            <span class="n">base_delay</span><span class="o">=</span><span class="mi">60</span>  <span class="c1"># 1 minute</span>
+        <span class="p">)</span>
+
+    <span class="nd">@retry</span><span class="p">(</span>
+        <span class="n">stop</span><span class="o">=</span><span class="n">stop_after_attempt</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+        <span class="n">wait</span><span class="o">=</span><span class="n">wait_exponential</span><span class="p">(</span><span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute_with_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute model with automatic retry.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_model</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">is_successful</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">ModelExecutionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model execution failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>
+</pre></div>
+</div>
+</section>
+<section id="circuit-breaker-pattern">
+<h3>Circuit Breaker Pattern<a class="headerlink" href="#circuit-breaker-pattern" title="Link to this heading"></a></h3>
+<p>Prevent cascade failures:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitBreaker</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ProtectedWorkflow</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">circuit_breaker</span> <span class="o">=</span> <span class="n">CircuitBreaker</span><span class="p">(</span>
+            <span class="n">failure_threshold</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">recovery_timeout</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>  <span class="c1"># 5 minutes</span>
+            <span class="n">expected_exception</span><span class="o">=</span><span class="n">ModelExecutionError</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute_protected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute with circuit breaker protection.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">circuit_breaker</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_model</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-optimization">
+<h2>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading"></a></h2>
+<p>Optimize workflow performance for production use.</p>
+<section id="resource-management">
+<h3>Resource Management<a class="headerlink" href="#resource-management" title="Link to this heading"></a></h3>
+<p>Optimize resource allocation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceOptimizer</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">OptimizedWorkflow</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">ResourceOptimizer</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize_batch_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Optimize resource allocation for batch processing.&quot;&quot;&quot;</span>
+        <span class="c1"># Analyze configurations</span>
+        <span class="n">resource_requirements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
+            <span class="n">req</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">estimate_resources</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="n">resource_requirements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+
+        <span class="c1"># Optimize scheduling</span>
+        <span class="n">schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">optimize_schedule</span><span class="p">(</span>
+            <span class="n">configs</span><span class="p">,</span> <span class="n">resource_requirements</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">schedule</span>
+</pre></div>
+</div>
+</section>
+<section id="caching-strategies">
+<h3>Caching Strategies<a class="headerlink" href="#caching-strategies" title="Link to this heading"></a></h3>
+<p>Implement intelligent caching:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rompy_oceanum</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResultCache</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CachedWorkflow</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">ResultCache</span><span class="p">(</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;redis&quot;</span><span class="p">,</span>  <span class="c1"># or &quot;memory&quot;, &quot;file&quot;</span>
+            <span class="n">ttl</span><span class="o">=</span><span class="mi">3600</span>  <span class="c1"># 1 hour</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute_with_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute with result caching.&quot;&quot;&quot;</span>
+        <span class="c1"># Generate cache key</span>
+        <span class="n">config_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;model_result_</span><span class="si">{</span><span class="n">config_hash</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Check cache</span>
+        <span class="n">cached_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cached_result</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cached_result</span>
+
+        <span class="c1"># Execute and cache</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_model</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<p>Guidelines for implementing robust advanced workflows:</p>
+<section id="workflow-design">
+<h3>Workflow Design<a class="headerlink" href="#workflow-design" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Modularity</strong>: Design workflows as composable components</p></li>
+<li><p><strong>Idempotency</strong>: Ensure workflows can be safely re-executed</p></li>
+<li><p><strong>Observability</strong>: Include comprehensive logging and monitoring</p></li>
+<li><p><strong>Error Boundaries</strong>: Isolate failures to prevent cascade effects</p></li>
+</ul>
+</section>
+<section id="id1">
+<h3>Resource Management<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Right-sizing</strong>: Monitor and optimize resource allocation</p></li>
+<li><p><strong>Scaling</strong>: Implement auto-scaling for variable workloads</p></li>
+<li><p><strong>Cost Control</strong>: Monitor and control computational costs</p></li>
+<li><p><strong>Efficiency</strong>: Optimize workflow scheduling and execution</p></li>
+</ul>
+</section>
+<section id="monitoring-and-alerting">
+<h3>Monitoring and Alerting<a class="headerlink" href="#monitoring-and-alerting" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Health Checks</strong>: Implement comprehensive health monitoring</p></li>
+<li><p><strong>Performance Metrics</strong>: Track key performance indicators</p></li>
+<li><p><strong>Alert Fatigue</strong>: Configure meaningful, actionable alerts</p></li>
+<li><p><strong>Documentation</strong>: Maintain runbooks for incident response</p></li>
+</ul>
+</section>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="basic-usage.html"><span class="doc">Basic Usage</span></a> - Getting started with rompy-oceanum</p></li>
+<li><p><a class="reference internal" href="pipeline-backends.html"><span class="doc">Pipeline Backends</span></a> - Understanding execution backends</p></li>
+<li><p><a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting</span></a> - Debugging workflow issues</p></li>
+<li><p><a class="reference internal" href="../api/index.html"><span class="doc">API Reference</span></a> - API reference documentation</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cli-reference.html" class="btn btn-neutral float-left" title="CLI Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="troubleshooting.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, rompy-oceanum contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
