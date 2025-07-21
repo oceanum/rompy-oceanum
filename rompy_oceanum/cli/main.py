@@ -30,3 +30,6 @@ main.add_command(logs)
 main.add_command(sync)
 main.add_command(init)
 main.add_command(pipelines)
+
+# Alias for oceanum CLI plugin system compatibility
+cli = main
