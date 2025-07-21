@@ -11,55 +11,221 @@ from oceanum.cli.common.models import ContextObject
 
 # Template configurations for different model types
 SWAN_TEMPLATE = {
-    "run_id": "swan_example_run",
-    "model_type": "swan",
+    "run_id": "swan_example_run",  # This has to be run_id for now - fix coming
+    "output_dir": "/app",
+    # Time period configuration
     "period": {
-        "start": "2024-01-01T00:00:00",
-        "end": "2024-01-02T00:00:00",
-        "interval": "1H"
+        "start": "20240101T000000",  # Format: YYYYMMDDTHHMMSS
+        "duration": "1d",           # Duration: 1 day
+        "interval": "1h"            # Output every hour
     },
-    "output": {
-        "grid": {
-            "type": "regular",
-            "lon_min": -180,
-            "lon_max": -170,
-            "lat_min": 20,
-            "lat_max": 30,
-            "resolution": 0.1
+    # SWAN model configuration
+    "config": {
+        "model_type": "swanconfig",
+        # Startup configuration
+        "startup": {
+            "model_type": "startup"
         },
-        "variables": ["hs", "tp", "dir", "tm01"],
-        "format": "netcdf"
-    },
-    "physics": {
-        "gen": 3,
-        "whitecapping": "komen",
-        "quadruplets": True,
-        "triads": True,
-        "breaking": True,
-        "friction": "jonswap",
-        "diffraction": False
-    },
-    "forcing": {
-        "winds": {
-            "source": "gfs",
-            "resolution": 0.25
+        # Project metadata
+        "project": {
+            "model_type": "project",
+            "name": "Swan Example",      # Project name
+            "nr": "run1",                # Run number
+            "title1": "Rompy Swan configuration"  # Title
         },
-        "waves": {
-            "source": "ww3",
-            "resolution": 0.5
+        # General settings
+        "set": {
+            "model_type": "set",
+            "level": 0.0,               # Water level
+            "depmin": 0.05,             # Minimum water depth (m)
+            "direction_convention": "nautical"  # Direction convention (nautical/cartesian)
         },
-        "currents": {
-            "source": "hycom",
-            "resolution": 0.08
-        }
-    },
-    "computational": {
-        "dt": 600,
-        "npnts": 95,
+        # Computation mode
+        "mode": {
+            "model_type": "mode",
+            "kind": "nonstationary",     # Stationary or nonstationary computation
+            "dim": "twodimensional"      # 1D or 2D computation
+        },
+        # Coordinate system
+        "coordinates": {
+            "model_type": "coordinates",
+            "kind": {
+                "model_type": "spherical"  # Spherical (lat/lon) or cartesian coordinates
+            }
+        },
+        # Computational grid definition
         "cgrid": {
-            "resolution": 0.05,
-            "ntheta": 36,
-            "nfreq": 35
+            "model_type": "regular",      # Regular rectangular grid
+            "spectrum": {
+                "mdc": 36,                # Number of directional bins
+                "flow": 0.04,             # Lowest frequency (Hz)
+                "fhigh": 1.0              # Highest frequency (Hz)
+            },
+            "grid": {
+                "xp": -180.0,             # Origin x-coordinate (longitude)
+                "yp": 20.0,               # Origin y-coordinate (latitude)
+                "alp": 0.0,               # Grid rotation angle (degrees)
+                "xlen": 10.0,             # Grid width (degrees)
+                "ylen": 10.0,             # Grid height (degrees)
+                "mx": 20,                 # Number of grid cells in x-direction
+                "my": 20                  # Number of grid cells in y-direction
+            }
+        },
+        # Input data grids
+        "inpgrid": {
+            "model_type": "data_interface",
+            # Bathymetry data
+            "bottom": {
+                "var": "bottom",          # Variable name
+                "source": {
+                    "model_type": "datamesh",
+                    "datasource": "gebco_2023_n0.0_s-90.0_w0.0_e180.0",  # Bathymetry source
+                    "token": None         # API token (if needed)
+                },
+                "fac": -1.0,              # Scaling factor (negative for depth)
+                "buffer": 1.0,            # Buffer around domain (degrees)
+                "z1": "elevation",        # Variable name in data source
+                "coords": {
+                    "x": "lon",           # X-coordinate name in data source
+                    "y": "lat"            # Y-coordinate name in data source
+                }
+            },
+            # Input forcing data
+            "input": [
+                {
+                    "var": "wind",         # Wind input
+                    "source": {
+                        "model_type": "datamesh",
+                        "datasource": "era5_wind10m",  # ERA5 wind data
+                        "token": None      # API token (if needed)
+                    },
+                    "buffer": 2.0,         # Buffer around domain (degrees)
+                    "z1": "u10",           # U-component variable name
+                    "z2": "v10",           # V-component variable name
+                    "coords": {
+                        "x": "longitude",  # X-coordinate name in data source
+                        "y": "latitude"    # Y-coordinate name in data source
+                    }
+                }
+            ]
+        },
+        # Boundary conditions
+        "boundary": {
+            "model_type": "boundspec",
+            "shapespec": {
+                "model_type": "shapespec",
+                "per_type": "peak",        # Period specification type
+                "dspr_type": "degrees",    # Directional spread units
+                "shape": {
+                    "model_type": "tma",   # TMA spectral shape
+                    "gamma": 3.3,          # Peak enhancement factor
+                    "d": 12.0              # Water depth (m)
+                }
+            },
+            "location": {
+                "model_type": "side",      # Boundary location type
+                "side": "west"             # Side of model domain (north/east/south/west)
+            },
+            "data": {
+                "model_type": "constantpar",  # Constant parameters
+                "hs": 2.0,                 # Significant wave height (m)
+                "per": 12.0,               # Peak period (s)
+                "dir": 255.0,              # Mean direction (degrees)
+                "dd": 25.0                 # Directional spread (degrees)
+            }
+        },
+        # Initial conditions
+        "initial": {
+            "kind": {
+                "model_type": "default"    # Default initial conditions (cold start)
+            }
+        },
+        # Physics parameters
+        "physics": {
+            "gen": {
+                "model_type": "gen3",      # Third-generation physics
+                "source_terms": {
+                    "model_type": "westhuysen"  # Source terms formulation
+                }
+            },
+            "quadrupl": {
+                "iquad": 2                 # Quadruplet interactions method
+            },
+            "breaking": {
+                "model_type": "constant",  # Depth-induced breaking
+                "gamma": 0.73              # Breaking parameter
+            },
+            "friction": {
+                "model_type": "madsen",    # Bottom friction formulation
+                "kn": 0.05                 # Bottom roughness length (m)
+            },
+            "triad": {
+                "model_type": "triad"      # Triad wave-wave interactions
+            }
+        },
+        # Numerical propagation scheme
+        "prop": {
+            "scheme": {
+                "model_type": "bsbt"       # BSBT propagation scheme
+            }
+        },
+        # Numerical parameters
+        "numeric": {
+            "stop": {
+                "model_type": "stopc",     # Stopping criteria
+                "dabs": 0.05,              # Absolute Hs difference threshold (m)
+                "drel": 0.05,              # Relative Hs difference threshold (fraction)
+                "curvat": 0.05,            # Curvature threshold
+                "npnts": 95,               # Percentage of points that must converge
+                "mode": {
+                    "model_type": "nonstat",  # Non-stationary convergence
+                    "mxitns": 3            # Maximum iterations per timestep
+                }
+            }
+        },
+        # Output configuration
+        "output": {
+            # Output locations (points)
+            "points": {
+                "model_type": "points",
+                "sname": "pts",            # Name of output location set
+                "xp": [-175.0, -178.0, -172.0],  # X-coordinates (longitude)
+                "yp": [25.0, 22.0, 28.0]   # Y-coordinates (latitude)
+            },
+            # Output quantities definition
+            "quantity": {
+                "model_type": "quantities",
+                "quantities": [
+                    {
+                        "output": ["depth", "hsign", "tps", "dir", "tm01"],  # Main wave parameters
+                        "excv": -9          # Exception value for missing data
+                    },
+                    {
+                        "output": ["hswell"],  # Swell component
+                        "fswell": 0.125     # Swell frequency threshold (Hz)
+                    }
+                ]
+            },
+            # Grid output file
+            "block": {
+                "model_type": "block",
+                "sname": "COMPGRID",       # Special frame name for computational grid
+                "fname": "swangrid.nc",    # Output filename (NetCDF format)
+                "output": ["depth", "wind", "hsign", "tps", "dir"],  # Grid variables
+                "times": {
+                    "dfmt": "hr"           # Time format (hours)
+                }
+            },
+            # Tabular output file
+            "table": {
+                "sname": "pts",            # Output location set name
+                "format": "header",        # Include header in output
+                "fname": "swantable.txt",  # Output filename
+                "output": ["time", "hsign", "hswell", "dir", "tps", "tm01"],  # Variables
+                "times": {
+                    "dfmt": "hr"           # Time format (hours)
+                }
+            }
         }
     }
 }
@@ -264,30 +430,36 @@ def init(
         # Model-specific customization
         if model_type == "swan":
             click.echo("\n🌊 SWAN Grid Configuration:")
-            template["output"]["grid"]["lon_min"] = click.prompt(
-                "  Longitude min",
-                default=template["output"]["grid"]["lon_min"],
+            # Domain configuration
+            template["config"]["cgrid"]["grid"]["xp"] = click.prompt(
+                "  Longitude origin (left edge)",
+                default=template["config"]["cgrid"]["grid"]["xp"],
                 type=float
             )
-            template["output"]["grid"]["lon_max"] = click.prompt(
-                "  Longitude max",
-                default=template["output"]["grid"]["lon_max"],
+            template["config"]["cgrid"]["grid"]["yp"] = click.prompt(
+                "  Latitude origin",
+                default=template["config"]["cgrid"]["grid"]["yp"],
                 type=float
             )
-            template["output"]["grid"]["lat_min"] = click.prompt(
-                "  Latitude min",
-                default=template["output"]["grid"]["lat_min"],
+            template["config"]["cgrid"]["grid"]["xlen"] = click.prompt(
+                "  Domain width (degrees)",
+                default=template["config"]["cgrid"]["grid"]["xlen"],
                 type=float
             )
-            template["output"]["grid"]["lat_max"] = click.prompt(
-                "  Latitude max",
-                default=template["output"]["grid"]["lat_max"],
+            template["config"]["cgrid"]["grid"]["ylen"] = click.prompt(
+                "  Domain height (degrees)",
+                default=template["config"]["cgrid"]["grid"]["ylen"],
                 type=float
             )
-            template["output"]["grid"]["resolution"] = click.prompt(
-                "  Resolution (degrees)",
-                default=template["output"]["grid"]["resolution"],
-                type=float
+            template["config"]["cgrid"]["grid"]["mx"] = click.prompt(
+                "  Number of grid cells in x-direction",
+                default=template["config"]["cgrid"]["grid"]["mx"],
+                type=int
+            )
+            template["config"]["cgrid"]["grid"]["my"] = click.prompt(
+                "  Number of grid cells in y-direction",
+                default=template["config"]["cgrid"]["grid"]["my"],
+                type=int
             )
 
         elif model_type == "schism":
@@ -354,9 +526,11 @@ def init(
         # Model-specific tips
         if model_type == "swan":
             click.echo("\n💡 SWAN Tips:")
-            click.echo("   - Use 'gen: 3' for third-generation mode")
-            click.echo("   - Enable 'quadruplets' for deep water applications")
-            click.echo("   - Set appropriate grid resolution based on your domain")
+            click.echo("   - Set appropriate grid resolution based on your domain (typically 0.5-5km)")
+            click.echo("   - Adjust spectral resolution (mdc and flow/fhigh) based on your wave conditions")
+            click.echo("   - For oceanic applications, add boundary conditions on all exposed sides")
+            click.echo("   - For deep water, enable quadruplets; for shallow water, enable triads")
+            click.echo("   - Ensure bathymetry data covers your entire domain plus buffer")
 
         elif model_type == "schism":
             click.echo("\n💡 SCHISM Tips:")
