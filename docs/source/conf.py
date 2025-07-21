@@ -75,9 +75,17 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# GitHub Pages configuration
+html_baseurl = 'https://rom-py.github.io/rompy-oceanum/'
+html_extra_path = ['.nojekyll']
+
 # HTML title and other options
 html_title = f"{project} v{version}"
 html_short_title = project
+
+# Ensure assets work correctly on GitHub Pages
+html_css_files = []
+html_js_files = []
 
 # -- Extension configuration -------------------------------------------------
 
@@ -157,9 +165,9 @@ copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: 
 copybutton_prompt_is_regexp = True
 
 # OpenGraph configuration
-ogp_site_url = "https://rompy-oceanum.readthedocs.io/"
+ogp_site_url = "https://rom-py.github.io/rompy-oceanum/"
 ogp_site_name = "rompy-oceanum"
-ogp_image = "https://rompy-oceanum.readthedocs.io/en/latest/_static/banner_light.svg"
+ogp_image = "https://rom-py.github.io/rompy-oceanum/_static/banner_light.svg"
 
 # -- Custom configuration ---------------------------------------------------
 
@@ -195,3 +203,11 @@ suppress_warnings = [
     'ref.not_found',
     'docutils'
 ]
+
+# GitHub Pages specific configuration
+html_copy_source = False
+html_show_sourcelink = False
+
+# Ensure proper URL generation for GitHub Pages
+if os.environ.get('GITHUB_ACTIONS'):
+    html_baseurl = 'https://rom-py.github.io/rompy-oceanum/'
