@@ -46,15 +46,15 @@ prax = "rompy_oceanum.pipeline:PraxPipelineBackend"
 datamesh = "rompy_oceanum.postprocess:DataMeshPostprocessor"
 
 [project.entry-points."oceanum.cli"]
-rompy = "rompy_oceanum.cli.main"
+rompy = "rompy_oceanum.cli.rompy:rompy"
 
 [project.entry-points."oceanum.cli.rompy"]
-main = "rompy_oceanum.cli.rompy.main"
-run = "rompy_oceanum.cli.rompy.run"
-status = "rompy_oceanum.cli.rompy.status"
-logs = "rompy_oceanum.cli.rompy.logs"
-sync = "rompy_oceanum.cli.rompy.sync"
-init = "rompy_oceanum.cli.rompy.init"
+main = "rompy_oceanum.cli.rompy:rompy_group"
+run = "rompy_oceanum.cli.rompy.run:run"
+status = "rompy_oceanum.cli.rompy.status:status"
+logs = "rompy_oceanum.cli.rompy.logs:logs"
+download = "rompy_oceanum.cli.rompy.download:download"
+list = "rompy_oceanum.cli.rompy.list:list_group"
 
 [project.scripts]
 datamesh = "rompy_oceanum.datamesh:main"
