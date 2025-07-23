@@ -1,6 +1,7 @@
 """Clean rompy CLI implementation that delegates to oceanum prax."""
 
 import click
+from oceanum.cli import main
 from .run import run
 from .status import status
 from .logs import logs
@@ -9,9 +10,8 @@ from .list import list_group
 from .init import init
 from .generate import generate_backend_config
 
-
-@click.group(name="rompy")
-def rompy_group():
+@main.group(name="rompy")
+def rompy():
     """Rompy model execution commands using Oceanum Prax.
 
     This CLI provides a simple interface for running rompy wave and ocean
@@ -20,19 +20,16 @@ def rompy_group():
     """
     pass
 
-
 # Register all subcommands
-rompy_group.add_command(run)
-rompy_group.add_command(status)
-rompy_group.add_command(logs)
-rompy_group.add_command(download)
-rompy_group.add_command(list_group)
-rompy_group.add_command(init)
-rompy_group.add_command(generate_backend_config)
+rompy.add_command(run)
+rompy.add_command(status)
+rompy.add_command(logs)
+rompy.add_command(download)
+rompy.add_command(list_group)
+rompy.add_command(init)
+rompy.add_command(generate_backend_config)
 
+__all__ = ["rompy"]
 
-# Export for entry point
-__all__ = ["rompy_group", "rompy"]
-
-# Alias for oceanum CLI discovery
-rompy = rompy_group
+def get_cli():
+    return rompy

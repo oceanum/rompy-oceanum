@@ -45,8 +45,8 @@ prax = "rompy_oceanum.pipeline:PraxPipelineBackend"
 [project.entry-points."rompy.postprocess"]
 datamesh = "rompy_oceanum.postprocess:DataMeshPostprocessor"
 
-[project.entry-points."oceanum.cli"]
-rompy = "rompy_oceanum.cli.rompy:rompy"
+[project.entry-points."oceanum.cli.extensions"]
+rompy = "rompy_oceanum.cli.rompy:get_cli"
 
 [project.entry-points."oceanum.cli.rompy"]
 main = "rompy_oceanum.cli.rompy:rompy_group"

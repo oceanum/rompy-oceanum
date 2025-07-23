@@ -4,7 +4,7 @@ import subprocess
 from typing import Optional
 
 import click
-from oceanum.cli.common.models import ContextObject
+from oceanum.cli.models import ContextObject
 
 from .utils import format_pipeline_filters
 

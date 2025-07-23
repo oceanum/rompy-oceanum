@@ -6,7 +6,7 @@ from typing import Optional
 
 import click
 import yaml
-from oceanum.cli.common.models import ContextObject
+from oceanum.cli.models import ContextObject
 
 # Template configurations for different model types
 SWAN_TEMPLATE = {

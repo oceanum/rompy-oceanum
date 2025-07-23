@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from oceanum.cli.common.models import ContextObject
+from oceanum.cli.models import ContextObject
 
 
 @click.command()

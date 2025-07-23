@@ -1,7 +1,7 @@
 """Main CLI plugin entry point for oceanum rompy integration."""
 
 import click
-from oceanum.cli.common.models import ContextObject
+from oceanum.cli.models import ContextObject
 
 
 @click.group()
@@ -16,7 +16,7 @@ def main(obj: ContextObject):
 
 
 # Import our rompy group command which has all subcommands registered
-from .rompy import rompy_group, rompy
+from .rompy import rompy
 
 # Add the rompy group command directly to main
 main.add_command(rompy)

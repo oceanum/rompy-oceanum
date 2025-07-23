@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 
 import click
-from oceanum.cli.common.models import ContextObject
+from oceanum.cli.models import ContextObject
 
 from .utils import (
     load_rompy_config,
