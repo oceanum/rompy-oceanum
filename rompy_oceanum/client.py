@@ -17,6 +17,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from .config import PraxConfig
 from .prax_client_wrapper import PraxClientWrapper, PraxResult as WrapperPraxResult
+# TODO: Replace with native oceanum-prax client or correct wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +231,7 @@ class PraxResult:
     retrieving logs, and downloading outputs using the native oceanum-prax library.
     """
 
-    def __init__(self, client: PraxClientWrapper, run_name: str, pipeline_name: str):
+    def __init__(self, client, run_name: str, pipeline_name: str):
         """
         Initialize result object.
 
