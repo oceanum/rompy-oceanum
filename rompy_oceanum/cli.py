@@ -224,7 +224,9 @@ def download(run_id, output_dir, org, project, pattern):
 @click.option("--memory", default="2G", help="Memory limit for Docker backend")
 @click.option("--timeout", default=3600, help="Execution timeout in seconds")
 @click.option("--mpi-procs", default=2, help="Number of MPI processes")
-def generate_backend_config(model, backend_type, output, cpu, memory, timeout, mpi_procs):
+@click.option("--format", type=click.Choice(["nested", "flat"]), default="nested",
+              help="Configuration format: 'nested' for oceanum rompy run, 'flat' for rompy run")
+def generate_backend_config(model, backend_type, output, cpu, memory, timeout, mpi_procs, format):
     """Generate backend configuration file for a specific model.
 
     Backend types:
@@ -324,15 +326,14 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
         }
     }
 
-    # Create backend configuration
-    if backend_type == "prax":
-        config = {"type": "local", "timeout": timeout}  # Prax uses local backend inside container
-    else:
-        config = {"type": backend_type, "timeout": timeout}
+    # Configure backend settings
+    config_type = "local" if backend_type == "prax" else backend_type
 
+    # Create backend configuration
     if backend_type == "docker":
         model_config = model_configs[model]["docker"]
-        config.update({
+        backend_config = {
+            "type": config_type,
             "image": model_config["image"],
             "cpu": cpu,
             "memory": memory,
@@ -341,27 +342,32 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
             "user": "root",
             "env_vars": model_config["env_vars"],
             "volumes": [],
-            "remove_container": True
-        })
+            "remove_container": True,
+            "timeout": timeout
+        }
     elif backend_type == "prax":
         model_config = model_configs[model]["prax"]
-        config.update({
+        backend_config = {
+            "type": config_type,
             "command": model_config["command"],
             "shell": True,
             "capture_output": True,
             "working_dir": model_config["working_dir"],
-            "env_vars": model_config["env_vars"]
-        })
+            "env_vars": model_config["env_vars"],
+            "timeout": timeout
+        }
     else:  # local
         model_config = model_configs[model]["local"]
-        config.update({
+        backend_config = {
+            "type": config_type,
             "command": model_config["command"],
             "shell": True,
             "capture_output": True,
-            "env_vars": model_config["env_vars"]
-        })
+            "env_vars": model_config["env_vars"],
+            "timeout": timeout
+        }
 
-    # Add postprocessor configuration with environment-specific tags
+    # Create postprocessing configuration
     env_tags = {
         "docker": [model, "oceanum", "rompy-generated", "local-testing"],
         "local": [model, "oceanum", "rompy-generated", "native-local"],
@@ -374,23 +380,33 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
         "prax": {"execution_environment": "prax", "purpose": "pipeline"}
     }
 
-    full_config = {
-        "backend": config,
-        "postprocess": {
-            "processor": "datamesh",
-            "config": {
-                "output_patterns": ["*.nc", "*.dat", "*.csv", "*.log"],
-                "tags": env_tags[backend_type],
-                "metadata": {
-                    "model_type": model,
-                    "backend_type": "local" if backend_type == "prax" else backend_type,
-                    "generated_by": "rompy-oceanum",
-                    "framework": "rompy",
-                    **env_metadata[backend_type]
-                }
+    postprocess_config = {
+        "processor": "datamesh",
+        "config": {
+            "output_patterns": ["*.nc", "*.dat", "*.csv", "*.log"],
+            "tags": env_tags[backend_type],
+            "metadata": {
+                "model_type": model,
+                "backend_type": "local" if backend_type == "prax" else backend_type,
+                "generated_by": "rompy-oceanum",
+                "framework": "rompy",
+                **env_metadata[backend_type]
             }
         }
     }
+
+    # Create final configuration based on requested format
+    if format == "flat":
+        # Flat format for rompy run (type at root level)
+        click.echo(f"Creating flat configuration with type at root level (for rompy run)")
+        full_config = backend_config
+    else:
+        # Nested format for oceanum rompy run
+        click.echo(f"Creating nested configuration (for oceanum rompy run)")
+        full_config = {
+            "backend": backend_config,
+            "postprocess": postprocess_config
+        }
 
     # Determine output file path
     if not output:
@@ -401,16 +417,23 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, 'w') as f:
-        yaml.dump(full_config, f, default_flow_style=False, indent=2)
+        yaml.dump(full_config, f, default_flow_style=False, indent=2, sort_keys=False)
 
     click.echo(f"✅ Backend configuration generated: {output_path}")
     click.echo(f"Model: {model}, Backend: {backend_type}")
+    click.echo(f"Format: {format}")
 
-    if backend_type == "prax":
-        click.echo(f"Usage: rompy pipeline config.yaml --run-backend local --processor datamesh")
-        click.echo(f"Note: Prax backend uses local execution within container")
+    if format == "flat":
+        click.echo(f"Configuration type: {full_config['type']} (at root level)")
+
+        if backend_type == "prax":
+            click.echo(f"Usage: rompy run config.yaml --backend-config {output}")
+            click.echo(f"Note: Prax backend uses local execution within container")
+        else:
+            click.echo(f"Usage: rompy run config.yaml --backend-config {output}")
     else:
-        click.echo(f"Usage: rompy pipeline config.yaml --run-backend {backend_type} --processor datamesh")
+        click.echo(f"Usage: oceanum rompy run config.yaml --pipeline-name {model}-from-rompy")
+        click.echo(f"Note: Use --format=flat to generate a config for direct rompy run command")
 
     if backend_type == "docker":
         click.echo(f"Docker image: {model_configs[model]['docker']['image']}")

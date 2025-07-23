@@ -85,7 +85,7 @@ def generate_backend_config(
             },
             "prax": {
                 "command": f"mpirun -n {mpi_procs} /usr/local/bin/swan.exe",
-                "working_dir": "/app",
+                "working_dir": "/tmp/rompy",
                 "env_vars": {
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
@@ -114,7 +114,7 @@ def generate_backend_config(
             },
             "prax": {
                 "command": f"mpirun -n {mpi_procs} /usr/local/bin/pschism",
-                "working_dir": "/app",
+                "working_dir": "/tmp/rompy",
                 "env_vars": {
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
@@ -143,7 +143,7 @@ def generate_backend_config(
             },
             "prax": {
                 "command": f"mpirun -n {mpi_procs} /usr/local/bin/ww3_shel",
-                "working_dir": "/app",
+                "working_dir": "/tmp/rompy",
                 "env_vars": {
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
@@ -204,23 +204,24 @@ def generate_backend_config(
         "prax": {"execution_environment": "prax", "purpose": "pipeline"}
     }
 
-    full_config = {
-        "backend": config,
-        "postprocess": {
-            "processor": "datamesh",
-            "config": {
-                "output_patterns": ["*.nc", "*.dat", "*.csv", "*.log"],
-                "tags": env_tags[backend_type],
-                "metadata": {
-                    "model_type": model,
-                    "backend_type": "local" if backend_type == "prax" else backend_type,
-                    "generated_by": "rompy-oceanum",
-                    "framework": "rompy",
-                    **env_metadata[backend_type]
-                }
-            }
-        }
-    }
+    # full_config = {
+    #     "backend": config,
+    #     "postprocess": {
+    #         "processor": "datamesh",
+    #         "config": {
+    #             "output_patterns": ["*.nc", "*.dat", "*.csv", "*.log"],
+    #             "tags": env_tags[backend_type],
+    #             "metadata": {
+    #                 "model_type": model,
+    #                 "backend_type": "local" if backend_type == "prax" else backend_type,
+    #                 "generated_by": "rompy-oceanum",
+    #                 "framework": "rompy",
+    #                 **env_metadata[backend_type]
+    #             }
+    #         }
+    #     }
+    # }
+    full_config = config
 
     # Determine output file path
     if not output:

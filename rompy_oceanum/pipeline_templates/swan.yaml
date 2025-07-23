@@ -7,7 +7,7 @@ resources:
       outputs:
         artifacts:
           - name: workspace
-            path: /app
+            path: /tmp/rompy
       resources:
         cpu: 1
         memory: 1G
@@ -22,17 +22,18 @@ resources:
       inputs:
         artifacts:
           - name: workspace
-            path: /app
-      command: rompy run --config-from-env --run-backend local -v
+            path: /tmp/rompy
+      # command: bash -c "cd /tmp/rompy && mpirun -n 2 /usr/local/bin/swan.exe"
+      command: bash -c "cd /tmp/rompy && ls"
       resources:
         cpu: 4
         memory: 2G
       outputs:
         artifacts:
           - name: grid
-            path: /app/swangrid.nc
+            path: /tmp/rompy/swangrid.nc
           - name: spectra
-            path: /app/swanspec.nc
+            path: /tmp/rompy/swanspec.nc
       env:
         - name: ROMPY_MODEL
           value: "swan"
@@ -57,9 +58,9 @@ resources:
       inputs:
         artifacts:
           - name: grid
-            path: /app/swangrid.nc
+            path: /tmp/rompy/swangrid.nc
           - name: spectra
-            path: /app/swanspec.nc
+            path: /tmp/rompy/swanspec.nc
       resources:
         cpu: 1
         memory: 1G

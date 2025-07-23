@@ -87,21 +87,38 @@ def convert_to_pipeline_params(config: Dict[str, Any], config_path: str) -> Dict
     # Detect model type
     model_type = detect_model_type(config)
 
-    # Build parameters
+    # Build parameters - keep it simple to avoid command line issues
     params = {
-        'rompy_config': json.dumps(config),
         'config_path': str(Path(config_path).absolute()),
         'model_type': model_type,
+        'datamesh-token': '',  # Required by SWAN pipeline
     }
 
-    # Add model-specific parameters
-    if model_type == 'swan':
-        if 'physics' in config:
-            params['physics_settings'] = json.dumps(config['physics'])
-        if 'grid' in config:
-            params['grid_settings'] = json.dumps(config['grid'])
+    # Extract datamesh token if present in the configuration
+    # Look in common locations where tokens might be stored
+    token = None
 
-    # Add run metadata if present
+    # Check in inpgrid sources
+    if 'config' in config and 'inpgrid' in config['config']:
+        inpgrid = config['config']['inpgrid']
+
+        # Check bottom source token
+        if 'bottom' in inpgrid and 'source' in inpgrid['bottom'] and 'token' in inpgrid['bottom']['source']:
+            token = inpgrid['bottom']['source']['token']
+
+        # Check input sources
+        if not token and 'input' in inpgrid and isinstance(inpgrid['input'], list):
+            for input_src in inpgrid['input']:
+                if 'source' in input_src and 'token' in input_src['source']:
+                    token = input_src['source']['token']
+                    if token:
+                        break
+
+    # If token found, add it
+    if token:
+        params['datamesh-token'] = token
+
+    # Add run metadata if present - these are typically small values safe for command line
     if 'metadata' in config:
         params.update({
             f'metadata_{k}': v
@@ -178,7 +195,7 @@ def format_status_output(status_data: Dict[str, Any]) -> str:
     return '\n'.join(lines)
 
 
-def parse_prax_response(response: str, expected_format: str = 'json') -> Any:
+def parse_prax_response(response: str, expected_format: str = 'text') -> Any:
     """Parse response from oceanum prax command.
 
     Args:
@@ -187,24 +204,41 @@ def parse_prax_response(response: str, expected_format: str = 'json') -> Any:
 
     Returns:
         Parsed response (dict for json, string for text)
+        For text format, attempts to extract structured information like run IDs
 
     Raises:
-        click.ClickException: If parsing fails
+        click.ClickException: If parsing fails when json is required
     """
     if not response:
         return {} if expected_format == 'json' else ''
 
-    if expected_format == 'json':
-        try:
-            return json.loads(response)
-        except json.JSONDecodeError as e:
-            # Try to extract JSON from mixed output
-            lines = response.strip().split('\n')
-            for line in reversed(lines):
-                try:
-                    return json.loads(line)
-                except:
-                    continue
-            raise click.ClickException(f"Failed to parse JSON response: {e}")
+    # For text format (default), extract structured info
+    if expected_format == 'text':
+        result = {}
+        for line in response.strip().split('\n'):
+            if "Run ID:" in line:
+                result['id'] = line.split("Run ID:")[1].strip()
+            elif "Status:" in line:
+                result['status'] = line.split("Status:")[1].strip()
 
-    return response
+        # If we found structured info, return it as a dict
+        if result:
+            return result
+
+        # Otherwise, just return the raw text
+        return response
+
+    # For JSON format (when explicitly requested)
+    try:
+        return json.loads(response)
+    except json.JSONDecodeError:
+        # Try to extract JSON from mixed output
+        lines = response.strip().split('\n')
+        for line in reversed(lines):
+            try:
+                return json.loads(line)
+            except:
+                continue
+
+        # If we couldn't parse JSON but it was required, raise exception
+        raise click.ClickException(f"Failed to parse JSON response")

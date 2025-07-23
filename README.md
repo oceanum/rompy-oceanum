@@ -41,7 +41,9 @@ oceanum auth login
 oceanum rompy init swan --template basic --domain "my_domain"
 
 # Execute model via Prax pipeline (use filename from init command)
-oceanum rompy run rompy_config_swan_basic.yml swan --pipeline-name my-pipeline
+# Requires DATAMESH_TOKEN environment variable to be set
+export DATAMESH_TOKEN="your_datamesh_token"
+oceanum rompy run rompy_config_swan_basic.yml --pipeline-name my-pipeline
 
 # Monitor execution
 oceanum rompy status <run-id> --watch
@@ -275,6 +277,44 @@ config = PraxConfig(
     project="your-project",
     stage="dev"
 )
+```
+
+### Pipeline Requirements
+
+When running SWAN or other models on the Oceanum Prax platform, the following requirements must be met:
+
+#### DataMesh Token
+
+Models that access the DataMesh API require a DataMesh token:
+
+```bash
+# Set the token as an environment variable (recommended)
+export DATAMESH_TOKEN="your_datamesh_token"
+
+# Or provide it directly when running the command
+oceanum rompy run config.yml --pipeline-name swan-from-rompy --token "your_datamesh_token"
+```
+
+Without a valid DataMesh token, models that require access to data sources will fail with an error like:
+```
+⚠ spec.arguments.datamesh-token.value or spec.arguments.datamesh-token.valueFrom is required
+```
+
+#### rompy-config Requirement
+
+The Prax pipeline also requires the rompy configuration to be passed as a parameter. This is handled automatically by the `oceanum rompy run` command, but if you're using the direct Prax command, you'll need to provide this:
+
+```bash
+# When using oceanum rompy run (handles this automatically)
+oceanum rompy run config.yml --pipeline-name swan-from-rompy
+
+# When using direct prax command
+oceanum prax submit pipeline swan-from-rompy -p rompy-config="@/path/to/config.yml" -p datamesh-token="$DATAMESH_TOKEN"
+```
+
+Without this parameter, you'll get an error like:
+```
+⚠ spec.arguments.rompy-config.value or spec.arguments.rompy-config.valueFrom is required
 ```
 
 ## Architecture
