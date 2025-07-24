@@ -140,9 +140,8 @@ class TestPraxConfig:
         )
         assert config.token == "valid_token"
 
-        # Invalid tokens
-        invalid_tokens = ["", "   ", None]
-
+        # Invalid tokens (empty string, whitespace)
+        invalid_tokens = ["", "   "]
         for token in invalid_tokens:
             with pytest.raises(ValidationError):
                 PraxConfig(
@@ -151,6 +150,15 @@ class TestPraxConfig:
                     org="test_org",
                     project="test_project"
                 )
+
+        # None token should be allowed
+        config_none = PraxConfig(
+            base_url="https://prax.oceanum.io",
+            token=None,
+            org="test_org",
+            project="test_project"
+        )
+        assert config_none.token is None
 
     def test_identifier_validation(self):
         """Test organization and project identifier validation."""

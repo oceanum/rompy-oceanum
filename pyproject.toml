@@ -42,6 +42,9 @@ Homepage = "https://github.com/rom-py/rompy"
 [project.entry-points."rompy.pipeline"]
 prax = "rompy_oceanum.pipeline:PraxPipelineBackend"
 
+[project.entry-points."rompy.auth"]
+prax = "rompy_oceanum.auth:PraxAuthBackend"
+
 [project.entry-points."rompy.postprocess"]
 datamesh = "rompy_oceanum.postprocess:DataMeshPostprocessor"
 

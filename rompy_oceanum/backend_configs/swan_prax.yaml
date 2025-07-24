@@ -1,37 +1,34 @@
 # Backend configuration for SWAN model execution within Prax pipeline containers
-# This configuration defines local backend execution for use when already running inside Docker
+# This configuration uses the new smart deployment system
 
-backend:
-  type: local
-  timeout: 3600
-  command: "mpirun -n 2 /usr/local/bin/swan.exe"
-  shell: true
-  capture_output: true
-  working_dir: "/app"
-  env_vars:
-    OMPI_ALLOW_RUN_AS_ROOT: "1"
-    OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: "1"
-    OMP_NUM_THREADS: "2"
-    ROMPY_MODEL: "swan"
+type: prax
+base_url: "https://prax.oceanum.io"
+org: "oceanum"
+project: "rompy-swan" 
+token: "your-prax-token-here"
+timeout: 3600
+stage: "dev"
+working_dir: "/app"
 
-postprocess:
-  processor: datamesh
-  config:
-    output_patterns:
-      - "*.nc"
-      - "*.dat"
-      - "*.csv"
-      - "*.log"
-      - "*.tab"
-    tags:
-      - "swan"
-      - "wave-model"
-      - "oceanum"
-      - "prax-pipeline"
-      - "rompy-generated"
-    metadata:
-      model_type: "swan"
-      backend_type: "local"
-      execution_environment: "prax"
-      generated_by: "rompy-oceanum"
-      framework: "rompy"
+# Pipeline deployment configuration
+pipeline_template: null  # Auto-detect based on model type
+auto_deploy: true
+redeploy_on_resource_change: true
+
+# Resource overrides (optional - will trigger redeployment if different from template)
+# resources:
+#   generate:
+#     cpu: "1"
+#     memory: "1G"
+#   run:
+#     cpu: "4" 
+#     memory: "2G"
+#   register:
+#     cpu: "1"
+#     memory: "1G"
+
+env_vars:
+  OMPI_ALLOW_RUN_AS_ROOT: "1"
+  OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: "1"
+  OMP_NUM_THREADS: "2"
+  ROMPY_MODEL: "swan"

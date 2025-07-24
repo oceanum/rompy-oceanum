@@ -9,17 +9,291 @@ import json
 import logging
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import yaml
 
 from .client import PraxClient, PraxResult
 from .config import DataMeshConfig, PraxConfig, PraxPipelineConfig
 
+if TYPE_CHECKING:
+    from .config import PraxPipelineResources
+
 logger = logging.getLogger(__name__)
 
 
 class PraxPipelineBackend:
+    def run(self, model, config, workspace_dir):
+        """
+        Run the Prax pipeline backend via the standard ROMPY interface.
+        """
+        # Get model configuration dictionary for template detection
+        model_config = {}
+
+        # Try different ways to get model configuration
+        if hasattr(model, "model_dump"):
+            model_config = model.model_dump()
+        elif hasattr(model, "dict"):
+            model_config = model.dict()
+        elif hasattr(model, "__dict__"):
+            model_config = model.__dict__.copy()
+
+        # Also check if model has a config attribute
+        if hasattr(model, "config") and model.config:
+            if hasattr(model.config, "model_dump"):
+                model_config["config"] = model.config.model_dump()
+            elif hasattr(model.config, "dict"):
+                model_config["config"] = model.config.dict()
+            elif hasattr(model.config, "__dict__"):
+                model_config["config"] = model.config.__dict__
+
+        # Add class information for type detection
+        model_config["_class_name"] = model.__class__.__name__
+        model_config["_class_module"] = model.__class__.__module__
+
+        logger.debug(f"Extracted model config: {list(model_config.keys())}")
+
+        # Use new smart deployment approach
+        return self.execute_with_smart_deployment(
+            model_run=model,
+            backend_config=config,
+            model_config=model_config,
+            workspace_dir=workspace_dir,
+        )
+
+    def execute_with_smart_deployment(
+        self,
+        model_run,
+        backend_config,
+        model_config: Dict[str, Any],
+        workspace_dir: Optional[str] = None,
+        wait_for_completion: bool = True,
+        download_outputs: bool = False,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """Execute model with smart pipeline deployment logic.
+
+        This method implements the new deployment strategy:
+        1. Detect model type
+        2. Resolve template path
+        3. Generate pipeline name based on hash
+        4. Check if pipeline exists, deploy/redeploy as needed
+        5. Execute pipeline
+
+        Args:
+            model_run: The ModelRun instance to execute
+            backend_config: PraxBackendConfig instance
+            model_config: Model configuration dictionary
+            workspace_dir: Workspace directory path
+            wait_for_completion: Whether to wait for completion
+            download_outputs: Whether to download outputs
+            **kwargs: Additional parameters
+
+        Returns:
+            Pipeline execution results
+        """
+        logger.info(
+            f"Starting smart Prax pipeline execution for run_id: {model_run.run_id}"
+        )
+
+        # Initialize results tracking
+        pipeline_results = {
+            "success": False,
+            "backend": "prax",
+            "run_id": model_run.run_id,
+            "stages_completed": [],
+            "deployment_info": {},
+        }
+
+        try:
+            # Stage 1: Model type detection and template resolution
+            logger.info("Detecting model type and resolving pipeline template")
+
+            model_type = backend_config.detect_model_type_from_config(model_config)
+            template_path = backend_config.resolve_pipeline_template(model_type)
+
+            logger.info(f"Detected model type: {model_type}")
+            logger.info(f"Using template: {template_path}")
+
+            pipeline_results["deployment_info"].update(
+                {
+                    "model_type": model_type,
+                    "template_path": str(template_path),
+                }
+            )
+
+            # Stage 2: Pipeline name generation and deployment check
+            logger.info("Generating pipeline name and checking deployment status")
+
+            # Try to get pipeline name from template first
+            template_pipeline_name = self._get_pipeline_name_from_template(template_path)
+            if template_pipeline_name:
+                logger.info(f"Using pipeline name from template: {template_pipeline_name}")
+                pipeline_name = template_pipeline_name
+            else:
+                # Fallback to generated name
+                pipeline_name = backend_config.generate_pipeline_name(
+                    model_type, template_path
+                )
+                logger.info(f"Generated pipeline name: {pipeline_name}")
+            
+            hash_info = backend_config.get_deployment_hash_info()
+
+            logger.info(f"Generated pipeline name: {pipeline_name}")
+            logger.debug(f"Deployment hash info: {hash_info}")
+
+            pipeline_results["deployment_info"].update(
+                {
+                    "pipeline_name": pipeline_name,
+                    "hash_info": hash_info,
+                }
+            )
+
+            # Create Prax client
+            prax_config = self._create_prax_config(backend_config)
+            client = PraxClient(prax_config)
+
+            # Stage 3: Smart deployment logic
+            deployment_needed = False
+
+            if backend_config.auto_deploy:
+                logger.info("Checking if pipeline deployment is needed")
+
+                # Check if pipeline already exists
+                if client.check_pipeline_exists(pipeline_name):
+                    logger.info(f"Pipeline {pipeline_name} already exists")
+                    pipeline_results["deployment_info"]["deployment_status"] = "exists"
+                else:
+                    logger.info(f"Pipeline {pipeline_name} does not exist, will deploy")
+                    deployment_needed = True
+                    pipeline_results["deployment_info"]["deployment_status"] = "needed"
+
+                # Deploy if needed
+                if deployment_needed:
+                    logger.info(f"Deploying pipeline from template: {template_path}")
+
+                    # Apply resource overrides to template if specified
+                    modified_template = self._apply_resource_overrides(
+                        template_path, backend_config.resources
+                    )
+
+                    if not client.deploy_pipeline(pipeline_name, modified_template):
+                        return {
+                            **pipeline_results,
+                            "stage": "deploy",
+                            "message": f"Failed to deploy pipeline {pipeline_name}",
+                        }
+
+                    logger.info(f"Successfully deployed pipeline: {pipeline_name}")
+                    pipeline_results["stages_completed"].append("deploy")
+                    pipeline_results["deployment_info"][
+                        "deployment_status"
+                    ] = "deployed"
+            else:
+                logger.info("Auto-deployment disabled, assuming pipeline exists")
+                pipeline_results["deployment_info"]["deployment_status"] = "skipped"
+
+            # Stage 4: Execute the existing pipeline logic
+            logger.info(f"Executing pipeline: {pipeline_name}")
+
+            execution_result = self.execute(
+                model_run=model_run,
+                pipeline_name=pipeline_name,
+                prax_config=prax_config,
+                deploy_pipeline=False,  # Already handled above
+                wait_for_completion=wait_for_completion,
+                download_outputs=download_outputs,
+                output_dir=workspace_dir,
+                **kwargs,
+            )
+
+            # Merge results
+            pipeline_results.update(execution_result)
+            pipeline_results["deployment_info"] = {
+                **pipeline_results.get("deployment_info", {}),
+                **execution_result.get("deployment_info", {}),
+            }
+
+            return pipeline_results
+
+        except Exception as e:
+            logger.exception(f"Error in smart pipeline deployment: {e}")
+            return {
+                **pipeline_results,
+                "stage": "smart_deployment",
+                "message": f"Smart deployment error: {str(e)}",
+                "error": str(e),
+            }
+
+    def _create_prax_config(self, backend_config) -> PraxConfig:
+        """Create PraxConfig from backend configuration.
+
+        Args:
+            backend_config: PraxBackendConfig instance
+
+        Returns:
+            PraxConfig instance
+        """
+        return PraxConfig(
+            base_url=backend_config.base_url,
+            token=backend_config.token,
+            org=backend_config.org,
+            project=backend_config.project,
+            stage=backend_config.stage,
+            timeout=backend_config.timeout,
+            environment=backend_config.env_vars,
+        )
+
+    def _apply_resource_overrides(
+        self, template_path: Path, resource_overrides: Optional["PraxPipelineResources"]
+    ) -> str:
+        """Apply resource overrides to pipeline template.
+
+        Args:
+            template_path: Path to the original template
+            resource_overrides: Resource override configuration
+
+        Returns:
+            Path to modified template (or original if no overrides)
+        """
+        if not resource_overrides:
+            return str(template_path)
+
+        logger.info("Applying resource overrides to template")
+
+        try:
+            # Load template
+            with open(template_path, "r") as f:
+                template_data = yaml.safe_load(f)
+
+            # Apply resource overrides
+            resource_dict = resource_overrides.get_resource_dict()
+
+            if "resources" in template_data and "tasks" in template_data["resources"]:
+                for task in template_data["resources"]["tasks"]:
+                    task_name = task.get("name")
+                    if task_name in resource_dict:
+                        task_resources = resource_dict[task_name]
+                        if "resources" not in task:
+                            task["resources"] = {}
+                        task["resources"].update(task_resources)
+                        logger.info(
+                            f"Applied resource overrides to task '{task_name}': {task_resources}"
+                        )
+
+            # Write modified template to temporary file
+            import tempfile
+
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".yaml", delete=False
+            ) as f:
+                yaml.dump(template_data, f, default_flow_style=False)
+                return f.name
+
+        except Exception as e:
+            logger.warning(f"Failed to apply resource overrides: {e}")
+            return str(template_path)
+
     """Prax pipeline backend that executes models on Oceanum's Prax platform.
 
     This backend submits rompy model configurations to Prax pipelines for remote
@@ -73,16 +347,41 @@ class PraxPipelineBackend:
         if not pipeline_name or not pipeline_name.strip():
             raise ValueError("pipeline_name cannot be empty")
 
+        # --- Authentication enforcement ---
+        # Check for Prax token (from env or plugin)
+        prax_token = None
+        import os
+
+        prax_token = os.getenv("PRAX_TOKEN")
+        if not prax_token:
+            # Try to load from PraxAuthBackend (if available)
+            try:
+                from rompy_oceanum.auth import PraxToken
+
+                # This assumes PraxToken has a static method to load the token
+                prax_token_obj = (
+                    PraxToken.load() if hasattr(PraxToken, "load") else None
+                )
+                if prax_token_obj and hasattr(prax_token_obj, "access_token"):
+                    prax_token = prax_token_obj.access_token
+            except Exception:
+                pass
+        if not prax_token:
+            raise ValueError(
+                "No Prax authentication token found. Please run 'rompy prax-auth login' to authenticate."
+            )
+        # --- End authentication enforcement ---
+
         # Initialize configuration
         if prax_config is None:
             try:
-                prax_config = PraxConfig.from_env()
+                prax_config = PraxConfig.from_env(token=prax_token)
             except Exception as e:
                 raise ValueError(
                     f"Failed to load Prax configuration from environment: {e}"
                 )
         elif isinstance(prax_config, dict):
-            prax_config = PraxConfig.from_dict(prax_config)
+            prax_config = PraxConfig.from_dict({**prax_config, "token": prax_token})
 
         # Initialize DataMesh configuration if provided
         if datamesh_config is not None and isinstance(datamesh_config, dict):
@@ -423,3 +722,29 @@ class PraxPipelineBackend:
                 return str(template_file)
 
         return None
+
+    def _get_pipeline_name_from_template(self, template_path: str) -> Optional[str]:
+        """Extract the actual pipeline name from the template file.
+        
+        Args:
+            template_path: Path to the pipeline template
+            
+        Returns:
+            Pipeline name from template, or None if not found
+        """
+        try:
+            import yaml
+            with open(template_path, 'r') as f:
+                template_data = yaml.safe_load(f)
+            
+            # Look for pipelines section and extract first pipeline name
+            if 'resources' in template_data and 'pipelines' in template_data['resources']:
+                pipelines = template_data['resources']['pipelines']
+                if pipelines and len(pipelines) > 0:
+                    return pipelines[0].get('name')
+            
+            return None
+            
+        except Exception as e:
+            logger.warning(f"Could not extract pipeline name from template {template_path}: {e}")
+            return None

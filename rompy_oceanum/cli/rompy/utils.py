@@ -8,7 +8,32 @@ import click
 import yaml
 
 
-def load_rompy_config(config_path: str) -> Dict[str, Any]:
+def load_rompy_config(config_path: str):
+    """Load and parse rompy configuration file, instantiating PraxBackendConfig if type: prax."""
+    from rompy_oceanum.config import PraxBackendConfig
+    path = Path(config_path)
+    if not path.exists():
+        raise click.ClickException(f"Configuration file not found: {config_path}")
+    try:
+        with open(path) as f:
+            if path.suffix in ['.yml', '.yaml']:
+                config = yaml.safe_load(f)
+            elif path.suffix == '.json':
+                config = json.load(f)
+            else:
+                raise click.ClickException(
+                    f"Unsupported config format: {path.suffix}. "
+                    "Use .yml, .yaml, or .json"
+                )
+    except Exception as e:
+        raise click.ClickException(f"Failed to load configuration: {e}")
+    # Detect Prax backend type and instantiate PraxBackendConfig
+    if config.get('type', '').lower() == 'prax':
+        return PraxBackendConfig(**{k: v for k, v in config.items() if k != 'type'})
+    return config
+
+def load_rompy_config_old(config_path: str) -> Dict[str, Any]:  # legacy fallback
+
     """Load and parse rompy configuration file.
 
     Args:

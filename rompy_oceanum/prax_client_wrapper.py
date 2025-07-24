@@ -56,14 +56,30 @@ class PraxClientWrapper:
 
     def submit_pipeline(self, pipeline_name: str, parameters: Dict[str, Any], wait_for_completion: bool = False, timeout: int = 3600) -> Dict[str, Any]:
         resp = self.client.submit_pipeline(pipeline_name, parameters, org=self.org, project=self.project, stage=self.stage)
-        # Convert response to dict
+        
+        # Check if response is an error
+        if hasattr(resp, 'detail'):
+            error_msg = getattr(resp, 'detail', 'Unknown error')
+            if 'CSRF check Failed' in error_msg:
+                raise Exception(f"Authentication failed: Invalid or missing Prax token. Please check your token in the backend configuration.")
+            else:
+                raise Exception(f"Pipeline submission failed: {error_msg}")
+        
+        # Handle successful response
         if hasattr(resp, 'model_dump'):
-            result = resp.model_dump(exclude_none=True)
+            pipeline_data = resp.model_dump(exclude_none=True)
+            # Extract run ID from last_run if available
+            if 'last_run' in pipeline_data and pipeline_data['last_run']:
+                run_id = pipeline_data['last_run'].get('id')
+                if run_id:
+                    return {"id": run_id, "run_id": run_id, "pipeline_id": pipeline_data.get('id')}
+            # Fallback to pipeline ID
+            return {"id": pipeline_data.get('id'), "pipeline_id": pipeline_data.get('id')}
         elif isinstance(resp, dict):
-            result = resp
+            return resp
         else:
-            result = {"id": getattr(resp, 'id', None), "name": getattr(resp, 'name', None)}
-        return result
+            # Fallback for unknown response types
+            return {"id": getattr(resp, 'id', None), "name": getattr(resp, 'name', None)}
 
     def get_run_status(self, run_id: str) -> Dict[str, Any]:
         resp = self.client.get_pipeline_run(run_id, org=self.org, project=self.project, stage=self.stage)
@@ -83,8 +99,100 @@ class PraxClientWrapper:
                     line = line.decode('utf-8')
                 lines.append(str(line))
         except Exception as e:
-            logger.error(f"Failed to get logs for run {run_id}: {e}")
+            logger.warning(f"Could not get run logs: {e}")
         return lines
+
+    def list_pipelines(self) -> List[Dict[str, Any]]:
+        """List available pipelines."""
+        try:
+            resp = self.client.list_pipelines(org=self.org, project=self.project, stage=self.stage)
+            if hasattr(resp, 'detail'):
+                # Error response
+                raise Exception(f"Failed to list pipelines: {resp.detail}")
+            elif isinstance(resp, list):
+                # List of pipeline schemas
+                return [p.model_dump(exclude_none=True) if hasattr(p, 'model_dump') else p for p in resp]
+            else:
+                return []
+        except Exception as e:
+            logger.warning(f"Could not list pipelines: {e}")
+            return []
+
+    def get_project_details(self) -> Dict[str, Any]:
+        """Get details of the current project."""
+        try:
+            resp = self.client.get_project(self.project, org=self.org, stage=self.stage)
+            if hasattr(resp, 'detail'):
+                # Error response
+                raise Exception(f"Failed to get project details: {resp.detail}")
+            
+            # Convert result to dict
+            if hasattr(resp, 'model_dump'):
+                return resp.model_dump(exclude_none=True)
+            else:
+                return {"id": getattr(resp, 'id', None), "name": getattr(resp, 'name', None)}
+                
+        except Exception as e:
+            logger.warning(f"Could not get project details: {e}")
+            return {}
+
+    def deploy_project_from_template(self, template_path: str) -> Dict[str, Any]:
+        """Deploy a project from a YAML template file."""
+        try:
+            # Load project spec from template
+            spec = self.client.load_spec(template_path)
+            
+            if hasattr(spec, 'detail'):
+                # Error response
+                raise Exception(f"Failed to load project spec: {spec.detail}")
+            
+            # Update project name to match our configuration
+            if hasattr(spec, 'name'):
+                logger.info(f"Updating template project name from '{spec.name}' to '{self.project}'")
+                spec.name = self.project
+            
+            # Deploy the project
+            result = self.client.deploy_project(spec)
+            
+            if hasattr(result, 'detail'):
+                # Error response
+                raise Exception(f"Failed to deploy project: {result.detail}")
+            
+            # Convert result to dict
+            if hasattr(result, 'model_dump'):
+                return result.model_dump(exclude_none=True)
+            else:
+                return {"id": getattr(result, 'id', None), "name": getattr(result, 'name', None)}
+                
+        except Exception as e:
+            logger.error(f"Project deployment failed: {e}")
+            raise
+
+    def _wait_for_completion(self, run_id: str, timeout: int = 3600) -> Dict[str, Any]:
+        """Wait for pipeline run completion with timeout."""
+        import time
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            try:
+                status = self.get_run_status(run_id)
+                current_status = status.get('status', 'unknown')
+                
+                logger.debug(f"Run {run_id} status: {current_status}")
+                
+                # Check if run is complete
+                if current_status in ['succeeded', 'failed', 'error']:
+                    return status
+                
+                # Wait before next check
+                time.sleep(5)
+                
+            except Exception as e:
+                logger.warning(f"Error checking run status: {e}")
+                time.sleep(5)
+        
+        # Timeout reached
+        raise Exception(f"Timeout waiting for run {run_id} to complete after {timeout} seconds")
 
     def download_artifacts(self, run_id: str, target_dir: Union[str, Path], file_patterns: Optional[List[str]] = None) -> List[Path]:
         # Not implemented in oceanum-prax; stub for now

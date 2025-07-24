@@ -1,34 +1,12 @@
 # Backend configuration for SWAN model execution using native local backend
 # This configuration is for native local execution on the host system (no containers)
 
-backend:
-  type: local
-  timeout: 3600
-  command: "mpirun -n 2 swan.exe"
-  shell: true
-  capture_output: true
-  env_vars:
-    OMP_NUM_THREADS: "2"
-    ROMPY_MODEL: "swan"
+type: local
+timeout: 3600
+command: "mpirun -n 2 swan.exe"
+shell: true
+capture_output: true
+env_vars:
+  OMP_NUM_THREADS: "2"
+  ROMPY_MODEL: "swan"
 
-postprocess:
-  processor: datamesh
-  config:
-    output_patterns:
-      - "*.nc"
-      - "*.dat"
-      - "*.csv"
-      - "*.log"
-    tags:
-      - "swan"
-      - "wave-model"
-      - "oceanum"
-      - "rompy-generated"
-      - "native-local"
-    metadata:
-      model_type: "swan"
-      backend_type: "local"
-      execution_environment: "native"
-      purpose: "local-development"
-      generated_by: "rompy-oceanum"
-      framework: "rompy"

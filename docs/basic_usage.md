@@ -9,7 +9,7 @@ This guide shows how to use the `rompy-oceanum` package through the Oceanum CLI 
 First, authenticate with Oceanum (this replaces manual token management):
 
 ```bash
-oceanum auth login
+rompy rompy oceanum-auth login
 ```
 
 Set your project environment variables:

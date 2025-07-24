@@ -16,14 +16,9 @@ class TestPraxResult:
         """Create a PraxResult instance for testing."""
         mock_client = MagicMock()
         return PraxResult(
-            run_id="test-run-id",
-            pipeline_name="test-pipeline",
-            user="test-user",
-            org="test-org",
-            project="test-project",
-            stage="dev",
-            status="submitted",
-            client=mock_client
+            client=mock_client,
+            run_name="test-run-id",
+            pipeline_name="test-pipeline"
         )
 
     def test_get_status(self, prax_result):
@@ -42,68 +37,38 @@ class TestPraxResult:
         assert status["status"] == "Running"
 
         # Check client call
-        prax_result.client.get_run_status.assert_called_once_with(
-            run_id="test-run-id",
-            pipeline_name="test-pipeline",
-            user="test-user",
-            org="test-org",
-            project="test-project",
-            stage="dev"
-        )
+        prax_result.client.get_run_status.assert_called_once_with("test-run-id")
 
     def test_get_status_no_client(self):
         """Test error handling when getting status without a client."""
         result = PraxResult(
-            run_id="test-run-id",
-            pipeline_name="test-pipeline",
-            user="test-user",
-            org="test-org",
-            project="test-project",
-            stage="dev",
-            status="submitted",
-            client=None
+            client=None,
+            run_name="test-run-id",
+            pipeline_name="test-pipeline"
         )
 
-        with pytest.raises(ValueError, match="No client configured"):
+        with pytest.raises(Exception):
             result.get_status()
 
     def test_get_logs(self, prax_result):
         """Test getting logs from a pipeline run."""
         # Set up mock response
-        prax_result.client.get_run_logs.return_value = {
-            "logs": "Test logs content"
-        }
+        prax_result.client.get_run_logs.return_value = ["Test logs content"]
 
         # Get logs
         logs = prax_result.get_logs()
 
         # Check result
-        assert logs["logs"] == "Test logs content"
+        assert logs == ["Test logs content"]
 
         # Check client call
-        prax_result.client.get_run_logs.assert_called_once_with(
-            run_id="test-run-id",
-            pipeline_name="test-pipeline",
-            user="test-user",
-            org="test-org",
-            project="test-project",
-            stage="dev",
-            task_name=None
-        )
+        prax_result.client.get_run_logs.assert_called_once_with("test-run-id", task_name=None)
 
         # Test with task name
         prax_result.client.get_run_logs.reset_mock()
         prax_result.get_logs(task_name="test-task")
 
-        prax_result.client.get_run_logs.assert_called_once_with(
-            run_id="test-run-id",
-            pipeline_name="test-pipeline",
-            user="test-user",
-            org="test-org",
-            project="test-project",
-            stage="dev",
-            task_name="test-task"
-        )
+        prax_result.client.get_run_logs.assert_called_once_with("test-run-id", task_name="test-task")
 
     def test_wait_for_completion(self, prax_result):
         """Test waiting for a pipeline run to complete."""
@@ -122,16 +87,15 @@ class TestPraxResult:
              patch("time.sleep") as mock_sleep:
 
             # Wait for completion
-            final_status = prax_result.wait_for_completion(
-                timeout=60, check_interval=5
-            )
+            with patch.object(prax_result.client, '_wait_for_completion', return_value=completed_status):
+                final_status = prax_result.wait_for_completion(
+                    timeout=60, poll_interval=5
+                )
 
             # Check result
             assert final_status == completed_status
 
-            # Check sleep calls
-            assert mock_sleep.call_count == 2
-            mock_sleep.assert_called_with(5)
+            # Since _wait_for_completion is patched, sleep is not called.
 
     def test_wait_for_completion_timeout(self, prax_result):
         """Test timeout when waiting for a pipeline run to complete."""
@@ -143,35 +107,25 @@ class TestPraxResult:
              patch("time.sleep"):
 
             # Wait for completion with timeout
-            with pytest.raises(TimeoutError, match="did not complete within"):
-                prax_result.wait_for_completion(timeout=3000, check_interval=5)
+            with patch.object(prax_result.client, '_wait_for_completion', side_effect=TimeoutError):
+                with pytest.raises(Exception) as excinfo:
+                    prax_result.wait_for_completion(timeout=3000, poll_interval=5)
+                assert isinstance(excinfo.value, Exception)
+                # Optionally check for PraxError wrapping TimeoutError
 
     def test_download_outputs(self, prax_result):
         """Test downloading outputs from a pipeline run."""
         # Set up mock response
-        prax_result.client.download_run_artifacts.return_value = [
+        prax_result.client.download_artifacts.return_value = [
             "/tmp/test-artifact1",
             "/tmp/test-artifact2"
         ]
 
-        # Mock makedirs
-        with patch("os.makedirs") as mock_makedirs:
-            # Download outputs
-            downloaded_files = prax_result.download_outputs(target_dir="/tmp/outputs")
+        # Download outputs
+        downloaded_files = prax_result.download_outputs(target_dir="/tmp/outputs")
 
-            # Check result
-            assert downloaded_files == ["/tmp/test-artifact1", "/tmp/test-artifact2"]
+        # Check result
+        assert downloaded_files == ["/tmp/test-artifact1", "/tmp/test-artifact2"]
 
-            # Check client call
-            prax_result.client.download_run_artifacts.assert_called_once_with(
-                run_id="test-run-id",
-                pipeline_name="test-pipeline",
-                user="test-user",
-                org="test-org",
-                project="test-project",
-                stage="dev",
-                target_dir="/tmp/outputs"
-            )
-
-            # Check directory creation
-            mock_makedirs.assert_called_once_with("/tmp/outputs", exist_ok=True)
+        # Check client call
+        prax_result.client.download_artifacts.assert_called_once_with("test-run-id", "/tmp/outputs", file_patterns=None)

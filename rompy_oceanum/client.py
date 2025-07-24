@@ -459,8 +459,6 @@ class PraxClient:
         """
         Deploy a pipeline from template.
 
-        Note: This functionality may be limited in the native client.
-
         Args:
             pipeline_name: Name of the pipeline
             template_path: Path to pipeline template
@@ -469,9 +467,23 @@ class PraxClient:
             True if deployment succeeded, False otherwise
         """
         try:
-            logger.warning(f"Pipeline deployment not fully implemented in native client for {pipeline_name}")
-            logger.info(f"Template path: {template_path}")
+            logger.info(f"Deploying project from template: {template_path}")
+            
+            # Deploy the project which contains the pipeline
+            result = self.wrapper.deploy_project_from_template(template_path)
+            
+            logger.info(f"✅ Project deployed successfully")
+            logger.info(f"Project ID: {result.get('id', 'Unknown')}")
+            logger.info(f"Project Name: {result.get('name', 'Unknown')}")
+            
+            # Wait for deployment to complete
+            if result.get('id'):
+                logger.info("Waiting for project deployment to complete...")
+                # Note: We could add deployment status checking here if needed
+                # For now, assume deployment is synchronous or will be ready shortly
+            
             return True
+            
         except Exception as e:
             logger.error(f"Failed to deploy pipeline {pipeline_name}: {e}")
             return False

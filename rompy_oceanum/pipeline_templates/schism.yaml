@@ -1,0 +1,106 @@
+# SCHISM Pipeline Template (Placeholder)
+# This is a placeholder template for future SCHISM model support
+
+name: rompy-oceanum-schism
+resources:
+  tasks:
+    - name: generate
+      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
+      command: rompy generate --config-from-env -v
+      outputs:
+        artifacts:
+          - name: workspace
+            path: /tmp/rompy
+      resources:
+        cpu: 1
+        memory: 2G
+      env:
+        - name: ROMPY_MODEL
+          value: "schism"
+        - name: ROMPY_LOG_LEVEL
+          value: "INFO"
+
+    - name: run
+      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/schism:latest"
+      inputs:
+        artifacts:
+          - name: workspace
+            path: /tmp/rompy
+      command: bash -c "cd /tmp/rompy && echo 'SCHISM execution placeholder'"
+      resources:
+        cpu: 8
+        memory: 8G
+      outputs:
+        artifacts:
+          - name: outputs
+            path: /tmp/rompy/outputs/
+      env:
+        - name: ROMPY_MODEL
+          value: "schism"
+        - name: ROMPY_BACKEND_TYPE
+          value: "local"
+
+    - name: register
+      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
+      command: rompy postprocess --config-from-env --processor datamesh -v
+      inputs:
+        artifacts:
+          - name: outputs
+            path: /tmp/rompy/outputs/
+      resources:
+        cpu: 1
+        memory: 1G
+      env:
+        - name: ROMPY_MODEL
+          value: "schism"
+        - name: DATAMESH_PROCESSOR
+          value: "datamesh"
+        - name: DATAMESH_OUTPUT_PATTERNS
+          value: "*.nc,*.dat,*.csv"
+        - name: DATAMESH_TAGS
+          value: "schism,hydrodynamic-model,oceanum"
+
+  pipelines:
+    - name: schism-from-rompy
+      arguments:
+        parameters:
+          - name: datamesh-token
+            env: DATAMESH_TOKEN
+          - name: rompy-config
+            env: ROMPY_CONFIG
+      defaults:
+        env:
+          - name: ROMPY_MODEL
+            value: "schism"
+        retryStrategy:
+          limit: 1
+      dag:
+        - name: generate
+          taskRef: generate
+          dependencies: []
+        - name: run
+          taskRef: run
+          arguments:
+            artifacts:
+              - name: workspace
+                stepRef:
+                  name: generate
+                  artifactRef: workspace
+          dependencies:
+            - name: generate
+        - name: register
+          taskRef: register
+          arguments:
+            artifacts:
+              - name: outputs
+                stepRef:
+                  name: run
+                  artifactRef: outputs
+          dependencies:
+            - name: run
+
+  stages:
+    - name: dev
+      resources:
+        pipelines:
+          - schism-from-rompy
