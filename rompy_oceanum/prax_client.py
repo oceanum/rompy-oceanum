@@ -36,7 +36,8 @@ class PraxClientWrapper:
                 def __init__(self, prax_config):
                     class MockObj:
                         def __init__(self, prax_config):
-                            self.domain = f"{prax_config.org}.oceanum.io"
+                            # Use the same domain format as the oceanum CLI
+                            self.domain = "oceanum.io"
                             class MockToken:
                                 def __init__(self, token):
                                     self.access_token = token
@@ -46,41 +47,6 @@ class PraxClientWrapper:
             mock_ctx = MockContext(self.prax_config)
             self._client = PRAXClient(mock_ctx)
         return self._client
-    
-    def list_pipelines(self, ctx=None) -> List[Dict[str, Any]]:
-        """List available pipelines.
-        
-        Args:
-            ctx: Click context (optional)
-            
-        Returns:
-            List of pipeline information dictionaries
-        """
-        client = self._get_client(ctx)
-        pipelines = client.list_pipelines(
-            org=self.prax_config.org,
-            project=self.prax_config.project,
-            stage=self.prax_config.stage
-        )
-        
-        if isinstance(pipelines, models.ErrorResponse):
-            logger.error(f"Failed to list pipelines: {pipelines.detail}")
-            return []
-        
-        # Convert to the format expected by rompy
-        result = []
-        for pipeline in pipelines:
-            # Handle both object attributes and dictionary keys
-            name = getattr(pipeline, 'name', None) or pipeline.get('name', 'unknown')
-            description = getattr(pipeline, 'description', None) or pipeline.get('description', 'No description')
-            status = getattr(pipeline, 'status', None) or pipeline.get('status', 'unknown')
-            
-            result.append({
-                "name": name,
-                "description": description,
-                "status": status
-            })
-        return result
     
     def submit_pipeline(self, pipeline_name: str, parameters: Dict[str, Any], ctx=None) -> str:
         """Submit a pipeline for execution.
@@ -204,21 +170,6 @@ class PraxClientWrapper:
             logs.append(str(line))
         
         return logs
-
-    def list_run_artifacts(self, run_name: str, ctx=None) -> List[Dict[str, Any]]:
-        """List available artifacts for a pipeline run.
-        
-        Args:
-            run_name: Pipeline run identifier
-            ctx: Click context (optional)
-            
-        Returns:
-            List of artifact information dictionaries
-        """
-        # This is a placeholder implementation
-        # In a real implementation, this would interact with the Prax API
-        logger.info("list_run_artifacts not yet implemented in client wrapper")
-        return []
 
 
 def parse_parameters(parameters: list[str]|None) -> dict|None:

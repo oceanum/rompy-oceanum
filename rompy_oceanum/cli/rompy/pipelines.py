@@ -1,4 +1,4 @@
-'''Pipeline management command for rompy-oceanum CLI.'''
+'''Pipeline template management command for rompy-oceanum CLI.'''
 
 import logging
 from pathlib import Path
@@ -8,30 +8,10 @@ import click
 import yaml
 from oceanum.cli.models import ContextObject
 
-from ...config import PraxConfig
-from ...prax_client import PraxClientWrapper
-
 logger = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option(
-    "--project",
-    envvar="PRAX_PROJECT",
-    help="Prax project (overrides oceanum context)"
-)
-@click.option(
-    "--stage",
-    default="dev",
-    envvar="PRAX_STAGE",
-    help="Deployment stage"
-)
-@click.option(
-    "--list",
-    "list_pipelines",
-    is_flag=True,
-    help="List all available pipelines"
-)
 @click.option(
     "--model-type",
     type=click.Choice(["swan", "schism", "ww3"]),
@@ -46,25 +26,32 @@ logger = logging.getLogger(__name__)
     "--create-template",
     help="Create a new pipeline template file"
 )
+@click.option(
+    "--project-name",
+    default="rompy-pipelines",
+    help="Prax project name for rompy pipelines (default: rompy-pipelines)"
+)
 @click.pass_obj
 def pipelines(
     obj: ContextObject,
-    project,
-    stage,
-    list_pipelines,
     model_type,
     show_templates,
-    create_template
+    create_template,
+    project_name
 ):
-    """Manage Prax pipelines for rompy execution.
+    """Manage pipeline templates for rompy execution.
+
+    This command focuses on template management. For actual pipeline operations,
+    use the 'oceanum prax' commands with project name: {project_name}
 
     Examples:
-        oceanum rompy pipelines --list
         oceanum rompy pipelines --show-templates
         oceanum rompy pipelines --create-template my-template.yaml --model-type swan
         
-    For pipeline deployment, use the 'oceanum prax' commands:
-        oceanum prax create pipeline --help
+    For pipeline deployment and management, use the 'oceanum prax' commands:
+        oceanum prax --project {project_name} list pipelines
+        oceanum prax --project {project_name} create pipeline --help
+        oceanum prax --project {project_name} submit pipeline <pipeline-name>
     """
 
     if show_templates:
@@ -75,71 +62,52 @@ def pipelines(
         _create_pipeline_template(create_template, model_type)
         return
 
-    # Create Prax configuration
-    try:
-        prax_config_data = {
-            "org": obj.domain.split('.')[0] if '.' in obj.domain else obj.domain,
-            "stage": stage
-        }
-
-        if project:
-            prax_config_data["project"] = project
-
-        if obj.token and obj.token.access_token:
-            prax_config_data["token"] = obj.token.access_token
-
-        prax_config = PraxConfig.from_env(**prax_config_data)
-
-    except ValueError as e:
-        click.echo(f"❌ Configuration error: {e}", err=True)
-        return
-
-    if list_pipelines:
-        _list_pipelines(prax_config)
-        return
-
     # Default action - show help
     click.echo("💡 Use --help to see available options")
     click.echo("Quick commands:")
-    click.echo("  oceanum rompy pipelines --list")
     click.echo("  oceanum rompy pipelines --show-templates")
-    click.echo("\nFor pipeline deployment, use the 'oceanum prax' commands:")
-    click.echo("  oceanum prax create pipeline --help")
+    click.echo("  oceanum rompy pipelines --create-template my-template.yaml --model-type swan")
+    click.echo(f"\nFor pipeline deployment and management, use the 'oceanum prax' commands:")
+    click.echo(f"  oceanum prax --project {project_name} list pipelines")
+    click.echo(f"  oceanum prax --project {project_name} create pipeline --help")
 
 
-def _list_pipelines(prax_config: PraxConfig):
-    """List available pipelines."""
-    click.echo("🔍 Listing available pipelines...")
+def _show_available_templates():
+    """Show available pipeline templates."""
+    click.echo("📚 Available Pipeline Templates:")
+    click.echo()
 
-    try:
-        client = PraxClientWrapper(prax_config)
-        pipelines = client.list_pipelines()
+    # Check for built-in templates
+    template_dir = Path(__file__).parent.parent.parent / "pipeline_templates"
 
-        if pipelines:
-            click.echo(f"✅ Found {len(pipelines)} pipelines in {prax_config.org}/{prax_config.project}:")
+    if template_dir.exists():
+        templates = list(template_dir.glob("*.yaml")) + list(template_dir.glob("*.yml"))
+
+        if templates:
+            click.echo("🔧 Built-in templates:")
+            for template in templates:
+                try:
+                    with open(template, 'r') as f:
+                        template_data = yaml.safe_load(f)
+
+                    name = template.stem
+                    desc = template_data.get('metadata', {}).get('description', 'No description')
+                    model_type = template_data.get('metadata', {}).get('labels', {}).get('model-type', 'generic')
+
+                    click.echo(f"   📋 {name}.yaml - {model_type}")
+                    click.echo(f"      {desc}")
+
+                except Exception:
+                    click.echo(f"   📋 {template.name}")
+
             click.echo()
-
-            for pipeline in pipelines:
-                name = pipeline.get('name', 'unknown')
-                desc = pipeline.get('description', 'No description')
-                status = pipeline.get('status', 'unknown')
-
-                click.echo(f"📋 {name}")
-                click.echo(f"   Description: {desc}")
-                click.echo(f"   Status: {status}")
-                click.echo()
-
-            click.echo("💡 Usage:")
-            click.echo("   oceanum rompy run config.yml swan --pipeline-name <pipeline_name>")
-
         else:
-            click.echo("📭 No pipelines found in this project")
-            click.echo("💡 Deploy a pipeline using oceanum prax commands:")
-            click.echo("   oceanum prax create pipeline --help")
+            click.echo("⚠️  No built-in templates found")
 
-    except Exception as e:
-        click.echo(f"❌ Failed to list pipelines: {e}", err=True)
-        click.echo("💡 Make sure you're authenticated: oceanum auth login")
+    # Show example usage
+    click.echo("💡 Usage:")
+    click.echo("   oceanum rompy run config.yml swan --pipeline-name my-pipeline")
+    click.echo("   oceanum rompy pipelines --create-template my-template.yaml --model-type swan")
 
 
 def _show_available_templates():
