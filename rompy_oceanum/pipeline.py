@@ -379,8 +379,8 @@ class PraxPipelineBackend:
         }
 
         try:
-            # Create Prax client
-            client = PraxClient(prax_config)
+            # Create Prax client wrapper
+            client = PraxClientWrapper(prax_config)
 
             # Stage 1: Deploy pipeline if needed
             if deploy_pipeline and template_path:
