@@ -7,7 +7,7 @@ import click
 from oceanum.cli.models import ContextObject
 
 from ...config import PraxConfig
-from ...client import PraxClient
+from ...prax_client import PraxClientWrapper
 
 
 logger = logging.getLogger(__name__)
@@ -77,6 +77,9 @@ def logs(
         oceanum rompy logs abc123 --tail 50 --follow
         oceanum rompy logs abc123 --stage generate --level ERROR
         oceanum rompy logs abc123 --since 2023-01-01T12:00:00
+        
+    For more advanced log viewing, use the 'oceanum prax logs' commands:
+        oceanum prax logs pipeline-runs <run_id>
     """
     # Create Prax configuration using oceanum context
     prax_config_data = {
@@ -97,7 +100,7 @@ def logs(
         click.echo(f"❌ Configuration error: {e}", err=True)
         return
 
-    client = PraxClient(prax_config)
+    client = PraxClientWrapper(prax_config)
 
     def _format_log_line(log_entry):
         """Format a single log line for display."""

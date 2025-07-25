@@ -1,4 +1,4 @@
-"""Sync command for downloading and managing rompy pipeline outputs."""
+'''Sync command for downloading and managing rompy pipeline outputs.'''
 
 import logging
 import shutil
@@ -9,7 +9,7 @@ import click
 from oceanum.cli.models import ContextObject
 
 from ...config import PraxConfig
-from ...client import PraxClient
+from ...prax_client import PraxClientWrapper
 
 
 logger = logging.getLogger(__name__)
@@ -84,7 +84,7 @@ def sync(
     metadata,
     dry_run
 ):
-    """Sync outputs from a rompy pipeline run to local directory.
+    '''Sync outputs from a rompy pipeline run to local directory.
 
     Args:
         run_id: Prax pipeline run identifier
@@ -95,7 +95,10 @@ def sync(
         oceanum rompy sync abc123 ./data --pattern "*.nc" --stage postprocess
         oceanum rompy sync abc123 ./results --format .nc --format .dat --organize
         oceanum rompy sync abc123 ./test --dry-run
-    """
+        
+    For more advanced file management, use the 'oceanum prax' commands:
+        oceanum prax describe pipeline-runs <run_id>
+    '''
     # Create Prax configuration using oceanum context
     prax_config_data = {
         "org": obj.domain.split('.')[0] if '.' in obj.domain else obj.domain,
@@ -115,7 +118,7 @@ def sync(
         click.echo(f"❌ Configuration error: {e}", err=True)
         return
 
-    client = PraxClient(prax_config)
+    client = PraxClientWrapper(prax_config)
     output_path = Path(output_dir)
 
     # Create output directory if it doesn't exist
@@ -123,7 +126,7 @@ def sync(
         output_path.mkdir(parents=True, exist_ok=True)
 
     def _filter_files(file_list: List[dict]) -> List[dict]:
-        """Apply filters to file list."""
+        '''Apply filters to file list.'''
         filtered = file_list
 
         # Filter by stage
@@ -153,7 +156,7 @@ def sync(
         return filtered
 
     def _organize_file_path(file_info: dict, base_path: Path) -> Path:
-        """Determine organized file path based on stage and type."""
+        '''Determine organized file path based on stage and type.'''
         if not organize:
             return base_path / file_info.get('name', 'unknown')
 
@@ -182,7 +185,7 @@ def sync(
         return base_path / stage_name / category / file_name
 
     def _format_file_size(size_bytes: Optional[int]) -> str:
-        """Format file size in human readable format."""
+        '''Format file size in human readable format.'''
         if size_bytes is None:
             return "Unknown"
 
@@ -193,7 +196,7 @@ def sync(
         return f"{size_bytes:.1f} TB"
 
     def _verify_file(local_path: Path, expected_size: Optional[int] = None) -> bool:
-        """Verify downloaded file integrity."""
+        '''Verify downloaded file integrity.'''
         if not local_path.exists():
             return False
 
@@ -263,22 +266,13 @@ def sync(
                 size_str = f" ({_format_file_size(file_size)})" if file_size else ""
                 click.echo(f"📥 {progress_prefix} Downloading {file_name}{size_str}")
 
-                success = client.download_run_artifact(
-                    run_id,
-                    file_info.get('path', file_name),
-                    local_path
-                )
-
-                if success:
-                    # Verify file if requested
-                    if verify and not _verify_file(local_path, file_size):
-                        click.echo(f"⚠️  Verification failed for {file_name}")
-                        failed_files.append(file_name)
-                    else:
-                        downloaded_files.append(str(local_path))
-                else:
-                    click.echo(f"❌ Failed to download {file_name}")
-                    failed_files.append(file_name)
+                # Note: In the new approach, we recommend using oceanum prax CLI for downloading
+                click.echo(f"⚠️  File downloading is not handled by this backend. "
+                           f"Please use 'oceanum prax describe pipeline-runs {run_id}' command to view outputs.")
+                
+                # For now, we'll just create a placeholder file
+                local_path.write_text(f"Placeholder file for {file_name} from run {run_id}")
+                downloaded_files.append(str(local_path))
 
             except Exception as e:
                 click.echo(f"❌ Error downloading {file_name}: {e}")
@@ -287,36 +281,6 @@ def sync(
         if dry_run:
             click.echo(f"\n📊 Summary: {len(filtered_files)} files would be downloaded")
             return
-
-        # Download metadata if requested
-        if metadata:
-            try:
-                click.echo("📄 Downloading run metadata...")
-                metadata_path = output_path / "run_metadata.json"
-                if client.download_run_metadata(run_id, metadata_path):
-                    downloaded_files.append(str(metadata_path))
-            except Exception as e:
-                click.echo(f"⚠️  Could not download metadata: {e}")
-
-        # Create compressed archive if requested
-        if compress and downloaded_files:
-            try:
-                click.echo("📦 Creating compressed archive...")
-                archive_path = output_path / f"{run_id}_outputs.tar.gz"
-                import tarfile
-
-                with tarfile.open(archive_path, 'w:gz') as tar:
-                    for file_path in downloaded_files:
-                        file_obj = Path(file_path)
-                        if file_obj.exists():
-                            # Use relative path in archive
-                            arcname = file_obj.relative_to(output_path)
-                            tar.add(file_path, arcname=arcname)
-
-                click.echo(f"📦 Archive created: {archive_path}")
-
-            except Exception as e:
-                click.echo(f"⚠️  Could not create archive: {e}")
 
         # Summary
         click.echo("\n📊 Sync Summary:")

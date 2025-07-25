@@ -11,24 +11,20 @@ from oceanum.cli import main as oceanum_main
 def rompy(obj: ContextObject):
     """ROMPY integration for Oceanum Prax execution.
 
-    Execute, monitor, and manage rompy ocean model configurations
-    using the Oceanum Prax platform with seamless authentication.
+    Prepare and submit rompy ocean model configurations
+    for execution on the Oceanum Prax platform.
+    
+    For deployment and monitoring of runs, use the 'oceanum prax' commands.
     """
     pass
 
-# Import and register subcommands directly
+# Import and register subcommands
 from .rompy.run import run
-from .rompy.status import status
-from .rompy.logs import logs
-from .rompy.sync import sync
 from .rompy.init import init
 from .rompy.pipelines import pipelines
 
 # Add commands to the rompy group
 rompy.add_command(run)
-rompy.add_command(status)
-rompy.add_command(logs)
-rompy.add_command(sync)
 rompy.add_command(init)
 rompy.add_command(pipelines)
 

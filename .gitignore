@@ -147,3 +147,9 @@ dmypy.json
 TASK.md
 .tasks/
 task-*.md
+
+
+legacy_backup/
+relevant_packages/
+work_sumarries/
+

@@ -6,7 +6,7 @@ components, following rompy's backend configuration patterns.
 """
 import os
 from typing import Dict, Any, Optional, List
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from pathlib import Path
 import logging
 
@@ -19,7 +19,8 @@ class PraxTaskResources(BaseModel):
     cpu: Optional[str] = Field(None, description="CPU resource request (e.g., '1000m', '2')")
     memory: Optional[str] = Field(None, description="Memory resource request (e.g., '2Gi', '4096Mi')")
 
-    @validator('cpu')
+    @field_validator('cpu')
+    @classmethod
     def validate_cpu(cls, v):
         """Validate CPU resource format."""
         if v is None:
@@ -29,7 +30,8 @@ class PraxTaskResources(BaseModel):
             raise ValueError("CPU must be numeric with optional 'm' suffix (e.g., '1000m', '2')")
         return v
 
-    @validator('memory')
+    @field_validator('memory')
+    @classmethod
     def validate_memory(cls, v):
         """Validate memory resource format."""
         if v is None:
@@ -116,21 +118,24 @@ class PraxConfig(BaseModel):
         """
         return cls(**config_dict)
 
-    @validator('base_url')
+    @field_validator('base_url')
+    @classmethod
     def validate_base_url(cls, v):
         """Validate base URL format."""
         if not v.startswith(('http://', 'https://')):
             raise ValueError("Base URL must start with http:// or https://")
         return v.rstrip('/')
 
-    @validator('token')
+    @field_validator('token')
+    @classmethod
     def validate_token(cls, v):
         """Validate authentication token."""
         if not v or not v.strip():
             raise ValueError("Authentication token cannot be empty")
         return v.strip()
 
-    @validator('org', 'project')
+    @field_validator('org', 'project')
+    @classmethod
     def validate_identifiers(cls, v):
         """Validate organization and project identifiers."""
         if not v or not v.strip():
@@ -140,7 +145,8 @@ class PraxConfig(BaseModel):
             raise ValueError("Identifiers must be alphanumeric with optional hyphens and underscores")
         return v.strip()
 
-    @validator('stage')
+    @field_validator('stage')
+    @classmethod
     def validate_stage(cls, v):
         """Validate deployment stage."""
         valid_stages = ['dev', 'staging', 'prod']
@@ -182,14 +188,16 @@ class DataMeshConfig(BaseModel):
 
         return cls(**config)
 
-    @validator('base_url')
+    @field_validator('base_url')
+    @classmethod
     def validate_base_url(cls, v):
         """Validate base URL format."""
         if not v.startswith(('http://', 'https://')):
             raise ValueError("Base URL must start with http:// or https://")
         return v.rstrip('/')
 
-    @validator('token')
+    @field_validator('token')
+    @classmethod
     def validate_token(cls, v):
         """Validate authentication token."""
         if not v or not v.strip():
@@ -216,7 +224,8 @@ class RunConfig(BaseModel):
         """Check if image should be built."""
         return self.build_image
 
-    @validator('working_dir')
+    @field_validator('working_dir')
+    @classmethod
     def validate_working_dir(cls, v):
         """Validate working directory path."""
         if v is None:
@@ -262,7 +271,8 @@ class PraxPipelineConfig(BaseModel):
 
         return cls(**config)
 
-    @validator('pipeline_name')
+    @field_validator('pipeline_name')
+    @classmethod
     def validate_pipeline_name(cls, v):
         """Validate pipeline name."""
         if not v or not v.strip():

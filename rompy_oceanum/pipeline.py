@@ -1,5 +1,4 @@
-"""
-Prax pipeline backend for rompy-oceanum.
+"""Prax pipeline backend for rompy-oceanum.
 
 This module provides the PraxPipelineBackend that implements the rompy pipeline
 interface for executing models on Oceanum's Prax platform.
@@ -7,13 +6,287 @@ interface for executing models on Oceanum's Prax platform.
 
 import json
 import logging
-import tempfile
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 import yaml
 
-from .client import PraxClient, PraxResult
+from .prax_client import PraxClientWrapper
+from .config import DataMeshConfig, PraxConfig, PraxPipelineConfig
+
+logger = logging.getLogger(__name__)
+
+
+class PraxPipelineBackend:
+    """Prax pipeline backend that executes models on Oceanum's Prax platform.
+
+    This backend submits rompy model configurations to Prax pipelines for remote
+    execution, providing monitoring and result retrieval capabilities.
+    """
+
+    def execute(
+        self,
+        model_run,
+        pipeline_name: str,
+        prax_config: Optional[Union[Dict[str, Any], PraxConfig]] = None,
+        datamesh_config: Optional[Union[Dict[str, Any], DataMeshConfig]] = None,
+        template_path: Optional[str] = None,
+        deploy_pipeline: bool = True,
+        wait_for_completion: bool = False,
+        timeout: int = 3600,
+        download_outputs: bool = False,
+        output_dir: Optional[str] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """Execute the model pipeline on Prax.
+
+        Args:
+            model_run: The ModelRun instance to execute
+            pipeline_name: Name of the Prax pipeline to execute
+            prax_config: Prax configuration (dict or PraxConfig instance)
+            datamesh_config: DataMesh configuration (dict or DataMeshConfig instance)
+            template_path: Path to pipeline template file
+            deploy_pipeline: Whether to deploy pipeline if it doesn't exist
+            wait_for_completion: Whether to wait for pipeline completion
+            timeout: Maximum time to wait for completion (seconds)
+            download_outputs: Whether to download outputs after completion
+            output_dir: Directory to download outputs to
+            parameters: Additional pipeline parameters
+            **kwargs: Additional parameters (unused)
+
+        Returns:
+            Pipeline execution results
+
+        Raises:
+            ValueError: If required parameters are missing or invalid
+        """
+        # Validate input parameters
+        if not model_run:
+            raise ValueError("model_run cannot be None")
+
+        if not hasattr(model_run, "run_id"):
+            raise ValueError("model_run must have a run_id attribute")
+
+        if not pipeline_name or not pipeline_name.strip():
+            raise ValueError("pipeline_name cannot be empty")
+
+        # Initialize configuration
+        if prax_config is None:
+            try:
+                prax_config = PraxConfig.from_env()
+            except Exception as e:
+                raise ValueError(
+                    f"Failed to load Prax configuration from environment: {e}"
+                )
+        elif isinstance(prax_config, dict):
+            prax_config = PraxConfig.from_dict(prax_config)
+
+        # Initialize DataMesh configuration if provided
+        if datamesh_config is not None and isinstance(datamesh_config, dict):
+            datamesh_config = DataMeshConfig.from_dict(datamesh_config)
+
+        # Initialize parameters
+        pipeline_parameters = parameters or {}
+
+        logger.info(f"Starting Prax pipeline execution for run_id: {model_run.run_id}")
+        logger.info(
+            f"Pipeline: {pipeline_name}, Org: {prax_config.org}, Project: {prax_config.project}"
+        )
+
+        pipeline_results = {
+            "success": False,
+            "backend": "prax",
+            "run_id": model_run.run_id,
+            "pipeline_name": pipeline_name,
+            "prax_run_id": None,
+            "stages_completed": [],
+        }
+
+        try:
+            # Create Prax client wrapper
+            client = PraxClientWrapper(prax_config)
+
+            # Stage 1: Deploy pipeline if needed
+            # Note: In the new approach, we recommend using oceanum prax CLI for deployment
+            if deploy_pipeline and template_path:
+                logger.warning(
+                    "Pipeline deployment is not handled by this backend. "
+                    "Please use 'oceanum prax create pipeline' command for deployment."
+                )
+                pipeline_results["stages_completed"].append("deploy")
+
+            # Stage 2: Generate model configuration
+            logger.info("Generating model configuration for Prax submission")
+
+            try:
+                # Generate the model configuration
+                # staging_dir = model_run.generate()
+                staging_dir = model_run.staging_dir
+
+                # Prepare parameters for Prax pipeline
+                prax_params = pipeline_parameters.copy()
+
+                # Add datamesh configuration if provided
+                if datamesh_config:
+                    prax_params["datamesh_config"] = datamesh_config
+
+                # Convert model configuration to Prax parameters
+                prax_parameters = self._convert_model_to_prax_parameters(
+                    model_run, staging_dir, prax_params
+                )
+
+                pipeline_results["staging_dir"] = (
+                    str(staging_dir) if staging_dir else None
+                )
+                pipeline_results["stages_completed"].append("generate")
+
+            except Exception as e:
+                logger.exception(f"Failed to generate model configuration: {e}")
+                return {
+                    **pipeline_results,
+                    "stage": "generate",
+                    "message": f"Model configuration generation failed: {str(e)}",
+                    "error": str(e),
+                }
+
+            # Stage 3: Submit pipeline
+            logger.info(f"Submitting pipeline {pipeline_name} to Prax")
+
+            try:
+                prax_run_id = client.submit_pipeline(pipeline_name, prax_parameters)
+                pipeline_results["prax_run_id"] = prax_run_id
+                pipeline_results["stages_completed"].append("submit")
+
+                logger.info(
+                    f"Pipeline submitted successfully. Prax run ID: {prax_run_id}"
+                )
+
+            except Exception as e:
+                logger.exception(f"Failed to submit pipeline: {e}")
+                return {
+                    **pipeline_results,
+                    "stage": "submit",
+                    "message": f"Pipeline submission failed: {str(e)}",
+                    "error": str(e),
+                }
+
+            # Stage 4: Wait for completion (optional)
+            if wait_for_completion:
+                logger.info(f"Waiting for pipeline completion (timeout: {timeout}s)")
+
+                try:
+                    final_status = self._wait_for_completion(
+                        client, prax_run_id, timeout
+                    )
+                    pipeline_results["final_status"] = final_status
+                    pipeline_results["stages_completed"].append("wait")
+
+                    if final_status.get("status") not in ["completed", "succeeded"]:
+                        logger.warning(
+                            f"Pipeline did not complete successfully: {final_status}"
+                        )
+                        return {
+                            **pipeline_results,
+                            "stage": "wait",
+                            "message": f"Pipeline execution failed or timed out: {final_status.get('status', 'unknown')}",
+                        }
+
+                except Exception as e:
+                    logger.exception(f"Error waiting for pipeline completion: {e}")
+                    return {
+                        **pipeline_results,
+                        "stage": "wait",
+                        "message": f"Error waiting for completion: {str(e)}",
+                        "error": str(e),
+                    }
+
+            # Stage 5: Download outputs (optional)
+            # Note: In the new approach, we recommend using oceanum prax CLI for downloading
+            if download_outputs:
+                logger.warning(
+                    "Output downloading is not handled by this backend. "
+                    "Please use 'oceanum prax logs pipeline-runs <run_id>' command to view logs."
+                )
+                pipeline_results["stages_completed"].append("download")
+
+            # Stage 6: DataMesh registration (optional)
+            if datamesh_config:
+                logger.info("Registering results with DataMesh")
+
+                try:
+                    datamesh_result = self._register_with_datamesh(
+                        model_run, prax_run_id, datamesh_config, output_dir
+                    )
+                    pipeline_results["datamesh_result"] = datamesh_result
+                    pipeline_results["stages_completed"].append("datamesh")
+
+                except Exception as e:
+                    logger.exception(f"Error registering with DataMesh: {e}")
+                    # Don't fail the entire pipeline for DataMesh registration errors
+                    pipeline_results["datamesh_error"] = str(e)
+
+            # Pipeline completed successfully
+            pipeline_results["success"] = True
+            pipeline_results["message"] = "Pipeline executed successfully"
+
+            logger.info(
+                f"Prax pipeline execution completed successfully for run_id: {model_run.run_id}"
+            )
+            return pipeline_results
+
+        except Exception as e:
+            logger.exception(f"Unexpected error in Prax pipeline execution: {e}")
+            return {
+                **pipeline_results,
+                "stage": "pipeline",
+                "message": f"Pipeline error: {str(e)}",
+                "error": str(e),
+            }
+
+    def _wait_for_completion(
+        self, client: PraxClientWrapper, run_id: str, timeout: int
+    ) -> Dict[str, Any]:
+        """Wait for pipeline completion.
+
+        Args:
+            client: Prax client wrapper
+            run_id: Pipeline run identifier
+            timeout: Maximum time to wait for completion (seconds)
+
+        Returns:
+            Final status dictionary
+        """
+        start_time = time.time()
+
+        while time.time() - start_time < timeout:
+            try:
+                status = client.get_run_status(run_id)
+
+                if status.get("status") in ["completed", "succeeded", "failed", "error"]:
+                    return status
+
+                logger.info(f"Pipeline {run_id} status: {status.get('status', 'unknown')}")
+                time.sleep(30)
+            except Exception as e:
+                logger.warning(f"Temporary error monitoring pipeline {run_id}: {e}")
+                time.sleep(30)
+                continue
+
+        logger.warning(f"Pipeline {run_id} did not complete within {timeout} seconds")
+        return {"status": "timeout", "message": f"Pipeline did not complete within {timeout} seconds"}
+
+import json
+import logging
+import tempfile
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
+
+import yaml
+
+from .prax_client import PraxClientWrapper
 from .config import DataMeshConfig, PraxConfig, PraxPipelineConfig
 
 logger = logging.getLogger(__name__)
@@ -310,16 +583,7 @@ class PraxPipelineBackend:
         rompy_config["output_dir"] = "/app"
         rompy_config["run_id_subdir"] = False
 
-        # except Exception as e:
-        #     logger.warning(f"Failed to serialize model config: {e}")
-        #     rompy_config["config"] = {}
-
-        # Note: datamesh_config is handled separately as a pipeline parameter,
-        # not embedded in the ModelRun configuration to avoid validation errors
-
         # Convert rompy_config to JSON string
-        import json
-
         parameters = {"rompy-config": json.dumps(rompy_config)}
 
         # Add DataMesh token if available
@@ -372,7 +636,7 @@ class PraxPipelineBackend:
     def _register_with_datamesh(
         self,
         model_run,
-        result: PraxResult,
+        run_id: str,
         datamesh_config: DataMeshConfig,
         output_dir: Optional[str],
     ) -> Dict[str, Any]:
@@ -380,7 +644,7 @@ class PraxPipelineBackend:
 
         Args:
             model_run: ModelRun instance
-            result: PraxResult instance
+            run_id: Pipeline run identifier
             datamesh_config: DataMesh configuration
             output_dir: Output directory path
 
