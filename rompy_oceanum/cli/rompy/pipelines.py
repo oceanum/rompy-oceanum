@@ -196,7 +196,6 @@ def _create_pipeline_template(
         click.echo(f"✅ Template created: {output_file}")
         click.echo("💡 Customize the template and deploy with oceanum prax commands:")
         click.echo(f"   oceanum prax deloy {template_path}")
-        click.echo("   oceanum prax deloy {template_path}")
 
     except Exception as e:
         click.echo(f"❌ Failed to create template: {e}", err=True)
