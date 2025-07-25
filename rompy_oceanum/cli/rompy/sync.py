@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
-from oceanum.cli.common.models import ContextObject
+from oceanum.cli.models import ContextObject
 
 from ...config import PraxConfig
 from ...client import PraxClient

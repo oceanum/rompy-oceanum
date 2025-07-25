@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 import yaml
 import rompy.model
-from oceanum.cli.common.models import ContextObject
+from oceanum.cli.models import ContextObject
 
 from ...config import PraxConfig, DataMeshConfig
 from ...pipeline import PraxPipelineBackend

@@ -6,7 +6,7 @@ from typing import Dict, Any
 
 import click
 import yaml
-from oceanum.cli.common.models import ContextObject
+from oceanum.cli.models import ContextObject
 
 
 logger = logging.getLogger(__name__)

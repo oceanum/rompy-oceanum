@@ -25,6 +25,7 @@ dependencies = [
     "rich>=10.11.0",
     "oceanum",
     "oceanum-prax",
+    "rompy",
 ]
 
 [tool.setuptools]
@@ -45,16 +46,15 @@ prax = "rompy_oceanum.pipeline:PraxPipelineBackend"
 [project.entry-points."rompy.postprocess"]
 datamesh = "rompy_oceanum.postprocess:DataMeshPostprocessor"
 
-[project.entry-points."oceanum.cli"]
-rompy = "rompy_oceanum.cli.main"
+[project.entry-points."oceanum.cli.extensions"]
+rompy = "rompy_oceanum.cli.main:cli"
 
-[project.entry-points."oceanum.cli.rompy"]
-main = "rompy_oceanum.cli.rompy.main"
-run = "rompy_oceanum.cli.rompy.run"
-status = "rompy_oceanum.cli.rompy.status"
-logs = "rompy_oceanum.cli.rompy.logs"
-sync = "rompy_oceanum.cli.rompy.sync"
-init = "rompy_oceanum.cli.rompy.init"
+# Optionally, register individual subcommands if needed:
+# rompy_run = "rompy_oceanum.cli.rompy.run"
+# rompy_status = "rompy_oceanum.cli.rompy.status"
+# rompy_logs = "rompy_oceanum.cli.rompy.logs"
+# rompy_sync = "rompy_oceanum.cli.rompy.sync"
+# rompy_init = "rompy_oceanum.cli.rompy.init"
 
 [project.scripts]
 datamesh = "rompy_oceanum.datamesh:main"
