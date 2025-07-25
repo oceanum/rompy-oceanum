@@ -249,6 +249,7 @@ jobs:
         - ${{ needs.determine-builds.outputs.build_rompy == 'true' && format('{0}/{1}/rompy', env.REGISTRY, env.IMAGE_NAME) || '' }}
       exclude:
         - image: ''
+
   steps:
       - name: Run Trivy vulnerability scanner
         if: github.event_name != 'pull_request'
