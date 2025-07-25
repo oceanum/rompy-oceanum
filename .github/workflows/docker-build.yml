@@ -243,13 +243,14 @@ jobs:
     permissions:
       security-events: write
     strategy:
-      matrix:
-        image:
-          - ${{ needs.determine-builds.outputs.build_swan == 'true' && format('{0}/{1}/swan', env.REGISTRY, env.IMAGE_NAME) || '' }}
-          - ${{ needs.determine-builds.outputs.build_rompy == 'true' && format('{0}/{1}/rompy', env.REGISTRY, env.IMAGE_NAME) || '' }}
-        exclude:
-          - image: ''
-    steps:
+matrix:
+  image:
+    # NOTE: REGISTRY and IMAGE_NAME must be set as repository/environment variables for this to work
+    - ${{ needs.determine-builds.outputs.build_swan == 'true' && format('{0}/{1}/swan', vars.REGISTRY, vars.IMAGE_NAME) || '' }}
+    - ${{ needs.determine-builds.outputs.build_rompy == 'true' && format('{0}/{1}/rompy', vars.REGISTRY, vars.IMAGE_NAME) || '' }}
+  exclude:
+    - image: ''
+  steps:
       - name: Run Trivy vulnerability scanner
         if: github.event_name != 'pull_request'
         uses: aquasecurity/trivy-action@master
