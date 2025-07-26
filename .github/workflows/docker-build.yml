@@ -242,13 +242,13 @@ jobs:
     if: always() && (needs.build-swan.result == 'success' || needs.build-rompy.result == 'success')
     permissions:
       security-events: write
-  strategy:
-    matrix:
-      image:
-        - ${{ needs.determine-builds.outputs.build_swan == 'true' && format('{0}/{1}/swan', env.REGISTRY, env.IMAGE_NAME) || '' }}
-        - ${{ needs.determine-builds.outputs.build_rompy == 'true' && format('{0}/{1}/rompy', env.REGISTRY, env.IMAGE_NAME) || '' }}
-      exclude:
-        - image: ''
+    strategy:
+      matrix:
+        image:
+          - ${{ needs.determine-builds.outputs.build_swan == 'true' && format('{0}/{1}/swan', env.REGISTRY, env.IMAGE_NAME) || '' }}
+          - ${{ needs.determine-builds.outputs.build_rompy == 'true' && format('{0}/{1}/rompy', env.REGISTRY, env.IMAGE_NAME) || '' }}
+        exclude:
+          - image: ''
 
   steps:
     - name: Run Trivy vulnerability scanner
