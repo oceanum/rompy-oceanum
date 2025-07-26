@@ -9,7 +9,7 @@ import click
 from oceanum.cli.models import ContextObject
 
 from ...config import PraxConfig
-from ...prax_client import PraxClientWrapper
+from ...client import PraxClient
 
 
 logger = logging.getLogger(__name__)
@@ -118,7 +118,7 @@ def sync(
         click.echo(f"❌ Configuration error: {e}", err=True)
         return
 
-    client = PraxClientWrapper(prax_config)
+    client = PraxClient(prax_config)
     output_path = Path(output_dir)
 
     # Create output directory if it doesn't exist

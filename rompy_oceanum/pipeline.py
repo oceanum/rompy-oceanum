@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional, Union
 
 import yaml
 
-from .prax_client import PraxClientWrapper
+from .client import PraxClient
 from .config import DataMeshConfig, PraxConfig, PraxPipelineConfig
 
 logger = logging.getLogger(__name__)
@@ -105,8 +105,8 @@ class PraxPipelineBackend:
         }
 
         try:
-            # Create Prax client wrapper
-            client = PraxClientWrapper(prax_config)
+            # Create Prax client
+            client = PraxClient(prax_config)
 
             # Stage 1: Deploy pipeline if needed
             # Note: In the new approach, we recommend using oceanum prax CLI for deployment
@@ -155,7 +155,10 @@ class PraxPipelineBackend:
             logger.info(f"Submitting pipeline {pipeline_name} to Prax")
 
             try:
-                prax_run_id = client.submit_pipeline(pipeline_name, prax_parameters)
+                result = client.submit_pipeline(
+                    pipeline_name, parameters=prax_parameters
+                )
+                prax_run_id = result.run_id
                 pipeline_results["prax_run_id"] = prax_run_id
                 pipeline_results["stages_completed"].append("submit")
 
@@ -246,7 +249,7 @@ class PraxPipelineBackend:
             }
 
     def _wait_for_completion(
-        self, client: PraxClientWrapper, run_id: str, timeout: int
+        self, client: PraxClient, run_id: str, timeout: int
     ) -> Dict[str, Any]:
         """Wait for pipeline completion.
 
@@ -264,10 +267,17 @@ class PraxPipelineBackend:
             try:
                 status = client.get_run_status(run_id)
 
-                if status.get("status") in ["completed", "succeeded", "failed", "error"]:
+                if status.get("status") in [
+                    "completed",
+                    "succeeded",
+                    "failed",
+                    "error",
+                ]:
                     return status
 
-                logger.info(f"Pipeline {run_id} status: {status.get('status', 'unknown')}")
+                logger.info(
+                    f"Pipeline {run_id} status: {status.get('status', 'unknown')}"
+                )
                 time.sleep(30)
             except Exception as e:
                 logger.warning(f"Temporary error monitoring pipeline {run_id}: {e}")
@@ -275,7 +285,11 @@ class PraxPipelineBackend:
                 continue
 
         logger.warning(f"Pipeline {run_id} did not complete within {timeout} seconds")
-        return {"status": "timeout", "message": f"Pipeline did not complete within {timeout} seconds"}
+        return {
+            "status": "timeout",
+            "message": f"Pipeline did not complete within {timeout} seconds",
+        }
+
 
 import json
 import logging
@@ -286,8 +300,8 @@ from typing import Any, Dict, Optional, Union
 
 import yaml
 
-from .prax_client import PraxClientWrapper
 from .config import DataMeshConfig, PraxConfig, PraxPipelineConfig
+from .prax_client import PraxClientWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -379,39 +393,15 @@ class PraxPipelineBackend:
         }
 
         try:
-            # Create Prax client wrapper
-            client = PraxClientWrapper(prax_config)
+            # Create Prax client
+            client = PraxClient(prax_config)
 
             # Stage 1: Deploy pipeline if needed
             if deploy_pipeline and template_path:
-                logger.info(
-                    f"Deploying pipeline {pipeline_name} from template: {template_path}"
+                logger.warning(
+                    "Pipeline deployment is not handled by this backend. "
+                    "Please use 'oceanum prax create pipeline' command for deployment."
                 )
-
-                template_file = Path(template_path)
-                if not template_file.exists():
-                    # Try to find template in package
-                    package_template = (
-                        Path(__file__).parent
-                        / "pipeline_templates"
-                        / f"{pipeline_name}.yaml"
-                    )
-                    if package_template.exists():
-                        template_path = str(package_template)
-                    else:
-                        return {
-                            **pipeline_results,
-                            "stage": "deploy",
-                            "message": f"Template file not found: {template_path}",
-                        }
-
-                if not client.deploy_pipeline(pipeline_name, template_path):
-                    return {
-                        **pipeline_results,
-                        "stage": "deploy",
-                        "message": f"Failed to deploy pipeline {pipeline_name}",
-                    }
-
                 pipeline_results["stages_completed"].append("deploy")
 
             # Stage 2: Generate model configuration
@@ -452,7 +442,10 @@ class PraxPipelineBackend:
             logger.info(f"Submitting pipeline {pipeline_name} to Prax")
 
             try:
-                prax_run_id = client.submit_pipeline(pipeline_name, prax_parameters)
+                result = client.submit_pipeline(
+                    pipeline_name, parameters=prax_parameters
+                )
+                prax_run_id = result.run_id
                 pipeline_results["prax_run_id"] = prax_run_id
                 pipeline_results["stages_completed"].append("submit")
 
@@ -470,7 +463,7 @@ class PraxPipelineBackend:
                 }
 
             # Create result object for tracking
-            result = client.create_result(prax_run_id, pipeline_name)
+            result = client.submit_pipeline(pipeline_name, parameters=prax_parameters)
             pipeline_results["result"] = result
 
             # Stage 4: Wait for completion (optional)
@@ -580,7 +573,7 @@ class PraxPipelineBackend:
         rompy_config = model_run.dump_inputs_dict()
 
         # Ensure output is somewhere where the prax pipelines expects
-        rompy_config["output_dir"] = "/app"
+        rompy_config["output_dir"] = "/tmp/rompy"
         rompy_config["run_id_subdir"] = False
 
         # Convert rompy_config to JSON string

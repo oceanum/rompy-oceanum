@@ -13,6 +13,113 @@ from .config import PraxConfig
 logger = logging.getLogger(__name__)
 
 
+class PraxResult:
+    """Result object for tracking Prax pipeline execution."""
+    
+    def __init__(self, run_id: str, pipeline_name: str, org: str, project: str, 
+                 stage: str, client=None):
+        """Initialize the PraxResult.
+        
+        Args:
+            run_id: Pipeline run identifier
+            pipeline_name: Name of the pipeline
+            org: Organization name
+            project: Project name
+            stage: Stage name
+            client: PraxClientWrapper instance
+        """
+        self.run_id = run_id
+        self.pipeline_name = pipeline_name
+        self.org = org
+        self.project = project
+        self.stage = stage
+        self.client = client
+    
+    def get_status(self):
+        """Get the current status of the pipeline run.
+        
+        Returns:
+            Status dictionary
+        """
+        if not self.client:
+            raise ValueError("No client configured")
+            
+        return self.client.get_run_status(
+            run_name=self.run_id,
+            org=self.org,
+            project=self.project,
+            stage=self.stage
+        )
+    
+    def get_logs(self, task_name: Optional[str] = None):
+        """Get logs from the pipeline run.
+        
+        Args:
+            task_name: Optional task name to get logs for specific task
+            
+        Returns:
+            List of log lines
+        """
+        if not self.client:
+            raise ValueError("No client configured")
+            
+        return self.client.get_run_logs(
+            run_name=self.run_id,
+            org=self.org,
+            project=self.project,
+            stage=self.stage
+        )
+    
+    def wait_for_completion(self, timeout: int = 3600, check_interval: int = 30):
+        """Wait for the pipeline run to complete.
+        
+        Args:
+            timeout: Maximum time to wait for completion (seconds)
+            check_interval: Time between status checks (seconds)
+            
+        Returns:
+            Final status dictionary
+            
+        Raises:
+            TimeoutError: If pipeline doesn't complete within timeout
+        """
+        import time
+        
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            status = self.get_status()
+            if status.get("status") in ["completed", "succeeded", "failed", "error"]:
+                return status
+                
+            logger.info(f"Pipeline {self.run_id} status: {status.get('status', 'unknown')}")
+            time.sleep(check_interval)
+            
+        raise TimeoutError(f"Pipeline {self.run_id} did not complete within {timeout} seconds")
+    
+    def download_outputs(self, target_dir: str):
+        """Download outputs from the pipeline run.
+        
+        Args:
+            target_dir: Directory to download outputs to
+            
+        Returns:
+            List of downloaded file paths
+        """
+        import os
+        
+        if not self.client:
+            raise ValueError("No client configured")
+            
+        # Create target directory if it doesn't exist
+        os.makedirs(target_dir, exist_ok=True)
+        
+        # For now, we'll return an empty list as we don't have the actual download implementation
+        # This would need to be implemented based on the actual oceanum-prax client API
+        logger.warning("Output download not yet implemented in PraxClientWrapper")
+        return []
+
+
 class PraxClientWrapper:
     """Wrapper around oceanum-prax client for rompy operations."""
     

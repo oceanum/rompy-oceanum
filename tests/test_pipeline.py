@@ -4,10 +4,10 @@ Unit tests for PraxPipelineBackend.
 This module tests the Prax pipeline backend implementation, including
 pipeline execution, configuration handling, and error scenarios.
 """
-import json
+import os
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, PropertyMock
 import pytest
 import yaml
 
@@ -54,12 +54,13 @@ class TestPraxPipelineBackend:
         # Mock generate method
         staging_dir = Path("/tmp/staging")
         self.mock_model_run.generate.return_value = staging_dir
+        self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
 
         # Mock client and result
         mock_client = Mock(spec=PraxClient)
         mock_result = Mock(spec=PraxResult)
-        mock_client.submit_pipeline.return_value = "prax-run-456"
-        mock_client.create_result.return_value = mock_result
+        mock_result.run_id = "prax-run-456"
+        mock_client.submit_pipeline.return_value = mock_result
 
         with patch('rompy_oceanum.pipeline.PraxClient') as mock_client_class:
             mock_client_class.return_value = mock_client
@@ -100,12 +101,13 @@ class TestPraxPipelineBackend:
             # Mock generate method
             staging_dir = Path("/tmp/staging")
             self.mock_model_run.generate.return_value = staging_dir
+            self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
 
             # Mock client
             mock_client = Mock(spec=PraxClient)
-            mock_client.deploy_pipeline.return_value = True
-            mock_client.submit_pipeline.return_value = "prax-run-456"
-            mock_client.create_result.return_value = Mock(spec=PraxResult)
+            mock_result = Mock(spec=PraxResult)
+            mock_result.run_id = "prax-run-456"
+            mock_client.submit_pipeline.return_value = mock_result
 
             with patch('rompy_oceanum.pipeline.PraxClient') as mock_client_class:
                 mock_client_class.return_value = mock_client
@@ -122,7 +124,6 @@ class TestPraxPipelineBackend:
                 # Verify
                 assert result["success"] is True
                 assert "deploy" in result["stages_completed"]
-                mock_client.deploy_pipeline.assert_called_once_with("test-pipeline", template_path)
 
         finally:
             # Cleanup
@@ -141,12 +142,15 @@ class TestPraxPipelineBackend:
         # Mock generate method
         staging_dir = Path("/tmp/staging")
         self.mock_model_run.generate.return_value = staging_dir
+        self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
 
         # Mock client and result
         mock_client = Mock(spec=PraxClient)
         mock_result = Mock(spec=PraxResult)
-        mock_client.submit_pipeline.return_value = "prax-run-456"
-        mock_client.create_result.return_value = mock_result
+        mock_result.run_id = "prax-run-456"
+        mock_client.submit_pipeline.return_value = mock_result
+        mock_result.run_id = "prax-run-456"
+        mock_client.submit_pipeline.return_value = mock_result
         mock_result.wait_for_completion.return_value = {"status": "completed"}
 
         with patch('rompy_oceanum.pipeline.PraxClient') as mock_client_class:
@@ -181,12 +185,13 @@ class TestPraxPipelineBackend:
         # Mock generate method
         staging_dir = Path("/tmp/staging")
         self.mock_model_run.generate.return_value = staging_dir
+        self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
 
         # Mock client and result
         mock_client = Mock(spec=PraxClient)
         mock_result = Mock(spec=PraxResult)
-        mock_client.submit_pipeline.return_value = "prax-run-456"
-        mock_client.create_result.return_value = mock_result
+        mock_result.run_id = "prax-run-456"
+        mock_client.submit_pipeline.return_value = mock_result
 
         downloaded_files = [Path("/tmp/output1.nc"), Path("/tmp/output2.csv")]
         mock_result.download_outputs.return_value = downloaded_files
@@ -228,12 +233,14 @@ class TestPraxPipelineBackend:
         # Mock generate method
         staging_dir = Path("/tmp/staging")
         self.mock_model_run.generate.return_value = staging_dir
+        self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
+        self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
 
         # Mock client and result
         mock_client = Mock(spec=PraxClient)
         mock_result = Mock(spec=PraxResult)
-        mock_client.submit_pipeline.return_value = "prax-run-456"
-        mock_client.create_result.return_value = mock_result
+        mock_result.run_id = "prax-run-456"
+        mock_client.submit_pipeline.return_value = mock_result
 
         with patch('rompy_oceanum.pipeline.PraxClient') as mock_client_class:
             mock_client_class.return_value = mock_client
@@ -286,11 +293,13 @@ class TestPraxPipelineBackend:
             # Mock generate method
             staging_dir = Path("/tmp/staging")
             self.mock_model_run.generate.return_value = staging_dir
+            self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
 
             # Mock client
             mock_client = Mock(spec=PraxClient)
-            mock_client.submit_pipeline.return_value = "prax-run-456"
-            mock_client.create_result.return_value = Mock(spec=PraxResult)
+            mock_result = Mock(spec=PraxResult)
+            mock_result.run_id = "prax-run-456"
+            mock_client.submit_pipeline.return_value = mock_result
 
             with patch('rompy_oceanum.pipeline.PraxClient') as mock_client_class:
                 mock_client_class.return_value = mock_client
@@ -319,8 +328,11 @@ class TestPraxPipelineBackend:
             project="test_project"
         )
 
-        # Mock generate method to fail
-        self.mock_model_run.generate.side_effect = Exception("Generate failed")
+        # Mock dump_inputs_dict
+        self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
+        
+        # Mock staging_dir property to fail
+        type(self.mock_model_run).staging_dir = PropertyMock(side_effect=Exception("Generate failed"))
 
         # Execute
         result = self.backend.execute(
@@ -348,6 +360,7 @@ class TestPraxPipelineBackend:
         # Mock generate method
         staging_dir = Path("/tmp/staging")
         self.mock_model_run.generate.return_value = staging_dir
+        self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
 
         # Mock client to fail submit
         mock_client = Mock(spec=PraxClient)
@@ -382,12 +395,13 @@ class TestPraxPipelineBackend:
         # Mock generate method
         staging_dir = Path("/tmp/staging")
         self.mock_model_run.generate.return_value = staging_dir
+        self.mock_model_run.dump_inputs_dict.return_value = {"test": "config"}
 
         # Mock client and result
         mock_client = Mock(spec=PraxClient)
         mock_result = Mock(spec=PraxResult)
-        mock_client.submit_pipeline.return_value = "prax-run-456"
-        mock_client.create_result.return_value = mock_result
+        mock_result.run_id = "prax-run-456"
+        mock_client.submit_pipeline.return_value = mock_result
         mock_result.wait_for_completion.return_value = {"status": "timeout"}
 
         with patch('rompy_oceanum.pipeline.PraxClient') as mock_client_class:
@@ -410,7 +424,15 @@ class TestPraxPipelineBackend:
     def test_convert_model_to_prax_parameters(self):
         """Test _convert_model_to_prax_parameters method."""
         staging_dir = Path("/tmp/staging")
-        additional_params = {"custom_param": "value"}
+        additional_params = {"datamesh_token": "test-token"}
+        
+        # Mock dump_inputs_dict to return expected keys
+        self.mock_model_run.dump_inputs_dict.return_value = {
+            "run_id": "test-run-123",
+            "model_type": "swan",
+            "start_time": "2023-01-01T00:00:00Z",
+            "end_time": "2023-01-02T00:00:00Z"
+        }
 
         # Execute
         params = self.backend._convert_model_to_prax_parameters(
@@ -418,13 +440,19 @@ class TestPraxPipelineBackend:
         )
 
         # Verify
-        assert params["run_id"] == "test-run-123"
-        assert params["model_type"] == "swan"
-        assert params["staging_dir"] == str(staging_dir)
-        assert params["start_time"] == "2023-01-01T00:00:00Z"
-        assert params["end_time"] == "2023-01-02T00:00:00Z"
-        assert params["custom_param"] == "value"
-        assert "config_yaml" in params
+        assert "rompy-config" in params
+        # Parse the JSON to check the contents
+        import json
+        rompy_config = json.loads(params["rompy-config"])
+        assert rompy_config["run_id"] == "test-run-123"
+        assert rompy_config["model_type"] == "swan"
+        assert rompy_config["start_time"] == "2023-01-01T00:00:00Z"
+        assert rompy_config["end_time"] == "2023-01-02T00:00:00Z"
+        assert rompy_config["output_dir"] == "/tmp/rompy"
+        assert rompy_config["run_id_subdir"] is False
+        
+        # Check that datamesh token is added to top-level parameters
+        assert params["datamesh-token"] == "test-token"
 
     def test_get_default_template_path(self):
         """Test get_default_template_path method."""
