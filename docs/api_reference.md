@@ -5,7 +5,7 @@ This page documents the API for the `rompy-oceanum` package.
 ## PraxClient
 
 ```python
-from rompy_oceanum.prax import PraxClient
+from rompy_oceanum.client import PraxClient
 ```
 
 The `PraxClient` class provides methods for interacting with the Oceanum Prax API.
@@ -26,22 +26,20 @@ client = PraxClient(base_url="https://prax.oceanum.io", token=None)
 ```python
 result = client.submit_pipeline(
     pipeline_name,
-    user,
-    org,
-    project,
-    stage,
-    parameters
+    parameters=None,
+    org=None,
+    project=None,
+    stage=None
 )
 ```
 
 Submits a pipeline to Prax.
 
 - `pipeline_name`: Name of the pipeline to run
-- `user`: Username
+- `parameters`: Pipeline parameters dictionary
 - `org`: Organization name
 - `project`: Project name
 - `stage`: Stage name (e.g., "dev", "prod")
-- `parameters`: Pipeline parameters dictionary
 
 Returns a `PraxResult` object with information about the submitted run.
 
@@ -51,10 +49,9 @@ Returns a `PraxResult` object with information about the submitted run.
 status = client.get_run_status(
     run_id,
     pipeline_name,
-    user,
-    org,
-    project,
-    stage
+    org=None,
+    project=None,
+    stage=None
 )
 ```
 
@@ -62,7 +59,6 @@ Gets the status of a pipeline run.
 
 - `run_id`: ID of the run to check
 - `pipeline_name`: Name of the pipeline
-- `user`: Username
 - `org`: Organization name
 - `project`: Project name
 - `stage`: Stage name
@@ -75,11 +71,9 @@ Returns a dictionary with run status information.
 logs = client.get_run_logs(
     run_id,
     pipeline_name,
-    user,
-    org,
-    project,
-    stage,
-    task_name=None
+    org=None,
+    project=None,
+    stage=None
 )
 ```
 
@@ -87,44 +81,16 @@ Gets logs from a pipeline run.
 
 - `run_id`: ID of the run
 - `pipeline_name`: Name of the pipeline
-- `user`: Username
 - `org`: Organization name
 - `project`: Project name
 - `stage`: Stage name
-- `task_name`: Optional task name to get logs for a specific task
 
-Returns a dictionary with logs information.
-
-#### download_run_artifacts
-
-```python
-files = client.download_run_artifacts(
-    run_id,
-    pipeline_name,
-    user,
-    org,
-    project,
-    stage,
-    target_dir="./outputs"
-)
-```
-
-Downloads artifacts from a completed pipeline run.
-
-- `run_id`: ID of the run
-- `pipeline_name`: Name of the pipeline
-- `user`: Username
-- `org`: Organization name
-- `project`: Project name
-- `stage`: Stage name
-- `target_dir`: Directory to save downloaded files
-
-Returns a list of paths to downloaded files.
+Returns a list of log lines.
 
 ## PraxResult
 
 ```python
-from rompy_oceanum.prax import PraxResult
+from rompy_oceanum.client import PraxResult
 ```
 
 The `PraxResult` class represents the result of a Prax pipeline submission.
@@ -133,7 +99,6 @@ The `PraxResult` class represents the result of a Prax pipeline submission.
 
 - `run_id`: ID of the pipeline run
 - `pipeline_name`: Name of the pipeline
-- `user`: Username
 - `org`: Organization name
 - `project`: Project name
 - `stage`: Stage name
@@ -154,14 +119,12 @@ Returns a dictionary with run status information.
 #### get_logs
 
 ```python
-logs = result.get_logs(task_name=None)
+logs = result.get_logs()
 ```
 
 Gets logs from the pipeline run.
 
-- `task_name`: Optional task name to get logs for a specific task
-
-Returns a dictionary with logs information.
+Returns a list of log lines.
 
 #### wait_for_completion
 
@@ -200,7 +163,6 @@ The package extends the rompy `ModelRun` class with the following methods:
 ```python
 result = model_run.submit_to_prax(
     pipeline_name="swan-from-rompy",
-    user=None,
     org=None,
     project=None,
     stage="dev",
@@ -212,7 +174,6 @@ result = model_run.submit_to_prax(
 Submits the model run to an Oceanum Prax pipeline.
 
 - `pipeline_name`: Name of the pipeline to run (default: swan-from-rompy)
-- `user`: Username (default: from env var PRAX_USER)
 - `org`: Organization name (default: from env var PRAX_ORG)
 - `project`: Project name (default: from env var PRAX_PROJECT)
 - `stage`: Stage name (default: dev)

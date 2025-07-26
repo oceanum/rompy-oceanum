@@ -113,7 +113,7 @@ Generate optimized rompy configuration files from templates.
 run
 ~~~
 
-Execute rompy configurations via Oceanum Prax pipeline.
+Initialize rompy configurations for Oceanum Prax pipeline execution.
 
 **Syntax:**
 
@@ -134,11 +134,8 @@ Execute rompy configurations via Oceanum Prax pipeline.
 
 * ``--project TEXT``: Prax project name (overrides oceanum context)
 * ``--stage {dev,prod}``: Deployment stage (default: dev)
-* ``--template PATH``: Custom pipeline template file
-* ``--deploy/--no-deploy``: Deploy pipeline if needed (default: --deploy)
 * ``--wait/--no-wait``: Wait for pipeline completion (default: --no-wait)
 * ``--timeout INTEGER``: Execution timeout in seconds
-* ``--tags TEXT``: Comma-separated tags for metadata
 
 **Examples:**
 
@@ -154,17 +151,10 @@ Execute rompy configurations via Oceanum Prax pipeline.
        --wait \
        --timeout 3600
 
-   # Execute in production with tags
+   # Execute in production
    oceanum rompy run config.yml schism \
        --pipeline-name schism-operational \
-       --stage prod \
-       --tags "australia,operational,storm-surge"
-
-   # Execute with custom pipeline template
-   oceanum rompy run config.yml ww3 \
-       --pipeline-name custom-ww3 \
-       --template ./custom_pipeline.yml \
-       --deploy
+       --stage prod
 
 **Output:**
 
@@ -172,50 +162,45 @@ The command returns rich terminal output with execution details:
 
 .. code-block:: text
 
-   🚀 Executing pipeline: swan-operational
+   🚀 Initializing pipeline: swan-operational
    📊 Model: swan, Run ID: perth_coast_swan_basic
    🏢 Org: oceanum, Project: wave-forecasting, Stage: dev
-   ✅ Pipeline executed successfully!
-   🆔 Prax run ID: prax-perth_coast_swan_basic
-   💡 Monitor with: oceanum rompy status prax-perth_coast_swan_basic
+   ✅ ModelRun created successfully: run_id
+   📤 Submitting to pipeline: swan-operational
+   🆔 Prax run ID: pipeline-swan-operational-run-id-dev-xyz123
+   💡 Monitor with: oceanum prax --project wave-forecasting logs pipeline-runs pipeline-swan-operational-run-id-dev-xyz123
+
 
 status
 ~~~~~~
 
-Monitor pipeline execution status with real-time updates.
+Monitor pipeline execution status with real-time updates using the oceanum prax CLI.
 
 **Syntax:**
 
 .. code-block:: bash
 
-   oceanum rompy status RUN_ID [OPTIONS]
+   oceanum prax --project PROJECT logs pipeline-runs RUN_ID [OPTIONS]
 
 **Required Arguments:**
 
+* ``PROJECT``: Prax project name
 * ``RUN_ID``: Prax run identifier
 
 **Options:**
 
-* ``--watch/--no-watch``: Continuously monitor status updates (default: --no-watch)
-* ``--interval INTEGER``: Update interval for watch mode in seconds (default: 10)
-* ``--json``: Output status in JSON format
-* ``--detailed``: Show detailed execution information
+* ``--follow, -f``: Follow log output in real-time
+* ``--tail INTEGER``: Show last N lines (default: 100)
 
 **Examples:**
 
 .. code-block:: bash
 
    # Check current status
-   oceanum rompy status prax-perth_coast_swan_basic
+   oceanum prax --project wave-forecasting describe pipeline-runs pipeline-swan-operational-run-id-dev-xyz123
 
    # Monitor status with real-time updates
-   oceanum rompy status prax-perth_coast_swan_basic --watch
-
-   # Get detailed status information
-   oceanum rompy status prax-perth_coast_swan_basic --detailed
-
-   # Export status as JSON
-   oceanum rompy status prax-perth_coast_swan_basic --json
+   oceanum prax --project wave-forecasting logs pipeline-runs pipeline-swan-operational-run-id-dev-xyz123 -f
 
 **Output Examples:**
 
@@ -223,171 +208,126 @@ Basic status output:
 
 .. code-block:: text
 
-   📊 Pipeline Status: prax-perth_coast_swan_basic
-   🔄 Status: RUNNING
-   ⏱️  Started: 2024-01-15 10:30:45 UTC
-   ⏳ Duration: 0:15:23
-   📈 Progress: Stage 2/4 (Executing model)
+   NAME: pipeline-swan-operational-run-id-dev-xyz123
+   STATUS: Running
+   STARTED: 2024-01-15T10:30:45Z
+   DURATION: 15m23s
+   PROGRESS: Stage 2/4 (Executing model)
 
 Watch mode output:
 
 .. code-block:: text
 
-   🔄 Monitoring pipeline: prax-perth_coast_swan_basic
-   📊 Status: RUNNING → COMPLETED ✅
-   ⏱️  Total duration: 0:23:15
-   📁 Outputs: 15 files (245.7 MB)
-   💡 Download with: oceanum rompy sync prax-perth_coast_swan_basic ./outputs
+   NAME: pipeline-swan-operational-run-id-dev-xyz123
+   STATUS: Running → Completed
+   STARTED: 2024-01-15T10:30:45Z
+   DURATION: 23m15s
+   OUTPUTS: 15 files
 
 logs
 ~~~~
 
-View and filter pipeline execution logs.
+View and filter pipeline execution logs using the oceanum prax CLI.
 
 **Syntax:**
 
 .. code-block:: bash
 
-   oceanum rompy logs RUN_ID [OPTIONS]
+   oceanum prax --project PROJECT logs pipeline-runs RUN_ID [OPTIONS]
 
 **Required Arguments:**
 
+* ``PROJECT``: Prax project name
 * ``RUN_ID``: Prax run identifier
 
 **Options:**
 
 * ``--follow, -f``: Follow log output in real-time
 * ``--tail INTEGER``: Show last N lines (default: 100)
-* ``--stage TEXT``: Filter logs by pipeline stage
-* ``--level {DEBUG,INFO,WARNING,ERROR}``: Filter by log level
-* ``--grep TEXT``: Filter logs by text pattern
 * ``--since TEXT``: Show logs since timestamp (ISO format)
-* ``--output PATH``: Save logs to file
-* ``--no-color``: Disable colored log output
 
 **Examples:**
 
 .. code-block:: bash
 
    # View recent logs
-   oceanum rompy logs prax-perth_coast_swan_basic
+   oceanum prax --project wave-forecasting logs pipeline-runs pipeline-swan-operational-run-id-dev-xyz123
 
    # Follow logs in real-time
-   oceanum rompy logs prax-perth_coast_swan_basic --follow
-
-   # View logs for specific stage
-   oceanum rompy logs prax-perth_coast_swan_basic --stage model-execution
-
-   # Filter error logs and save to file
-   oceanum rompy logs prax-perth_coast_swan_basic \
-       --level ERROR \
-       --output error_logs.txt
-
-   # Filter logs by pattern
-   oceanum rompy logs prax-perth_coast_swan_basic \
-       --grep "wave height" \
-       --tail 200
+   oceanum prax --project wave-forecasting logs pipeline-runs pipeline-swan-operational-run-id-dev-xyz123 -f
 
    # Show logs since specific time
-   oceanum rompy logs prax-perth_coast_swan_basic \
+   oceanum prax --project wave-forecasting logs pipeline-runs pipeline-swan-operational-run-id-dev-xyz123 \
        --since "2024-01-15T10:30:00Z"
 
 **Output:**
 
-Logs are displayed with color coding and timestamps:
+Logs are displayed with timestamps:
 
 .. code-block:: text
 
-   📋 Pipeline Logs: prax-perth_coast_swan_basic
-   ════════════════════════════════════════════
-   [10:30:45] 🔄 INIT    Starting SWAN model execution
-   [10:30:46] ℹ️  INFO    Grid: 100x80, Resolution: 0.05°
-   [10:31:15] ✅ INFO    Model initialization complete
-   [10:31:16] 🌊 INFO    Processing wave conditions...
-   [10:35:22] ⚠️  WARN    High wave heights detected in domain
-   [10:42:18] ✅ INFO    Model execution completed successfully
+   NAME: pipeline-swan-operational-run-id-dev-xyz123
+   STATUS: Running
+   STARTED: 2024-01-15T10:30:45Z
+   DURATION: 15m23s
+   OUTPUTS: 15 files
+
+   2024-01-15T10:30:45Z [INFO] Starting SWAN model execution
+   2024-01-15T10:30:46Z [INFO] Grid: 100x80, Resolution: 0.05°
+   2024-01-15T10:31:15Z [INFO] Model initialization complete
+   2024-01-15T10:31:16Z [INFO] Processing wave conditions...
+   2024-01-15T10:35:22Z [WARN] High wave heights detected in domain
+   2024-01-15T10:42:18Z [INFO] Model execution completed successfully
 
 sync
 ~~~~
 
-Download and organize pipeline outputs with automatic file management.
+Download and organize pipeline outputs using the oceanum prax CLI.
 
 **Syntax:**
 
 .. code-block:: bash
 
-   oceanum rompy sync RUN_ID OUTPUT_DIR [OPTIONS]
+   oceanum prax --project PROJECT download pipeline-runs RUN_ID [OPTIONS]
 
 **Required Arguments:**
 
+* ``PROJECT``: Prax project name
 * ``RUN_ID``: Prax run identifier
-* ``OUTPUT_DIR``: Local directory for downloaded files
 
 **Options:**
 
-* ``--organize/--no-organize``: Organize files by stage and type (default: --organize)
-* ``--include TEXT``: Include only files matching pattern (e.g., "*.nc,*.txt")
-* ``--exclude TEXT``: Exclude files matching pattern
-* ``--stage TEXT``: Download files from specific pipeline stage only
-* ``--verify/--no-verify``: Verify file integrity after download (default: --verify)
-* ``--overwrite/--no-overwrite``: Overwrite existing files (default: --no-overwrite)
-* ``--metadata/--no-metadata``: Include run metadata file (default: --metadata)
+* ``--output PATH``: Output directory for downloaded files
 
 **Examples:**
 
 .. code-block:: bash
 
-   # Download all outputs with organization
-   oceanum rompy sync prax-perth_coast_swan_basic ./outputs
-
-   # Download only NetCDF files
-   oceanum rompy sync prax-perth_coast_swan_basic ./netcdf_data \
-       --include "*.nc" \
-       --no-organize
-
-   # Download from specific stage
-   oceanum rompy sync prax-perth_coast_swan_basic ./model_outputs \
-       --stage postprocess \
-       --verify
-
-   # Download without file organization
-   oceanum rompy sync prax-perth_coast_swan_basic ./raw_outputs \
-       --no-organize \
-       --no-metadata
-
-   # Download excluding log files
-   oceanum rompy sync prax-perth_coast_swan_basic ./outputs \
-       --exclude "*.log,*.tmp" \
-       --overwrite
+   # Download all outputs
+   oceanum prax --project wave-forecasting download pipeline-runs pipeline-swan-operational-run-id-dev-xyz123 \
+       --output ./outputs
 
 **Output:**
 
-The command provides detailed download progress:
+The command provides download progress:
 
 .. code-block:: text
 
-   📁 Syncing outputs: prax-perth_coast_swan_basic
-   🔍 Found 15 files (245.7 MB total)
-   📊 Downloading: ████████████████████ 100%
+   NAME: pipeline-swan-operational-run-id-dev-xyz123
+   STATUS: Completed
+   STARTED: 2024-01-15T10:30:45Z
+   DURATION: 23m15s
+   OUTPUTS: 15 files
 
-   📂 Files organized by stage and type:
-     outputs/
-     ├── postprocess/
-     │   ├── netcdf/
-     │   │   ├── wave_height.nc (125.3 MB)
-     │   │   └── wave_period.nc (89.4 MB)
-     │   └── plots/
-     │       ├── wave_field.png (2.1 MB)
-     │       └── time_series.png (1.8 MB)
-     ├── run/
-     │   ├── logs/
-     │   │   └── model.log (15.2 MB)
-     │   └── input/
-     │       └── config.yml (2.3 KB)
-     └── run_metadata.json (1.8 KB)
+   Downloading outputs to ./outputs:
+   wave_height.nc [====================] 100% (125.3 MB)
+   wave_period.nc [====================] 100% (89.4 MB)
+   wave_field.png [====================] 100% (2.1 MB)
+   time_series.png [===================] 100% (1.8 MB)
+   model.log [========================] 100% (15.2 MB)
 
    ✅ Downloaded 15 files successfully
-   📋 Run metadata saved to: outputs/run_metadata.json
+
 
 Output Formats
 --------------

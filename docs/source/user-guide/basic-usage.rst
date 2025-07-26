@@ -167,18 +167,18 @@ For programmatic submission:
 Step 5: Monitor Execution
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Monitor execution using the oceanum CLI:
+Monitor execution using the oceanum prax CLI:
 
 .. code-block:: bash
 
    # Check current status
-   oceanum rompy status <run-id>
+   oceanum prax --project wave-forecasting describe pipeline-runs <run-id>
 
    # Monitor with real-time updates
-   oceanum rompy status <run-id> --watch
+   oceanum prax --project wave-forecasting logs pipeline-runs <run-id> -f
 
    # View logs in real-time
-   oceanum rompy logs <run-id> --follow
+   oceanum prax --project wave-forecasting logs pipeline-runs <run-id> -f
 
 For programmatic monitoring:
 
@@ -203,18 +203,12 @@ For programmatic monitoring:
 Step 6: Retrieve Results
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Download organized results using the oceanum CLI:
+Download organized results using the oceanum prax CLI:
 
 .. code-block:: bash
 
-   # Download all outputs with organization
-   oceanum rompy sync <run-id> ./outputs --organize
-
-   # Download specific file types
-   oceanum rompy sync <run-id> ./netcdf_data --include "*.nc"
-
-   # Download from specific pipeline stage
-   oceanum rompy sync <run-id> ./model_outputs --stage postprocess
+   # Download all outputs
+   oceanum prax --project wave-forecasting download pipeline-runs <run-id> --output ./outputs
 
 For programmatic downloads:
 
@@ -254,13 +248,13 @@ Complete Workflow Example
    oceanum rompy run config.yml swan --pipeline-name swan-operational
 
    # 4. Monitor execution (use run-id from previous command)
-   oceanum rompy status <run-id> --watch
+   oceanum prax --project wave-forecasting logs pipeline-runs <run-id> -f
 
    # 5. View logs
-   oceanum rompy logs <run-id> --follow
+   oceanum prax --project wave-forecasting logs pipeline-runs <run-id> -f
 
    # 6. Download organized results
-   oceanum rompy sync <run-id> ./outputs --organize
+   oceanum prax --project wave-forecasting download pipeline-runs <run-id> --output ./outputs
 
 Individual Commands
 ~~~~~~~~~~~~~~~~~~~
@@ -274,35 +268,31 @@ Individual Commands
    oceanum rompy run config.yml swan --pipeline-name my-pipeline
 
    # Check pipeline status
-   oceanum rompy status <run-id>
+   oceanum prax --project wave-forecasting describe pipeline-runs <run-id>
 
    # Monitor logs in real-time
-   oceanum rompy logs <run-id> --follow
+   oceanum prax --project wave-forecasting logs pipeline-runs <run-id> -f
 
    # Download organized outputs
-   oceanum rompy sync <run-id> ./outputs --organize
+   oceanum prax --project wave-forecasting download pipeline-runs <run-id> --output ./outputs
 
 Enhanced Output Organization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The sync command automatically organizes files:
+The prax download command automatically organizes files:
 
 .. code-block:: bash
 
    # Organized download creates structured directories
-   oceanum rompy sync <run-id> ./outputs --organize
+   oceanum prax --project wave-forecasting download pipeline-runs <run-id> --output ./outputs
 
    # Results in structure like:
    # outputs/
-   # ├── postprocess/
-   # │   ├── netcdf/
-   # │   │   └── wave_height.nc
-   # │   └── plots/
-   # │       └── wave_field.png
-   # ├── run/
-   # │   └── logs/
-   # │       └── model.log
-   # └── run_metadata.json
+   # ├── wave_height.nc
+   # ├── wave_period.nc
+   # ├── wave_field.png
+   # ├── time_series.png
+   # └── model.log
 
 Configuration Patterns
 -----------------------
@@ -496,6 +486,7 @@ Complete workflow automation using the oceanum CLI:
    MODEL="swan"
    TEMPLATE="operational"
    PIPELINE="swan-operational"
+   PROJECT="wave-forecasting"
    OUTPUT_DIR="./results/$(date +%Y%m%d_%H%M%S)"
 
    echo "🚀 Starting automated modeling workflow"
@@ -518,7 +509,7 @@ Complete workflow automation using the oceanum CLI:
    # Download results
    echo "📁 Downloading results..."
    mkdir -p ${OUTPUT_DIR}
-   oceanum rompy sync ${RUN_ID} ${OUTPUT_DIR} --organize
+   oceanum prax --project ${PROJECT} download pipeline-runs ${RUN_ID} --output ${OUTPUT_DIR}
 
    echo "🎉 Workflow completed successfully!"
 
@@ -534,6 +525,7 @@ Process multiple configurations:
 
    DOMAINS=("perth" "sydney" "melbourne")
    PIPELINE="swan-operational"
+   PROJECT="wave-forecasting"
 
    for domain in "${DOMAINS[@]}"; do
        echo "🔄 Processing domain: ${domain}"

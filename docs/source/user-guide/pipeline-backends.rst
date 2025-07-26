@@ -50,7 +50,7 @@ Features
 ~~~~~~~~
 
 * **Scalable Execution**: Automatic resource allocation based on model requirements
-* **Monitoring**: Real-time progress tracking and logging
+* **Monitoring**: Real-time progress tracking and logging via oceanum prax CLI
 * **Result Management**: Automatic output organization and DataMesh registration
 * **Fault Tolerance**: Built-in retry mechanisms and error recovery
 * **Authentication**: Seamless integration with Oceanum authentication
@@ -62,12 +62,10 @@ The Prax backend requires several configuration parameters:
 
 .. code-block:: python
 
-   from rompy_oceanum.backends import PraxConfig
+   from rompy_oceanum import PraxConfig
 
    prax_config = PraxConfig(
        # Required parameters
-       pipeline_name="my-wave-model",
-       user="your-username",
        org="your-organization",
        project="your-project",
        stage="dev",  # or "prod"
@@ -92,11 +90,9 @@ Common configuration can be set via environment variables:
 
 .. code-block:: bash
 
-   export PRAX_BASE_URL="https://prax.oceanum.science"
    export PRAX_TOKEN="your-authentication-token"
    export PRAX_ORG="your-organization"
    export PRAX_PROJECT="your-project"
-   export PRAX_USER="your-username"
 
 Authentication
 ~~~~~~~~~~~~~~
@@ -140,7 +136,6 @@ SWAN models benefit from specific optimizations:
 .. code-block:: python
 
    swan_config = PraxConfig(
-       pipeline_name="swan-forecast",
        model_type="swan",
        resources={
            "cpu": "4000m",
@@ -158,7 +153,6 @@ WAVEWATCH III Backend
 .. code-block:: python
 
    ww3_config = PraxConfig(
-       pipeline_name="ww3-hindcast",
        model_type="wavewatch3",
        resources={
            "cpu": "8000m",

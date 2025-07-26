@@ -9,7 +9,6 @@ The following environment variables can be used to configure the package:
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `PRAX_TOKEN` | Your Prax API token for authentication | Yes |
-| `PRAX_USER` | Your Prax username | No (if specified in code) |
 | `PRAX_ORG` | Your Prax organization | No (if specified in code) |
 | `PRAX_PROJECT` | Your Prax project | No (if specified in code) |
 
@@ -18,7 +17,7 @@ The following environment variables can be used to configure the package:
 When creating a `PraxClient` instance, you can configure the following options:
 
 ```python
-from rompy_oceanum.prax import PraxClient
+from rompy_oceanum.client import PraxClient
 
 client = PraxClient(
     base_url="https://prax.oceanum.io",  # The base URL for the Prax API
@@ -33,7 +32,6 @@ When calling the `submit_to_prax` method on a `ModelRun` instance, you can use t
 ```python
 result = model_run.submit_to_prax(
     pipeline_name="swan-from-rompy",    # Name of the pipeline to run
-    user="your_username",               # Your Prax username
     org="your_organization",            # Your Prax organization
     project="your_project",             # Your Prax project
     stage="dev",                        # Stage to run in (e.g., "dev", "prod")
@@ -57,10 +55,10 @@ Returns the current status of the pipeline run.
 ### get_logs
 
 ```python
-logs = result.get_logs(task_name=None)
+logs = result.get_logs()
 ```
 
-Gets logs from the pipeline run. If `task_name` is provided, only returns logs for that specific task.
+Gets logs from the pipeline run.
 
 ### wait_for_completion
 
