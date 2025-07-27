@@ -56,7 +56,7 @@ rompy-oceanum extends the rompy wave modeling framework with cloud-native execut
    Environment variables, configuration files, and runtime parameters.
 
 **Pipeline Operations**
-   Submitting, monitoring, and managing model execution pipelines.
+   Submitting, monitoring, and managing model execution pipelines, including project management.
 
 **Result Management**
    Downloading outputs, registering in DataMesh, and post-processing workflows.

@@ -54,6 +54,7 @@ Features
 * **Result Management**: Automatic output organization and DataMesh registration
 * **Fault Tolerance**: Built-in retry mechanisms and error recovery
 * **Authentication**: Seamless integration with Oceanum authentication
+* **Project Management**: Organize pipelines into projects for better resource management
 
 Configuration
 ~~~~~~~~~~~~~
@@ -106,6 +107,34 @@ The Prax backend uses Oceanum's authentication system:
 
    # Or set token directly
    export PRAX_TOKEN="your-token"
+
+Project Management
+~~~~~~~~~~~~~~~~~~
+
+Organize your pipelines into projects for better resource management:
+
+.. code-block:: bash
+
+   # Create a project spec file
+   cat > my-project.yaml << EOF
+   name: wave-modeling
+   description: Wave modeling project
+   org: your-organization
+   stages:
+     - name: dev
+       description: Development environment
+     - name: prod
+       description: Production environment
+   EOF
+
+   # Create the project
+   oceanum rompy projects create my-project.yaml
+
+   # Deploy the default pipeline template
+   oceanum rompy pipelines --deploy-default --project-name wave-modeling
+
+   # List projects
+   oceanum rompy projects list
 
 Resource Requirements
 ~~~~~~~~~~~~~~~~~~~~~

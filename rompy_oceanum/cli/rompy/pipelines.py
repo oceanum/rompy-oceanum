@@ -42,14 +42,22 @@ def pipelines(
 ):
     """Manage pipeline templates for rompy execution.
 
-    This command focuses on template management. For actual pipeline operations,
-    use the 'oceanum prax' commands with project name: {project_name}
+    This command focuses on template management. Pipelines need to be deployed to a Prax project.
+    
+    First, create a project:
+        oceanum rompy projects create my-project.yaml
+    
+    Then, create pipeline templates:
+        oceanum rompy pipelines --create-template my-template.yaml --model-type swan
+    
+    Finally, deploy pipelines to your project:
+        oceanum rompy pipelines create my-template.yaml --project my-project
 
     Examples:
         oceanum rompy pipelines --show-templates
         oceanum rompy pipelines --create-template my-template.yaml --model-type swan
 
-    For pipeline deployment and management, use the 'oceanum prax' commands:
+    For pipeline deployment and management, you can also use the 'oceanum prax' commands:
         oceanum prax --project {project_name} list pipelines
         oceanum prax --project {project_name} create pipeline --help
         oceanum prax --project {project_name} submit pipeline <pipeline-name>
@@ -274,7 +282,9 @@ def _get_template_structure(
                     "name": "generate",
                     "image": model_config["generate_image"],
                     "command": "rompy generate --config-from-env -v",
-                    "outputs": {"artifacts": [{"name": "workspace", "path": "/app"}]},
+                    "outputs": {
+                        "artifacts": [{"name": "workspace", "path": "/tmp/rompy"}]
+                    },
                     "resources": {"cpu": "1", "memory": "1G"},
                     "env": [
                         {"name": "ROMPY_MODEL", "value": model_type},
@@ -284,13 +294,17 @@ def _get_template_structure(
                 {
                     "name": "run",
                     "image": model_config["run_image"],
-                    "inputs": {"artifacts": [{"name": "workspace", "path": "/app"}]},
+                    "inputs": {
+                        "artifacts": [{"name": "workspace", "path": "/tmp/rompy"}]
+                    },
                     "command": f"rompy run --config-from-env --run-backend local -v",
                     "resources": {
                         "cpu": model_config["cpu"],
                         "memory": model_config["memory"],
                     },
-                    "outputs": {"artifacts": [{"name": "output", "path": "/app"}]},
+                    "outputs": {
+                        "artifacts": [{"name": "output", "path": "/tmp/rompy"}]
+                    },
                     "env": [
                         {"name": "ROMPY_MODEL", "value": model_type},
                         {"name": "ROMPY_BACKEND_TYPE", "value": "local"},
@@ -310,7 +324,7 @@ def _get_template_structure(
                     "name": "register",
                     "image": model_config["generate_image"],
                     "command": "rompy postprocess --config-from-env --processor datamesh -v",
-                    "inputs": {"artifacts": [{"name": "output", "path": "/app"}]},
+                    "inputs": {"artifacts": [{"name": "output", "path": "/tmp/rompy"}]},
                     "resources": {"cpu": "1", "memory": "1G"},
                     "env": [
                         {"name": "ROMPY_MODEL", "value": model_type},

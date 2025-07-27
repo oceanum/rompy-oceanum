@@ -22,6 +22,14 @@ class DataMeshPostprocessor:
     This postprocessor registers model outputs and metadata with Oceanum's
     DataMesh data catalog system for discovery and access.
     """
+    
+    def __init__(self, config: Optional[Union[Dict[str, Any], DataMeshConfig]] = None):
+        """Initialize the DataMeshPostprocessor.
+        
+        Args:
+            config: DataMesh configuration (dict or DataMeshConfig instance)
+        """
+        self.config = config
 
     def process(self, model_run,
                 datamesh_config: Optional[Union[Dict[str, Any], DataMeshConfig]] = None,

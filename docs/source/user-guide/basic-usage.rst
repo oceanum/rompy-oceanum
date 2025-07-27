@@ -136,12 +136,18 @@ Submit your model using the oceanum CLI:
 
 .. code-block:: bash
 
+   # Create a project for your pipelines (if you don't have one)
+   oceanum rompy projects create my-project.yaml
+
+   # Deploy the default pipeline template
+   oceanum rompy pipelines --deploy-default --project-name my-project
+
    # Execute model via Prax pipeline
-   oceanum rompy run config.yml swan --pipeline-name my-pipeline
+   oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
 
    # Execute with custom options
    oceanum rompy run config.yml swan \
-       --pipeline-name swan-research \
+       --pipeline-name swan-from-rompy \
        --project wave-forecasting \
        --wait \
        --timeout 3600
@@ -241,20 +247,26 @@ Complete Workflow Example
    # 1. Authenticate (one-time setup)
    oceanum auth login
 
-   # 2. Generate optimized configuration
+   # 2. Create a project for your pipelines
+   oceanum rompy projects create wave-project.yaml
+
+   # 3. Generate optimized configuration
    oceanum rompy init swan --template operational --domain "perth_coast"
 
-   # 3. Execute model
-   oceanum rompy run config.yml swan --pipeline-name swan-operational
+   # 4. Deploy the default pipeline template
+   oceanum rompy pipelines --deploy-default --project-name wave-project
 
-   # 4. Monitor execution (use run-id from previous command)
-   oceanum prax --project wave-forecasting logs pipeline-runs <run-id> -f
+   # 5. Execute model
+   oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project wave-project
 
-   # 5. View logs
-   oceanum prax --project wave-forecasting logs pipeline-runs <run-id> -f
+   # 6. Monitor execution (use run-id from previous command)
+   oceanum prax --project wave-project logs pipeline-runs <run-id> -f
 
-   # 6. Download organized results
-   oceanum prax --project wave-forecasting download pipeline-runs <run-id> --output ./outputs
+   # 7. View logs
+   oceanum prax --project wave-project logs pipeline-runs <run-id> -f
+
+   # 8. Download organized results
+   oceanum prax --project wave-project download pipeline-runs <run-id> --output ./outputs
 
 Individual Commands
 ~~~~~~~~~~~~~~~~~~~
@@ -264,17 +276,23 @@ Individual Commands
    # Generate configuration from template
    oceanum rompy init swan --template basic --domain "my_domain"
 
+   # Create a project for your pipelines
+   oceanum rompy projects create my-project.yaml
+
+   # Deploy the default pipeline template
+   oceanum rompy pipelines --deploy-default --project-name my-project
+
    # Submit pipeline execution
-   oceanum rompy run config.yml swan --pipeline-name my-pipeline
+   oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
 
    # Check pipeline status
-   oceanum prax --project wave-forecasting describe pipeline-runs <run-id>
+   oceanum prax --project my-project describe pipeline-runs <run-id>
 
    # Monitor logs in real-time
-   oceanum prax --project wave-forecasting logs pipeline-runs <run-id> -f
+   oceanum prax --project my-project logs pipeline-runs <run-id> -f
 
    # Download organized outputs
-   oceanum prax --project wave-forecasting download pipeline-runs <run-id> --output ./outputs
+   oceanum prax --project my-project download pipeline-runs <run-id> --output ./outputs
 
 Enhanced Output Organization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -485,7 +503,7 @@ Complete workflow automation using the oceanum CLI:
    DOMAIN="perth_coast"
    MODEL="swan"
    TEMPLATE="operational"
-   PIPELINE="swan-operational"
+   PIPELINE="swan-from-rompy"
    PROJECT="wave-forecasting"
    OUTPUT_DIR="./results/$(date +%Y%m%d_%H%M%S)"
 
@@ -497,13 +515,21 @@ Complete workflow automation using the oceanum CLI:
        exit 1
    fi
 
+   # Create project if needed
+   echo "🏗️  Creating project (if needed)..."
+   oceanum rompy projects create ${PROJECT}.yaml || echo "Project may already exist"
+
+   # Deploy the default pipeline template
+   echo "🔧 Deploying default pipeline template..."
+   oceanum rompy pipelines --deploy-default --project-name ${PROJECT} || echo "Pipeline may already be deployed"
+
    # Generate configuration
    echo "📝 Generating ${MODEL} configuration..."
    oceanum rompy init ${MODEL} --template ${TEMPLATE} --domain ${DOMAIN}
 
    # Execute model
    echo "🎯 Executing model..."
-   RUN_OUTPUT=$(oceanum rompy run config.yml ${MODEL} --pipeline-name ${PIPELINE} --wait)
+   RUN_OUTPUT=$(oceanum rompy run config.yml ${MODEL} --pipeline-name ${PIPELINE} --project ${PROJECT} --wait)
    RUN_ID=$(echo "$RUN_OUTPUT" | grep "🆔 Prax run ID:" | cut -d' ' -f4)
 
    # Download results
@@ -524,8 +550,16 @@ Process multiple configurations:
    # batch_modeling.sh
 
    DOMAINS=("perth" "sydney" "melbourne")
-   PIPELINE="swan-operational"
+   PIPELINE="swan-from-rompy"
    PROJECT="wave-forecasting"
+
+   # Create project if needed
+   echo "🏗️  Creating project (if needed)..."
+   oceanum rompy projects create ${PROJECT}.yaml || echo "Project may already exist"
+
+   # Deploy the default pipeline template
+   echo "🔧 Deploying default pipeline template..."
+   oceanum rompy pipelines --deploy-default --project-name ${PROJECT} || echo "Pipeline may already be deployed"
 
    for domain in "${DOMAINS[@]}"; do
        echo "🔄 Processing domain: ${domain}"
@@ -534,7 +568,7 @@ Process multiple configurations:
        oceanum rompy init swan --template operational --domain "${domain}" --output "${domain}_config.yml"
 
        # Submit pipeline
-       oceanum rompy run "${domain}_config.yml" swan --pipeline-name ${PIPELINE} &
+       oceanum rompy run "${domain}_config.yml" swan --pipeline-name ${PIPELINE} --project ${PROJECT} &
    done
 
    # Wait for all background jobs

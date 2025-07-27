@@ -40,8 +40,14 @@ oceanum auth login
 # Generate optimized rompy configuration
 oceanum rompy init swan --template basic --domain "my_domain"
 
+# Create a project for your pipelines (if you don't have one)
+oceanum rompy projects create my-project.yaml
+
+# Deploy the default pipeline template
+oceanum rompy pipelines --deploy-default --project-name my-project
+
 # Execute model via Prax pipeline
-oceanum rompy run config.yml swan --pipeline-name my-pipeline
+oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
 
 # Monitor execution
 oceanum rompy status <run-id> --watch
@@ -59,6 +65,8 @@ oceanum rompy sync <run-id> ./outputs --organize
 | `oceanum rompy status` | Monitor pipeline execution with real-time updates |
 | `oceanum rompy logs` | View and filter pipeline logs |
 | `oceanum rompy sync` | Download and organize pipeline outputs |
+| `oceanum rompy projects` | Manage Prax projects for rompy pipelines |
+| `oceanum rompy pipelines` | Manage pipeline templates and deployments |
 
 ### Basic Pipeline Execution (Programmatic)
 
@@ -139,8 +147,14 @@ oceanum auth login
 # Generate configuration
 oceanum rompy init swan --template operational --domain "perth_coast"
 
+# Create project if needed
+oceanum rompy projects create wave-project.yaml
+
+# Deploy the default pipeline template
+oceanum rompy pipelines --deploy-default --project-name wave-project
+
 # Execute model
-RUN_ID=$(oceanum rompy run config.yml swan --pipeline-name swan-operational | grep "Prax run ID:" | cut -d' ' -f4)
+RUN_ID=$(oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project wave-project | grep "Prax run ID:" | cut -d' ' -f4)
 
 # Monitor execution
 oceanum rompy status $RUN_ID --watch
@@ -155,8 +169,20 @@ oceanum rompy sync $RUN_ID ./outputs --organize
 # Generate configuration from template
 oceanum rompy init swan --template basic --domain "my_domain"
 
+# Create a project for your pipelines
+oceanum rompy projects create my-project.yaml
+
+# Deploy the default pipeline template
+oceanum rompy pipelines --deploy-default --project-name my-project
+
+# Or create a custom pipeline template
+oceanum rompy pipelines --create-template my-pipeline.yaml --model-type swan
+
+# Deploy custom pipeline to your project
+oceanum rompy pipeline-crud create my-pipeline.yaml --project my-project
+
 # Execute model via Prax pipeline
-oceanum rompy run config.yml swan --pipeline-name my-pipeline
+oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
 
 # Monitor pipeline execution
 oceanum rompy status <run-id> --watch
@@ -209,7 +235,11 @@ Perfect for scripts and automation:
 # Batch processing multiple domains
 for domain in "perth" "sydney" "melbourne"; do
     oceanum rompy init swan --template operational --domain "$domain" --output "${domain}_config.yml"
-    oceanum rompy run "${domain}_config.yml" swan --pipeline-name swan-operational &
+    
+    # Deploy the default pipeline template if not already done
+    oceanum rompy pipelines --deploy-default --project-name wave-project 2>/dev/null || true
+    
+    oceanum rompy run "${domain}_config.yml" swan --pipeline-name swan-from-rompy --project wave-project &
 done
 wait  # Wait for all background jobs
 ```
@@ -306,29 +336,39 @@ done
 
 ### Python Integration
 
+Use rompy programmatically with oceanum authentication:
+
 ```python
-import subprocess
+import rompy
+from rompy_oceanum import PraxConfig
 
-# Generate configuration
-subprocess.run([
-    "oceanum", "rompy", "init", "swan",
-    "--template", "research",
-    "--domain", "research_domain"
-], check=True)
+# Create configuration programmatically
+config = rompy.SwanConfig(
+    grid=rompy.swan.SwanGrid(x0=115.0, y0=-35.0, dx=0.05, dy=0.05, nx=100, ny=80),
+    winds=[rompy.swan.SwanWind(speed=10.0, direction=270.0)],
+    physics={"whitecapping": True, "breaking": True}
+)
 
-# Execute model
-result = subprocess.run([
-    "oceanum", "rompy", "run", "config.yml", "swan",
-    "--pipeline-name", "swan-research", 
-    "--wait"
-], capture_output=True, text=True, check=True)
+# Create ModelRun
+model_run = rompy.ModelRun(config=config, output_dir="./outputs")
 
-# Extract run ID for further processing
-for line in result.stdout.split('\n'):
-    if '🆔 Prax run ID:' in line:
-        run_id = line.split()[-1]
-        break
+# Submit to Prax with project specification
+prax_config = PraxConfig(
+    org="your-org",
+    project="wave-project",  # Specify your project
+    pipeline_name="swan-pipeline"
+)
+
+result = model_run.pipeline(backend="prax", **prax_config.dict())
+
+# Monitor execution
+result.wait_for_completion(timeout=3600)
+
+# Download results
+if result.is_successful():
+    output_paths = result.download_outputs("./results")
 ```
+
 
 ## Documentation
 
@@ -350,6 +390,8 @@ If you were using the standalone `rompy-oceanum` CLI, the new commands are:
 | `rompy-oceanum logs` | `oceanum rompy logs` |
 | `rompy-oceanum download` | `oceanum rompy sync` |
 | Manual config | `oceanum rompy init` |
+| (New) Project management | `oceanum rompy projects` |
+| (New) Pipeline management | `oceanum rompy pipelines` |
 
 Authentication is now handled via `oceanum auth login` instead of environment variables.
 

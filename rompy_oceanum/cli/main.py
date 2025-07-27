@@ -23,12 +23,14 @@ from .rompy.run import run
 from .rompy.init import init
 from .rompy.pipelines import pipelines
 from .rompy.pipeline_crud import pipeline_crud
+from .rompy.project_crud import project_crud
 
 # Add commands to the rompy group
 rompy.add_command(run)
 rompy.add_command(init)
 rompy.add_command(pipelines)
-rompy.add_command(pipeline_crud)
+rompy.add_command(pipeline_crud, name='pipeline-crud')  # Rename pipeline_crud to pipeline-crud
+rompy.add_command(project_crud, name='projects')   # Add project CRUD operations
 
 # For plugin system compatibility
 cli = rompy

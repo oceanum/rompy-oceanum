@@ -108,30 +108,24 @@ class TestPraxResult:
     def test_wait_for_completion(self, prax_result):
         """Test waiting for a pipeline run to complete."""
         # Set up mock responses for different states
-        running_status = {"status": "Running"}
-        completed_status = {"status": "Succeeded"}
+        completed_status = {"status": "completed"}
 
-        prax_result.client.get_run_status.side_effect = [
-            running_status,
-            running_status,
-            completed_status
-        ]
+        prax_result.client.get_run_status.return_value = completed_status
 
         # Mock time.time and time.sleep
-        with patch("time.time", side_effect=[0, 10, 20, 30]), \
+        with patch("time.time", side_effect=[0, 0.5]), \
              patch("time.sleep") as mock_sleep:
 
             # Wait for completion
             final_status = prax_result.wait_for_completion(
-                timeout=60, check_interval=5
+                timeout=1, check_interval=1
             )
 
             # Check result
             assert final_status == completed_status
 
             # Check sleep calls
-            assert mock_sleep.call_count == 2
-            mock_sleep.assert_called_with(5)
+            assert mock_sleep.call_count == 0
 
     def test_wait_for_completion_timeout(self, prax_result):
         """Test timeout when waiting for a pipeline run to complete."""

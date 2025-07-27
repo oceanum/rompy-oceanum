@@ -25,6 +25,64 @@ class PraxPipelineBackend:
     execution, providing monitoring and result retrieval capabilities.
     """
 
+    def __init__(self, config: Optional[Union[Dict[str, Any], PraxConfig]] = None):
+        """Initialize the PraxPipelineBackend.
+        
+        Args:
+            config: Prax configuration (dict or PraxConfig instance)
+        """
+        self.config = config
+
+    def submit(self, model_run, pipeline_name: str, **kwargs):
+        """Submit a model run to a Prax pipeline.
+        
+        This is an alias for the execute method for compatibility with rompy's pipeline interface.
+        
+        Args:
+            model_run: The ModelRun instance to execute
+            pipeline_name: Name of the Prax pipeline to execute
+            **kwargs: Additional parameters passed to execute method
+            
+        Returns:
+            Pipeline execution results
+        """
+        return self.execute(model_run, pipeline_name, **kwargs)
+
+    def get_status(self, result):
+        """Get the status of a pipeline run.
+        
+        Args:
+            result: PraxResult object
+            
+        Returns:
+            Status dictionary
+        """
+        return result.get_status()
+
+    def get_logs(self, result, task_name: Optional[str] = None):
+        """Get logs from a pipeline run.
+        
+        Args:
+            result: PraxResult object
+            task_name: Optional task name to get logs for specific task
+            
+        Returns:
+            List of log lines
+        """
+        return result.get_logs(task_name)
+
+    def download_outputs(self, result, target_dir: str):
+        """Download outputs from a pipeline run.
+        
+        Args:
+            result: PraxResult object
+            target_dir: Directory to download outputs to
+            
+        Returns:
+            List of downloaded file paths
+        """
+        return result.download_outputs(target_dir)
+
     def execute(
         self,
         model_run,
@@ -312,6 +370,64 @@ class PraxPipelineBackend:
     This backend submits rompy model configurations to Prax pipelines for remote
     execution, providing monitoring and result retrieval capabilities.
     """
+
+    def __init__(self, config: Optional[Union[Dict[str, Any], PraxConfig]] = None):
+        """Initialize the PraxPipelineBackend.
+        
+        Args:
+            config: Prax configuration (dict or PraxConfig instance)
+        """
+        self.config = config
+
+    def submit(self, model_run, pipeline_name: str, **kwargs):
+        """Submit a model run to a Prax pipeline.
+        
+        This is an alias for the execute method for compatibility with rompy's pipeline interface.
+        
+        Args:
+            model_run: The ModelRun instance to execute
+            pipeline_name: Name of the Prax pipeline to execute
+            **kwargs: Additional parameters passed to execute method
+            
+        Returns:
+            Pipeline execution results
+        """
+        return self.execute(model_run, pipeline_name, **kwargs)
+
+    def get_status(self, result):
+        """Get the status of a pipeline run.
+        
+        Args:
+            result: PraxResult object
+            
+        Returns:
+            Status dictionary
+        """
+        return result.get_status()
+
+    def get_logs(self, result, task_name: Optional[str] = None):
+        """Get logs from a pipeline run.
+        
+        Args:
+            result: PraxResult object
+            task_name: Optional task name to get logs for specific task
+            
+        Returns:
+            List of log lines
+        """
+        return result.get_logs(task_name)
+
+    def download_outputs(self, result, target_dir: str):
+        """Download outputs from a pipeline run.
+        
+        Args:
+            result: PraxResult object
+            target_dir: Directory to download outputs to
+            
+        Returns:
+            List of downloaded file paths
+        """
+        return result.download_outputs(target_dir)
 
     def execute(
         self,

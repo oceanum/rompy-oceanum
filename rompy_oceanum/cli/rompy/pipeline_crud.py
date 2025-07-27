@@ -32,11 +32,11 @@ def pipeline_crud(ctx: click.Context, obj: ContextObject, project: str, org: str
     pipeline templates in a Prax project.
     
     Examples:
-        oceanum rompy pipeline-crud create my-pipeline.yaml
-        oceanum rompy pipeline-crud list
-        oceanum rompy pipeline-crud get my-pipeline
-        oceanum rompy pipeline-crud update my-pipeline my-updated-pipeline.yaml
-        oceanum rompy pipeline-crud delete my-pipeline
+        oceanum rompy pipelines create my-pipeline.yaml --project my-project
+        oceanum rompy pipelines list --project my-project
+        oceanum rompy pipelines get my-pipeline --project my-project
+        oceanum rompy pipelines update my-pipeline my-updated-pipeline.yaml --project my-project
+        oceanum rompy pipelines delete my-pipeline --project my-project
     """
     # Store project and org in context for subcommands
     ctx.ensure_object(dict)

@@ -9,6 +9,8 @@ Overview
 The oceanum rompy CLI integration provides the following capabilities:
 
 * **Configuration Management**: Generate optimized rompy configurations from templates
+* **Project Management**: Create and manage Prax projects for rompy pipelines
+* **Pipeline Management**: Create, list, get, update, and delete pipeline templates
 * **Pipeline Execution**: Submit models to Prax for remote execution with enhanced monitoring
 * **Status Monitoring**: Real-time pipeline status tracking with rich terminal output
 * **Log Management**: View and filter pipeline logs with rompy-specific enhancements
@@ -110,6 +112,22 @@ Generate optimized rompy configuration files from templates.
        --domain "great_barrier_reef" \
        --output research_config.yml
 
+**Complete Workflow:**
+
+.. code-block:: bash
+
+   # 1. Create a project for your pipelines
+   oceanum rompy projects create my-project.yaml
+
+   # 2. Deploy the default pipeline template
+   oceanum rompy pipelines --deploy-default --project-name my-project
+
+   # 3. Generate configuration
+   oceanum rompy init swan --template operational --domain "perth_coast"
+
+   # 4. Execute model
+   oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
+
 run
 ~~~
 
@@ -169,6 +187,21 @@ The command returns rich terminal output with execution details:
    📤 Submitting to pipeline: swan-operational
    🆔 Prax run ID: pipeline-swan-operational-run-id-dev-xyz123
    💡 Monitor with: oceanum prax --project wave-forecasting logs pipeline-runs pipeline-swan-operational-run-id-dev-xyz123
+
+**Project Workflow:**
+
+Before running pipelines, you need to create a project and deploy a pipeline template:
+
+.. code-block:: bash
+
+   # Create a project for your pipelines
+   oceanum rompy projects create my-project.yaml
+
+   # Deploy the default pipeline template
+   oceanum rompy pipelines --deploy-default --project-name my-project
+
+   # Execute model
+   oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
 
 
 status
@@ -279,46 +312,87 @@ Logs are displayed with timestamps:
    2024-01-15T10:35:22Z [WARN] High wave heights detected in domain
    2024-01-15T10:42:18Z [INFO] Model execution completed successfully
 
-pipelines
-~~~~~~~~~
+pipeline-crud
+~~~~~~~~~~~~~
 
-Manage pipeline templates for rompy execution.
+Manage pipeline templates and deployments for rompy execution.
 
 **Syntax:**
 
 .. code-block:: bash
 
-   oceanum rompy pipelines [OPTIONS]
+   oceanum rompy pipeline-crud [OPTIONS] COMMAND [ARGS]...
 
 **Options:**
 
-* ``--model-type {swan,schism,ww3}``: Model type for template selection
-* ``--show-templates``: Show available pipeline templates
-* ``--create-template TEXT``: Create a new pipeline template file
-* ``--project-name TEXT``: Prax project name for rompy pipelines (default: rompy-pipelines)
-* ``--run-image TEXT``: Custom Docker image for the run task
-* ``--cpu TEXT``: CPU resources for the run task (e.g., '4')
-* ``--memory TEXT``: Memory resources for the run task (e.g., '8G')
+* ``--project TEXT``: Prax project name (default: rompy-pipelines)
+* ``--org TEXT``: Prax organization name (overrides oceanum context)
+
+**Commands:**
+
+* ``create TEMPLATE_FILE``: Create a new pipeline from a template file
+* ``list-pipelines``: List all pipelines in the project
+* ``get PIPELINE_NAME``: Get details of a specific pipeline
+* ``update PIPELINE_NAME TEMPLATE_FILE``: Update an existing pipeline with a new template
+* ``delete PIPELINE_NAME``: Delete a pipeline from the project
 
 **Examples:**
 
 .. code-block:: bash
 
-   # Show available templates
-   oceanum rompy pipelines --show-templates
+   # Create a pipeline from a template
+   oceanum rompy pipeline-crud create my-pipeline.yaml --project my-project
 
-   # Create a new pipeline template
-   oceanum rompy pipelines --create-template my-template.yaml --model-type swan
+   # List all pipelines in a project
+   oceanum rompy pipeline-crud list-pipelines --project my-project
 
-For pipeline deployment and management, use the 'oceanum prax' commands or the new CRUD operations:
+   # Get details of a specific pipeline
+   oceanum rompy pipeline-crud get my-pipeline --project my-project
+
+   # Update an existing pipeline
+   oceanum rompy pipeline-crud update my-pipeline my-updated-pipeline.yaml --project my-project
+
+   # Delete a pipeline
+   oceanum rompy pipeline-crud delete my-pipeline --project my-project
+
+
+projects
+~~~~~~~~
+
+Manage Prax projects for rompy pipelines.
+
+**Syntax:**
 
 .. code-block:: bash
 
-   # List pipelines using oceanum prax
-   oceanum prax --project rompy-pipelines list pipelines
+   oceanum rompy projects [OPTIONS] COMMAND [ARGS]...
 
-   # Or use the new CRUD operations
-   oceanum rompy pipeline-crud list-pipelines
+**Commands:**
+
+* ``create SPEC_FILE``: Create a new project from a spec file
+* ``list``: List all projects accessible to the user
+* ``get PROJECT_NAME``: Get details of a specific project
+* ``delete PROJECT_NAME``: Delete a project
+
+**Options for all commands:**
+
+* ``--org TEXT``: Prax organization name (overrides oceanum context)
+
+**Examples:**
+
+.. code-block:: bash
+
+   # Create a new project
+   oceanum rompy projects create my-project.yaml
+
+   # List all projects
+   oceanum rompy projects list
+
+   # Get project details
+   oceanum rompy projects get my-project
+
+   # Delete a project
+   oceanum rompy projects delete my-project
 
 
 Output Formats
@@ -408,7 +482,8 @@ Bash Script Example
    DOMAIN="perth_coast"
    MODEL="swan"
    TEMPLATE="operational"
-   PIPELINE="swan-operational"
+   PIPELINE="swan-from-rompy"
+   PROJECT="wave-forecasting"
    OUTPUT_DIR="./results/$(date +%Y%m%d_%H%M%S)"
 
    # Ensure authentication
@@ -418,6 +493,14 @@ Bash Script Example
    fi
 
    echo "🚀 Starting automated modeling workflow"
+
+   # Create project if needed
+   echo "🏗️  Creating project (if needed)..."
+   oceanum rompy projects create ${PROJECT}.yaml || echo "Project may already exist"
+
+   # Deploy the default pipeline template
+   echo "🔧 Deploying default pipeline template..."
+   oceanum rompy pipelines --deploy-default --project-name ${PROJECT} || echo "Pipeline may already be deployed"
 
    # Generate configuration
    echo "📝 Generating ${MODEL} configuration..."
@@ -430,6 +513,7 @@ Bash Script Example
    echo "🎯 Executing ${MODEL} model via Prax..."
    RUN_OUTPUT=$(oceanum rompy run config.yml ${MODEL} \
        --pipeline-name ${PIPELINE} \
+       --project ${PROJECT} \
        --wait \
        --timeout 3600)
 
@@ -478,9 +562,9 @@ Python Script Example
            print(f"Error: {e.stderr}")
            sys.exit(1)
 
-   def submit_pipeline(config_file, model, pipeline_name):
+   def submit_pipeline(config_file, model, pipeline_name, project):
        """Submit pipeline and return run ID."""
-       cmd = f"oceanum rompy run {config_file} {model} --pipeline-name {pipeline_name} --wait"
+       cmd = f"oceanum rompy run {config_file} {model} --pipeline-name {pipeline_name} --project {project} --wait"
        output = run_command(cmd)
 
        # Extract run ID from output
@@ -490,24 +574,30 @@ Python Script Example
 
        raise ValueError("Could not extract run ID from output")
 
-   def wait_for_completion(run_id, timeout=3600):
+   def wait_for_completion(run_id, project, timeout=3600):
        """Wait for pipeline completion."""
        import time
        start_time = time.time()
 
        while time.time() - start_time < timeout:
-           status_json = run_command(f"oceanum rompy status {run_id} --json")
-           status_data = json.loads(status_json)
+           # Using oceanum prax command to check status
+           cmd = f"oceanum prax --project {project} describe pipeline-runs {run_id} --output json"
+           try:
+               status_json = run_command(cmd)
+               status_data = json.loads(status_json)
+               
+               # Extract status - this might vary based on actual API response
+               current_status = status_data.get('status', 'UNKNOWN')
+               print(f"🔄 Status: {current_status}")
 
-           current_status = status_data['status']
-           print(f"🔄 Status: {current_status}")
-
-           if current_status == 'COMPLETED':
-               print("✅ Pipeline completed successfully!")
-               return True
-           elif current_status == 'FAILED':
-               print("❌ Pipeline execution failed!")
-               return False
+               if current_status.upper() in ['COMPLETED', 'SUCCEEDED']:
+                   print("✅ Pipeline completed successfully!")
+                   return True
+               elif current_status.upper() in ['FAILED', 'ERROR']:
+                   print("❌ Pipeline execution failed!")
+                   return False
+           except Exception as e:
+               print(f"⚠️  Status check failed: {e}")
 
            time.sleep(30)  # Check every 30 seconds
 
@@ -520,7 +610,8 @@ Python Script Example
        domain = "perth_coast"
        model = "swan"
        template = "operational"
-       pipeline = "swan-operational"
+       pipeline = "swan-from-rompy"
+       project = "wave-forecasting"
 
        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
        output_dir = Path(f"./results/{timestamp}")
@@ -534,17 +625,32 @@ Python Script Example
            print("❌ Not authenticated. Please run: oceanum auth login")
            sys.exit(1)
 
+       # Create project if needed
+       print("🏗️  Creating project (if needed)...")
+       try:
+           run_command(f"oceanum rompy projects create {project}.yaml")
+       except:
+           print("Project may already exist or creation failed")
+
+       # Deploy the default pipeline template
+       print("🔧 Deploying default pipeline template...")
+       try:
+           run_command(f"oceanum rompy pipelines --deploy-default --project-name {project}")
+       except:
+           print("Pipeline may already be deployed")
+
        # Generate configuration
        print(f"📝 Generating {model} configuration...")
        run_command(f"oceanum rompy init {model} --template {template} --domain {domain}")
 
        # Submit pipeline
        print(f"🎯 Executing {model} model via Prax...")
-       run_id = submit_pipeline("config.yml", model, pipeline)
+       run_id = submit_pipeline("config.yml", model, pipeline, project)
        print(f"📋 Run ID: {run_id}")
 
-       # Wait for completion
-       if not wait_for_completion(run_id):
+       # Wait for completion (using oceanum prax commands)
+       print("⏳ Waiting for pipeline completion...")
+       if not wait_for_completion(run_id, project):
            sys.exit(1)
 
        # Download results
@@ -608,7 +714,13 @@ If pipeline execution fails:
    python -c "import yaml; yaml.safe_load(open('config.yml'))"
 
    # Check pipeline template availability
-   oceanum prax pipelines list
+   oceanum rompy pipeline-crud list-pipelines --project my-project
+
+   # Check project exists
+   oceanum rompy projects list
+
+   # Deploy default pipeline template if needed
+   oceanum rompy pipelines --deploy-default --project-name my-project
 
 **Download Issues**
 

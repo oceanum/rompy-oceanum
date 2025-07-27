@@ -37,15 +37,12 @@ def mock_requests(monkeypatch):
     mock_response.json.return_value = {"name": "test-run-id", "status": "Running"}
     mock_response.text = '{"name": "test-run-id", "status": "Running"}'
     
-    mock_post = MagicMock(return_value=mock_response)
-    mock_get = MagicMock(return_value=mock_response)
+    def mock_make_request(self, method, url, **kwargs):
+        return mock_response.json()
     
-    monkeypatch.setattr("requests.post", mock_post)
-    monkeypatch.setattr("requests.get", mock_get)
+    monkeypatch.setattr("rompy_oceanum.client.PraxClient._make_request", mock_make_request)
     
     return {
-        "post": mock_post,
-        "get": mock_get,
         "response": mock_response
     }
 
