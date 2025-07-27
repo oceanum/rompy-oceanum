@@ -279,54 +279,46 @@ Logs are displayed with timestamps:
    2024-01-15T10:35:22Z [WARN] High wave heights detected in domain
    2024-01-15T10:42:18Z [INFO] Model execution completed successfully
 
-sync
-~~~~
+pipelines
+~~~~~~~~~
 
-Download and organize pipeline outputs using the oceanum prax CLI.
+Manage pipeline templates for rompy execution.
 
 **Syntax:**
 
 .. code-block:: bash
 
-   oceanum prax --project PROJECT download pipeline-runs RUN_ID [OPTIONS]
-
-**Required Arguments:**
-
-* ``PROJECT``: Prax project name
-* ``RUN_ID``: Prax run identifier
+   oceanum rompy pipelines [OPTIONS]
 
 **Options:**
 
-* ``--output PATH``: Output directory for downloaded files
+* ``--model-type {swan,schism,ww3}``: Model type for template selection
+* ``--show-templates``: Show available pipeline templates
+* ``--create-template TEXT``: Create a new pipeline template file
+* ``--project-name TEXT``: Prax project name for rompy pipelines (default: rompy-pipelines)
+* ``--run-image TEXT``: Custom Docker image for the run task
+* ``--cpu TEXT``: CPU resources for the run task (e.g., '4')
+* ``--memory TEXT``: Memory resources for the run task (e.g., '8G')
 
 **Examples:**
 
 .. code-block:: bash
 
-   # Download all outputs
-   oceanum prax --project wave-forecasting download pipeline-runs pipeline-swan-operational-run-id-dev-xyz123 \
-       --output ./outputs
+   # Show available templates
+   oceanum rompy pipelines --show-templates
 
-**Output:**
+   # Create a new pipeline template
+   oceanum rompy pipelines --create-template my-template.yaml --model-type swan
 
-The command provides download progress:
+For pipeline deployment and management, use the 'oceanum prax' commands or the new CRUD operations:
 
-.. code-block:: text
+.. code-block:: bash
 
-   NAME: pipeline-swan-operational-run-id-dev-xyz123
-   STATUS: Completed
-   STARTED: 2024-01-15T10:30:45Z
-   DURATION: 23m15s
-   OUTPUTS: 15 files
+   # List pipelines using oceanum prax
+   oceanum prax --project rompy-pipelines list pipelines
 
-   Downloading outputs to ./outputs:
-   wave_height.nc [====================] 100% (125.3 MB)
-   wave_period.nc [====================] 100% (89.4 MB)
-   wave_field.png [====================] 100% (2.1 MB)
-   time_series.png [===================] 100% (1.8 MB)
-   model.log [========================] 100% (15.2 MB)
-
-   ✅ Downloaded 15 files successfully
+   # Or use the new CRUD operations
+   oceanum rompy pipeline-crud list-pipelines
 
 
 Output Formats
