@@ -35,7 +35,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # Job to determine which images to build
   determine-builds:
     runs-on: ubuntu-latest
     outputs:
@@ -52,42 +51,36 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          # For workflow_dispatch, use inputs
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "swan=${{ github.event.inputs.build_swan }}" >> $GITHUB_OUTPUT
             echo "rompy=${{ github.event.inputs.build_rompy }}" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # For releases, build both
           if [ "${{ github.event_name }}" = "release" ]; then
             echo "swan=true" >> $GITHUB_OUTPUT
             echo "rompy=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # For push/PR, check what changed
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE_SHA="${{ github.event.pull_request.base.sha }}"
           else
             BASE_SHA="${{ github.event.before }}"
           fi
 
-          # Check if SWAN-related files changed
           if git diff --name-only "$BASE_SHA" HEAD | grep -E "(docker/swan\.Dockerfile|\.github/workflows/docker-build\.yml)" > /dev/null; then
             echo "swan=true" >> $GITHUB_OUTPUT
           else
             echo "swan=false" >> $GITHUB_OUTPUT
           fi
 
-          # Check if Rompy-related files changed
           if git diff --name-only "$BASE_SHA" HEAD | grep -E "(docker/rompy\.Dockerfile|rompy_oceanum/|pyproject\.toml|\.github/workflows/docker-build\.yml)" > /dev/null; then
             echo "rompy=true" >> $GITHUB_OUTPUT
           else
             echo "rompy=false" >> $GITHUB_OUTPUT
           fi
 
-  # Build SWAN Docker image
   build-swan:
     runs-on: ubuntu-latest
     needs: determine-builds
@@ -145,18 +138,11 @@ jobs:
       - name: Test SWAN image
         if: github.event_name == 'pull_request'
         run: |
-          # Load the built image for testing
           docker buildx build --load -t test-swan:latest -f ./docker/swan.Dockerfile .
-
-          # Test that SWAN executable is available
           docker run --rm test-swan:latest swan.exe --help || echo "SWAN help command completed"
-
-          # Test that required libraries are installed
           docker run --rm test-swan:latest ldd /usr/local/bin/swan.exe
-
           echo "✅ SWAN image tests passed"
 
-  # Build Rompy Docker image
   build-rompy:
     runs-on: ubuntu-latest
     needs: determine-builds
@@ -214,28 +200,19 @@ jobs:
       - name: Test Rompy image
         if: github.event_name == 'pull_request'
         run: |
-          # Load the built image for testing
           docker buildx build --load -t test-rompy:latest -f ./docker/rompy.Dockerfile .
-
-          # Test that Python packages are installed correctly
           docker run --rm test-rompy:latest python -c "import rompy; print(f'Rompy version: {rompy.__version__}')"
           docker run --rm test-rompy:latest python -c "import rompy_oceanum; print('rompy-oceanum imported successfully')"
           docker run --rm test-rompy:latest python -c "import oceanum; print('oceanum imported successfully')"
-
-          # Test CLI tools
           docker run --rm test-rompy:latest rompy-oceanum --help
           docker run --rm test-rompy:latest oceanum --version || echo "oceanum CLI test completed"
-
-          # Test that rompy can import the plugin
           docker run --rm test-rompy:latest python -c "
           import rompy
           from rompy_oceanum.pipeline import PraxPipelineBackend
           print('✅ Prax pipeline backend can be imported')
           "
-
           echo "✅ Rompy image tests passed"
 
-  # Security scanning
   security-scan:
     runs-on: ubuntu-latest
     needs: [determine-builds, build-swan, build-rompy]
@@ -249,23 +226,21 @@ jobs:
           - ${{ needs.determine-builds.outputs.build_rompy == 'true' && format('{0}/{1}/rompy', env.REGISTRY, env.IMAGE_NAME) || '' }}
         exclude:
           - image: ''
+    steps:
+      - name: Run Trivy vulnerability scanner
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.image }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
 
-  steps:
-    - name: Run Trivy vulnerability scanner
-      if: github.event_name != 'pull_request'
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: ${{ matrix.image }}:${{ github.sha }}
-        format: 'sarif'
-        output: 'trivy-results.sarif'
+      - name: Upload Trivy scan results to GitHub Security tab
+        if: github.event_name != 'pull_request'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
 
-    - name: Upload Trivy scan results to GitHub Security tab
-      if: github.event_name != 'pull_request'
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: 'trivy-results.sarif'
-
-  # Summary job
   build-summary:
     runs-on: ubuntu-latest
     needs: [determine-builds, build-swan, build-rompy]
@@ -310,3 +285,4 @@ jobs:
             echo "### Registry" >> $GITHUB_STEP_SUMMARY
             echo "Images are available at: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
           fi
+
