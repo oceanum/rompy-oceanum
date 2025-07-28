@@ -7,7 +7,7 @@ resources:
       outputs:
         artifacts:
           - name: workspace
-            path: /app
+            path: /tmp/rompy
       resources:
         cpu: 1
         memory: 1G
@@ -22,34 +22,34 @@ resources:
       inputs:
         artifacts:
           - name: workspace
-            path: /app
-      command: rompy run --config-from-env --run-backend local -v
+            path: /tmp/rompy
+      command: bach -c "cd /tmp/rompy && mpirun --allow-run-as-root -n 4 /usr/local/bin/swan.exe"
       resources:
         cpu: 4
         memory: 2G
       outputs:
         artifacts:
           - name: grid
-            path: /app/swangrid.nc
+            path: /tmp/rompy/swangrid.nc
           - name: spectra
-            path: /app/swanspec.nc
-      env:
-        - name: ROMPY_MODEL
-          value: "swan"
-        - name: OMPI_ALLOW_RUN_AS_ROOT
-          value: "1"
-        - name: OMPI_ALLOW_RUN_AS_ROOT_CONFIRM
-          value: "1"
-        - name: OMP_NUM_THREADS
-          value: "2"
-        - name: ROMPY_BACKEND_TYPE
-          value: "local"
-        - name: ROMPY_BACKEND_COMMAND
-          value: "mpirun -n 2 /usr/local/bin/swan.exe"
-        - name: ROMPY_BACKEND_SHELL
-          value: "true"
-        - name: ROMPY_BACKEND_CAPTURE_OUTPUT
-          value: "true"
+            path: /tmp/rompy/swanspec.nc
+      # env:
+      #   - name: ROMPY_MODEL
+      #     value: "swan"
+      #   - name: OMPI_ALLOW_RUN_AS_ROOT
+      #     value: "1"
+      #   - name: OMPI_ALLOW_RUN_AS_ROOT_CONFIRM
+      #     value: "1"
+      #   - name: OMP_NUM_THREADS
+      #     value: "2"
+      #   - name: ROMPY_BACKEND_TYPE
+      #     value: "local"
+      #   - name: ROMPY_BACKEND_COMMAND
+      #     value: "mpirun -n 2 /usr/local/bin/swan.exe"
+      #   - name: ROMPY_BACKEND_SHELL
+      #     value: "true"
+      #   - name: ROMPY_BACKEND_CAPTURE_OUTPUT
+      #     value: "true"
 
     - name: register
       image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
@@ -57,9 +57,9 @@ resources:
       inputs:
         artifacts:
           - name: grid
-            path: /app/swangrid.nc
+            path: /tmp/rompy/swangrid.nc
           - name: spectra
-            path: /app/swanspec.nc
+            path: /tmp/rompy/swanspec.nc
       resources:
         cpu: 1
         memory: 1G
