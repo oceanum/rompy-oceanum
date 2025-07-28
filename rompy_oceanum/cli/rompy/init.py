@@ -2,12 +2,11 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 import click
 import yaml
 from oceanum.cli.models import ContextObject
-
 
 logger = logging.getLogger(__name__)
 
@@ -18,50 +17,32 @@ logger = logging.getLogger(__name__)
     "--template",
     type=click.Choice(["basic", "advanced", "research", "operational"]),
     default="basic",
-    help="Configuration template type"
+    help="Configuration template type",
 )
 @click.option(
     "--output",
     "-o",
-    help="Output configuration file path (default: rompy_config_{model}_{template}.yml)"
+    help="Output configuration file path (default: rompy_config_{model}_{template}.yml)",
 )
+@click.option("--domain", help="Model domain name")
 @click.option(
-    "--domain",
-    help="Model domain name"
+    "--grid-resolution", type=float, help="Grid resolution in degrees (e.g., 0.1)"
 )
-@click.option(
-    "--grid-resolution",
-    type=float,
-    help="Grid resolution in degrees (e.g., 0.1)"
-)
-@click.option(
-    "--time-start",
-    help="Start time (ISO format: 2023-01-01T00:00:00)"
-)
-@click.option(
-    "--time-end",
-    help="End time (ISO format: 2023-01-02T00:00:00)"
-)
-@click.option(
-    "--bbox",
-    help="Bounding box as 'lon_min,lat_min,lon_max,lat_max'"
-)
+@click.option("--time-start", help="Start time (ISO format: 2023-01-01T00:00:00)")
+@click.option("--time-end", help="End time (ISO format: 2023-01-02T00:00:00)")
+@click.option("--bbox", help="Bounding box as 'lon_min,lat_min,lon_max,lat_max'")
 @click.option(
     "--forcing",
     type=click.Choice(["era5", "gfs", "local"]),
     default="era5",
-    help="Atmospheric forcing data source"
+    help="Atmospheric forcing data source",
 )
 @click.option(
     "--prax-optimized/--no-prax-optimized",
     default=True,
-    help="Include Prax-specific optimizations"
+    help="Include Prax-specific optimizations",
 )
-@click.option(
-    "--interactive",
-    is_flag=True,
-    help="Interactive configuration setup"
-)
+@click.option("--interactive", is_flag=True, help="Interactive configuration setup")
 @click.pass_obj
 def init(
     obj: ContextObject,
@@ -75,7 +56,7 @@ def init(
     bbox,
     forcing,
     prax_optimized,
-    interactive
+    interactive,
 ):
     """Initialize a rompy configuration optimized for Oceanum Prax execution.
 
@@ -107,13 +88,19 @@ def init(
         domain = domain or click.prompt("Domain name", default="my_domain")
 
         if not grid_resolution:
-            grid_resolution = click.prompt("Grid resolution (degrees)", type=float, default=0.1)
+            grid_resolution = click.prompt(
+                "Grid resolution (degrees)", type=float, default=0.1
+            )
 
         if not time_start:
-            time_start = click.prompt("Start time (YYYY-MM-DDTHH:MM:SS)", default="2023-01-01T00:00:00")
+            time_start = click.prompt(
+                "Start time (YYYY-MM-DDTHH:MM:SS)", default="2023-01-01T00:00:00"
+            )
 
         if not time_end:
-            time_end = click.prompt("End time (YYYY-MM-DDTHH:MM:SS)", default="2023-01-02T00:00:00")
+            time_end = click.prompt(
+                "End time (YYYY-MM-DDTHH:MM:SS)", default="2023-01-02T00:00:00"
+            )
 
         if not bbox:
             click.echo("Bounding box coordinates:")
@@ -126,19 +113,22 @@ def init(
         forcing = click.prompt(
             "Forcing data source",
             type=click.Choice(["era5", "gfs", "local"]),
-            default=forcing
+            default=forcing,
         )
 
     # Parse bounding box
     if bbox:
         try:
-            lon_min, lat_min, lon_max, lat_max = map(float, bbox.split(','))
+            lon_min, lat_min, lon_max, lat_max = map(float, bbox.split(","))
         except ValueError:
-            click.echo("❌ Invalid bounding box format. Use: 'lon_min,lat_min,lon_max,lat_max'", err=True)
+            click.echo(
+                "❌ Invalid bounding box format. Use: 'lon_min,lat_min,lon_max,lat_max'",
+                err=True,
+            )
             return
     else:
         # Default global domain
-        lon_min, lat_min, lon_max, lat_max = -180.0, -90.0, 180.0, 90.0
+        lon_min, lat_min, lon_max, lat_max = 106.0, -39.0, 114.0, -30.0
 
     # Generate configuration
     try:
@@ -146,7 +136,7 @@ def init(
             model=model,
             template=template,
             domain=domain or "my_domain",
-            grid_resolution=grid_resolution or 0.1,
+            grid_resolution=grid_resolution or 0.5,
             time_start=time_start or "2023-01-01T00:00:00",
             time_end=time_end or "2023-01-02T00:00:00",
             lon_min=lon_min,
@@ -155,13 +145,13 @@ def init(
             lat_max=lat_max,
             forcing=forcing,
             prax_optimized=prax_optimized,
-            oceanum_context=obj
+            oceanum_context=obj,
         )
 
         # Write configuration file
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             yaml.dump(config, f, default_flow_style=False, indent=2, sort_keys=False)
 
         click.echo(f"✅ Configuration created: {output_path}")
@@ -173,7 +163,9 @@ def init(
         # Show next steps
         click.echo(f"\n💡 Next steps:")
         click.echo(f"  1. Review and customize: {output_path}")
-        click.echo(f"  2. Execute via Prax: oceanum rompy run {output_path} {model} --pipeline-name my-pipeline")
+        click.echo(
+            f"  2. Execute via Prax: oceanum rompy run {output_path} {model} --pipeline-name my-pipeline"
+        )
 
         # Show template-specific guidance
         _show_template_guidance(model, template)
@@ -196,27 +188,35 @@ def _generate_config(
     lat_max: float,
     forcing: str,
     prax_optimized: bool,
-    oceanum_context: ContextObject
+    oceanum_context: ContextObject,
 ) -> Dict[str, Any]:
     """Generate rompy configuration based on parameters."""
 
     # Create the model configuration
     model_config = _get_model_config(
-        model, template, domain, grid_resolution, time_start, time_end,
-        lon_min, lat_min, lon_max, lat_max, forcing
+        model,
+        template,
+        domain,
+        grid_resolution,
+        time_start,
+        time_end,
+        lon_min,
+        lat_min,
+        lon_max,
+        lat_max,
+        forcing,
     )
 
     # Create the complete config structure for rompy ModelRun
-    config = {
-        "run_id": f"{domain}_{model}_{template}",
-        "config": model_config
-    }
+    config = {"run_id": f"{domain}_{model}_{template}", "config": model_config}
 
     # Add period information
     config["period"] = {
-        "start": time_start.replace("T", "T").replace(":", "").replace("-", ""),  # Format: 20230101T000000
+        "start": time_start.replace("T", "T")
+        .replace(":", "")
+        .replace("-", ""),  # Format: 20230101T000000
         "duration": "1d",
-        "interval": "1h"
+        "interval": "1h",
     }
 
     # Add output directory
@@ -226,33 +226,72 @@ def _generate_config(
 
 
 def _get_model_config(
-    model: str, template: str, domain: str, grid_resolution: float,
-    time_start: str, time_end: str, lon_min: float, lat_min: float,
-    lon_max: float, lat_max: float, forcing: str
+    model: str,
+    template: str,
+    domain: str,
+    grid_resolution: float,
+    time_start: str,
+    time_end: str,
+    lon_min: float,
+    lat_min: float,
+    lon_max: float,
+    lat_max: float,
+    forcing: str,
 ) -> Dict[str, Any]:
     """Get model-specific configuration for rompy."""
 
     if model == "swan":
         return _get_swan_config(
-            template, domain, grid_resolution, time_start, time_end,
-            lon_min, lat_min, lon_max, lat_max, forcing
+            template,
+            domain,
+            grid_resolution,
+            time_start,
+            time_end,
+            lon_min,
+            lat_min,
+            lon_max,
+            lat_max,
+            forcing,
         )
     elif model == "schism":
         return _get_schism_config(
-            template, domain, grid_resolution, time_start, time_end,
-            lon_min, lat_min, lon_max, lat_max, forcing
+            template,
+            domain,
+            grid_resolution,
+            time_start,
+            time_end,
+            lon_min,
+            lat_min,
+            lon_max,
+            lat_max,
+            forcing,
         )
     else:  # ww3
         return _get_ww3_config(
-            template, domain, grid_resolution, time_start, time_end,
-            lon_min, lat_min, lon_max, lat_max, forcing
+            template,
+            domain,
+            grid_resolution,
+            time_start,
+            time_end,
+            lon_min,
+            lat_min,
+            lon_max,
+            lat_max,
+            forcing,
         )
 
 
 def _get_swan_config(
-    template: str, domain: str, grid_resolution: float,
-    time_start: str, time_end: str, lon_min: float, lat_min: float,
-    lon_max: float, lat_max: float, forcing: str
+    template: str,
+    domain: str,
+    grid_resolution: float,
+    time_start: str,
+    time_end: str,
+    lon_min: float,
+    lat_min: float,
+    lon_max: float,
+    lat_max: float,
+    forcing: str,
 ) -> Dict[str, Any]:
     """Generate a proper SWAN configuration following rompy schema."""
 
@@ -269,33 +308,27 @@ def _get_swan_config(
                 "model_type": "project",
                 "name": domain[:16],  # Limit to 16 characters
                 "nr": "run1",
-                "title1": f"Generated {template} SWAN configuration"
+                "title1": f"Generated {template} SWAN configuration",
             },
             "set": {
                 "model_type": "set",
                 "level": 0.0,
                 "depmin": 0.05,
-                "direction_convention": "nautical"
+                "direction_convention": "nautical",
             },
             "mode": {
                 "model_type": "mode",
                 "kind": "nonstationary",
-                "dim": "twodimensional"
+                "dim": "twodimensional",
             },
             "coordinates": {
                 "model_type": "coordinates",
-                "kind": {
-                    "model_type": "spherical"
-                }
-            }
+                "kind": {"model_type": "spherical"},
+            },
         },
         "cgrid": {
             "model_type": "regular",
-            "spectrum": {
-                "mdc": 36,
-                "flow": 0.04,
-                "fhigh": 1.0
-            },
+            "spectrum": {"mdc": 36, "flow": 0.04, "fhigh": 1.0},
             "grid": {
                 "xp": lon_min + xlen / 2,
                 "yp": lat_min + ylen / 2,
@@ -303,8 +336,8 @@ def _get_swan_config(
                 "xlen": xlen,
                 "ylen": ylen,
                 "mx": mx,
-                "my": my
-            }
+                "my": my,
+            },
         },
         "inpgrid": {
             "model_type": "data_interface",
@@ -313,38 +346,30 @@ def _get_swan_config(
                 "source": {
                     "model_type": "datamesh",
                     "datasource": "our-changing-coast-gebco_1_degree_for_testing",
-                    "token": None
+                    "token": None,
                 },
                 "fac": -1.0,
                 "buffer": 1.0,
                 "z1": "elevation",
-                "coords": {
-                    "x": "lon",
-                    "y": "lat"
-                }
+                "coords": {"x": "lon", "y": "lat"},
             },
             "input": [
                 {
                     "var": "wind",
                     "source": {
                         "model_type": "datamesh",
-                        "datasource": "era5_wind10m" if forcing == "era5" else "gfs_wind10m",
-                        "token": None
+                        "datasource": (
+                            "era5_wind10m" if forcing == "era5" else "gfs_wind10m"
+                        ),
+                        "token": None,
                     },
                     "buffer": 2.0,
-                    "filter": {
-                        "sort": {
-                            "coords": ["latitude"]
-                        }
-                    },
+                    "filter": {"sort": {"coords": ["latitude"]}},
                     "z1": "u10",
                     "z2": "v10",
-                    "coords": {
-                        "x": "longitude",
-                        "y": "latitude"
-                    }
+                    "coords": {"x": "longitude", "y": "latitude"},
                 }
-            ]
+            ],
         },
         "boundary": {
             "model_type": "boundspec",
@@ -352,56 +377,26 @@ def _get_swan_config(
                 "model_type": "shapespec",
                 "per_type": "peak",
                 "dspr_type": "degrees",
-                "shape": {
-                    "model_type": "tma",
-                    "gamma": 3.3,
-                    "d": 12.0
-                }
+                "shape": {"model_type": "tma", "gamma": 3.3, "d": 12.0},
             },
-            "location": {
-                "model_type": "side",
-                "side": "west"
-            },
+            "location": {"model_type": "side", "side": "west"},
             "data": {
                 "model_type": "constantpar",
                 "hs": 2.0,
                 "per": 12.0,
                 "dir": 270.0,
-                "dd": 25.0
-            }
+                "dd": 25.0,
+            },
         },
-        "initial": {
-            "kind": {
-                "model_type": "default"
-            }
-        },
+        "initial": {"kind": {"model_type": "default"}},
         "physics": {
-            "gen": {
-                "model_type": "gen3",
-                "source_terms": {
-                    "model_type": "westhuysen"
-                }
-            },
-            "quadrupl": {
-                "iquad": 2
-            },
-            "breaking": {
-                "model_type": "constant",
-                "gamma": 0.73
-            },
-            "friction": {
-                "model_type": "madsen",
-                "kn": 0.05
-            },
-            "triad": {
-                "model_type": "triad"
-            }
+            "gen": {"model_type": "gen3", "source_terms": {"model_type": "westhuysen"}},
+            "quadrupl": {"iquad": 2},
+            "breaking": {"model_type": "constant", "gamma": 0.73},
+            "friction": {"model_type": "madsen", "kn": 0.05},
+            "triad": {"model_type": "triad"},
         },
-        "prop": {
-            "scheme": {
-                "model_type": "bsbt"
-            }
-        },
+        "prop": {"scheme": {"model_type": "bsbt"}},
         "numeric": {
             "stop": {
                 "model_type": "stopc",
@@ -409,10 +404,7 @@ def _get_swan_config(
                 "drel": 0.05,
                 "curvat": 0.05,
                 "npnts": 95,
-                "mode": {
-                    "model_type": "nonstat",
-                    "mxitns": 3
-                }
+                "mode": {"model_type": "nonstat", "mxitns": 3},
             }
         },
         "output": {
@@ -420,114 +412,97 @@ def _get_swan_config(
                 "model_type": "points",
                 "sname": "pts",
                 "xp": [lon_min + xlen * 0.3, lon_min + xlen * 0.7],
-                "yp": [lat_min + ylen * 0.3, lat_min + ylen * 0.7]
+                "yp": [lat_min + ylen * 0.3, lat_min + ylen * 0.7],
             },
             "quantity": {
                 "model_type": "quantities",
                 "quantities": [
-                    {
-                        "output": ["depth", "hsign", "tps", "dir", "tm01"],
-                        "excv": -9
-                    },
-                    {
-                        "output": ["hswell"],
-                        "fswell": 0.125
-                    }
-                ]
+                    {"output": ["depth", "hsign", "tps", "dir", "tm01"], "excv": -9},
+                    {"output": ["hswell"], "fswell": 0.125},
+                ],
             },
             "block": {
                 "model_type": "block",
                 "sname": "COMPGRID",
                 "fname": "swangrid.nc",
                 "output": ["depth", "wind", "hsign", "tps", "dir"],
-                "times": {
-                    "dfmt": "hr"
-                }
+                "times": {"dfmt": "hr"},
             },
             "table": {
                 "sname": "pts",
                 "format": "header",
                 "fname": "swantable.txt",
                 "output": ["time", "hsign", "hswell", "dir", "tps", "tm01"],
-                "times": {
-                    "dfmt": "hr"
-                }
+                "times": {"dfmt": "hr"},
             },
             "specout": {
                 "sname": "pts",
                 "fname": "swanspec.nc",
-                "dim": {
-                    "model_type": "spec2d"
-                },
-                "freq": {
-                    "model_type": "abs"
-                },
-                "times": {
-                    "dfmt": "hr"
-                }
-            }
+                "dim": {"model_type": "spec2d"},
+                "freq": {"model_type": "abs"},
+                "times": {"dfmt": "hr"},
+            },
         },
         "lockup": {
             "compute": {
                 "model_type": "nonstat",
                 "initstat": True,
-                "times": {
-                    "model_type": "nonstationary",
-                    "tfmt": 1,
-                    "dfmt": "hr"
-                },
-                "hotfile": {
-                    "fname": "hotfile.txt",
-                    "format": "free"
-                },
-                "hottimes": [-1]
+                "times": {"model_type": "nonstationary", "tfmt": 1, "dfmt": "hr"},
+                "hotfile": {"fname": "hotfile.txt", "format": "free"},
+                "hottimes": [-1],
             }
-        }
+        },
     }
 
 
 def _get_schism_config(
-    template: str, domain: str, grid_resolution: float,
-    time_start: str, time_end: str, lon_min: float, lat_min: float,
-    lon_max: float, lat_max: float, forcing: str
+    template: str,
+    domain: str,
+    grid_resolution: float,
+    time_start: str,
+    time_end: str,
+    lon_min: float,
+    lat_min: float,
+    lon_max: float,
+    lat_max: float,
+    forcing: str,
 ) -> Dict[str, Any]:
     """Generate a basic SCHISM configuration."""
     return {
         "model_type": "schism",
-        "grid": {
-            "model_type": "unstructured"
-        },
+        "grid": {"model_type": "unstructured"},
         "time": {
             "model_type": "time_range",
             "start": time_start,
             "end": time_end,
-            "step": "PT1H"
-        }
+            "step": "PT1H",
+        },
     }
 
 
 def _get_ww3_config(
-    template: str, domain: str, grid_resolution: float,
-    time_start: str, time_end: str, lon_min: float, lat_min: float,
-    lon_max: float, lat_max: float, forcing: str
+    template: str,
+    domain: str,
+    grid_resolution: float,
+    time_start: str,
+    time_end: str,
+    lon_min: float,
+    lat_min: float,
+    lon_max: float,
+    lat_max: float,
+    forcing: str,
 ) -> Dict[str, Any]:
     """Generate a basic WW3 configuration."""
     return {
         "model_type": "ww3",
-        "grid": {
-            "model_type": "regular_grid",
-            "spacing": grid_resolution
-        },
+        "grid": {"model_type": "regular_grid", "spacing": grid_resolution},
         "time": {
             "model_type": "time_range",
             "start": time_start,
             "end": time_end,
-            "step": "PT1H"
-        }
+            "step": "PT1H",
+        },
     }
-
-
-
 
 
 def _show_template_guidance(model: str, template: str):
@@ -537,13 +512,13 @@ def _show_template_guidance(model: str, template: str):
         "basic": "🎯 Basic template includes essential model physics and standard outputs.",
         "advanced": "⚙️  Advanced template includes additional physics, validation, and diagnostics.",
         "research": "🔬 Research template includes comprehensive analysis and statistics.",
-        "operational": "🏭 Operational template optimized for speed and monitoring."
+        "operational": "🏭 Operational template optimized for speed and monitoring.",
     }
 
     model_notes = {
         "swan": "🌊 SWAN: Spectral wave model - good for coastal and nearshore applications",
         "schism": "🌍 SCHISM: 3D hydrodynamic model - suitable for estuarine and coastal modeling",
-        "ww3": "🌐 WaveWatch III: Global wave model - ideal for ocean-scale applications"
+        "ww3": "🌐 WaveWatch III: Global wave model - ideal for ocean-scale applications",
     }
 
     click.echo(f"\n📚 Template info: {guidance.get(template, '')}")
