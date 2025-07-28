@@ -17,13 +17,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for GDAL
-ENV GDAL_VERSION=$(gdal-config --version) \
-    CPLUS_INCLUDE_PATH=/usr/include/gdal \
+RUN GDAL_VERSION=$(gdal-config --version) && \
+    echo "GDAL_VERSION=$GDAL_VERSION" >> /etc/environment
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
     C_INCLUDE_PATH=/usr/include/gdal
 
 # Install Python dependencies in one layer to reduce image size
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir appdirs numpy wheel setuptools && \
+    GDAL_VERSION=$(gdal-config --version) && \
     pip install --no-cache-dir GDAL==${GDAL_VERSION} && \
     pip install --no-cache-dir rasterio && \
     pip install --no-cache-dir oceanum rompy
