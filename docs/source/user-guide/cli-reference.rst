@@ -131,7 +131,7 @@ Generate optimized rompy configuration files from templates.
 run
 ~~~
 
-Initialize rompy configurations for Oceanum Prax pipeline execution.
+Initialize rompy configurations for Oceanum Prax pipeline execution or run locally with Docker.
 
 **Syntax:**
 
@@ -144,7 +144,7 @@ Initialize rompy configurations for Oceanum Prax pipeline execution.
 * ``CONFIG``: Path to rompy configuration file
 * ``MODEL``: Model type (``swan``, ``schism``, ``ww3``)
 
-**Required Options:**
+**Required Options (when not using --local):**
 
 * ``--pipeline-name TEXT``: Name of the Prax pipeline template
 
@@ -154,6 +154,7 @@ Initialize rompy configurations for Oceanum Prax pipeline execution.
 * ``--stage {dev,prod}``: Deployment stage (default: dev)
 * ``--wait/--no-wait``: Wait for pipeline completion (default: --no-wait)
 * ``--timeout INTEGER``: Execution timeout in seconds
+* ``--local``: Run the model locally using Docker instead of submitting to Prax
 
 **Examples:**
 
@@ -174,6 +175,9 @@ Initialize rompy configurations for Oceanum Prax pipeline execution.
        --pipeline-name schism-operational \
        --stage prod
 
+   # Run locally with Docker
+   oceanum rompy run config.yml swan --local
+
 **Output:**
 
 The command returns rich terminal output with execution details:
@@ -187,6 +191,22 @@ The command returns rich terminal output with execution details:
    📤 Submitting to pipeline: swan-operational
    🆔 Prax run ID: pipeline-swan-operational-run-id-dev-xyz123
    💡 Monitor with: oceanum prax --project wave-forecasting logs pipeline-runs pipeline-swan-operational-run-id-dev-xyz123
+
+**Local Execution:**
+
+When using the ``--local`` option, the model is run locally using Docker:
+
+.. code-block:: text
+
+   🔄 Processing rompy configuration...
+   ✅ ModelRun created successfully: perth_coast_swan_basic
+   🔄 Running model locally with Docker...
+   🐳 Using Docker image: us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest
+   🔄 Generating model configuration...
+   📁 Staging directory: /tmp/rompy/perth_coast_swan_basic
+   🚀 Running model locally with Docker...
+   ✅ Model run completed successfully!
+   📁 Results are in: /tmp/rompy/perth_coast_swan_basic
 
 **Project Workflow:**
 

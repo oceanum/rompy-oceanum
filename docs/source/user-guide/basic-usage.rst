@@ -137,10 +137,10 @@ Submit your model using the oceanum CLI:
 .. code-block:: bash
 
    # Create a project for your pipelines (if you don't have one)
-   oceanum rompy projects create my-project.yaml
+   oceanum rompy create project my-project.yaml
 
    # Deploy the default pipeline template
-   oceanum rompy pipelines deploy-default --project my-project
+   oceanum rompy create pipeline --project my-project
 
    # Execute model via Prax pipeline
    oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
@@ -151,6 +151,9 @@ Submit your model using the oceanum CLI:
        --project wave-forecasting \
        --wait \
        --timeout 3600
+
+   # Run model locally with Docker
+   oceanum rompy run config.yml swan --local
 
 For programmatic submission:
 
@@ -244,17 +247,14 @@ Complete Workflow Example
 
 .. code-block:: bash
 
-   # 1. Authenticate (one-time setup)
-   oceanum auth login
-
    # 2. Create a project for your pipelines
-   oceanum rompy projects create wave-project.yaml
+   oceanum rompy create project wave-project.yaml
 
    # 3. Generate optimized configuration
    oceanum rompy init swan --template operational --domain "perth_coast"
 
    # 4. Deploy the default pipeline template
-   oceanum rompy pipelines deploy-default --project wave-project
+   oceanum rompy create pipeline --project wave-project
 
    # 5. Execute model
    oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project wave-project
@@ -277,10 +277,10 @@ Individual Commands
    oceanum rompy init swan --template basic --domain "my_domain"
 
    # Create a project for your pipelines
-   oceanum rompy projects create my-project.yaml
+   oceanum rompy create project my-project.yaml
 
    # Deploy the default pipeline template
-   oceanum rompy pipelines deploy-default --project my-project
+   oceanum rompy create pipeline --project my-project
 
    # Submit pipeline execution
    oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
@@ -517,11 +517,11 @@ Complete workflow automation using the oceanum CLI:
 
    # Create project if needed
    echo "🏗️  Creating project (if needed)..."
-   oceanum rompy projects create ${PROJECT}.yaml || echo "Project may already exist"
+   oceanum rompy create project ${PROJECT}.yaml || echo "Project may already exist"
 
    # Deploy the default pipeline template
    echo "🔧 Deploying default pipeline template..."
-   oceanum rompy pipelines deploy-default --project rompy-oceanum || echo "Pipeline may already be deployed"
+   oceanum rompy create pipeline --project rompy-oceanum || echo "Pipeline may already be deployed"
 
    # Generate configuration
    echo "📝 Generating ${MODEL} configuration..."
@@ -555,11 +555,11 @@ Process multiple configurations:
 
    # Create project if needed
    echo "🏗️  Creating project (if needed)..."
-   oceanum rompy projects create ${PROJECT}.yaml || echo "Project may already exist"
+   oceanum rompy create project ${PROJECT}.yaml || echo "Project may already exist"
 
    # Deploy the default pipeline template
    echo "🔧 Deploying default pipeline template..."
-   oceanum rompy pipelines deploy-default --project rompy-oceanum || echo "Pipeline may already be deployed"
+   oceanum rompy create pipeline --project rompy-oceanum || echo "Pipeline may already be deployed"
 
    for domain in "${DOMAINS[@]}"; do
        echo "🔄 Processing domain: ${domain}"
