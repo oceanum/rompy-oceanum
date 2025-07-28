@@ -29,7 +29,7 @@ class PraxPipelineBackend:
 
     def __init__(self, config: Optional[Union[Dict[str, Any], PraxConfig]] = None):
         """Initialize the PraxPipelineBackend.
-        
+
         Args:
             config: Prax configuration (dict or PraxConfig instance)
         """
@@ -37,14 +37,14 @@ class PraxPipelineBackend:
 
     def submit(self, model_run, pipeline_name: str, **kwargs):
         """Submit a model run to a Prax pipeline.
-        
+
         This is an alias for the execute method for compatibility with rompy's pipeline interface.
-        
+
         Args:
             model_run: The ModelRun instance to execute
             pipeline_name: Name of the Prax pipeline to execute
             **kwargs: Additional parameters passed to execute method
-            
+
         Returns:
             Pipeline execution results
         """
@@ -52,10 +52,10 @@ class PraxPipelineBackend:
 
     def get_status(self, result):
         """Get the status of a pipeline run.
-        
+
         Args:
             result: PraxResult object
-            
+
         Returns:
             Status dictionary
         """
@@ -63,11 +63,11 @@ class PraxPipelineBackend:
 
     def get_logs(self, result, task_name: Optional[str] = None):
         """Get logs from a pipeline run.
-        
+
         Args:
             result: PraxResult object
             task_name: Optional task name to get logs for specific task
-            
+
         Returns:
             List of log lines
         """
@@ -75,11 +75,11 @@ class PraxPipelineBackend:
 
     def download_outputs(self, result, target_dir: str):
         """Download outputs from a pipeline run.
-        
+
         Args:
             result: PraxResult object
             target_dir: Directory to download outputs to
-            
+
         Returns:
             List of downloaded file paths
         """
@@ -215,9 +215,9 @@ class PraxPipelineBackend:
 
             try:
                 result = client.submit_pipeline(
-                    pipeline_name, 
-                    user=getattr(prax_config, 'user', 'unknown'),
-                    parameters=prax_parameters
+                    pipeline_name,
+                    user=getattr(prax_config, "user", "unknown"),
+                    parameters=prax_parameters,
                 )
                 prax_run_id = result.run_id
                 pipeline_results["prax_run_id"] = prax_run_id
@@ -236,12 +236,6 @@ class PraxPipelineBackend:
                     "error": str(e),
                 }
 
-            # Create result object for tracking
-            result = client.submit_pipeline(
-                pipeline_name, 
-                user=getattr(prax_config, 'user', 'unknown'),
-                parameters=prax_parameters
-            )
             pipeline_results["result"] = result
 
             # Stage 4: Wait for completion (optional)
