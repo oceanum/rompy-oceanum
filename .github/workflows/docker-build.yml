@@ -4,30 +4,30 @@ on:
   push:
     branches: [main, master, develop]
     paths:
-      - 'docker/**'
-      - 'rompy_oceanum/**'
-      - 'pyproject.toml'
-      - '.github/workflows/docker-build.yml'
+      - "docker/**"
+      - "rompy_oceanum/**"
+      - "pyproject.toml"
+      - ".github/workflows/docker-build.yml"
   pull_request:
     branches: [main, master, develop]
     paths:
-      - 'docker/**'
-      - 'rompy_oceanum/**'
-      - 'pyproject.toml'
-      - '.github/workflows/docker-build.yml'
+      - "docker/**"
+      - "rompy_oceanum/**"
+      - "pyproject.toml"
+      - ".github/workflows/docker-build.yml"
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       build_swan:
-        description: 'Build SWAN Docker image'
+        description: "Build SWAN Docker image"
         required: false
-        default: 'true'
+        default: "true"
         type: boolean
       build_rompy:
-        description: 'Build Rompy Docker image'
+        description: "Build Rompy Docker image"
         required: false
-        default: 'true'
+        default: "true"
         type: boolean
 
 env:
@@ -221,25 +221,25 @@ jobs:
       security-events: write
     strategy:
       matrix:
-        image:
-          - ${{ needs.determine-builds.outputs.build_swan == 'true' && format('{0}/{1}/swan', env.REGISTRY, env.IMAGE_NAME) || '' }}
-          - ${{ needs.determine-builds.outputs.build_rompy == 'true' && format('{0}/{1}/rompy', env.REGISTRY, env.IMAGE_NAME) || '' }}
-        exclude:
-          - image: ''
+        include:
+          - image-type: "swan"
+            run: ${{ needs.determine-builds.outputs.build_swan == 'true' }}
+          - image-type: "rompy"
+            run: ${{ needs.determine-builds.outputs.build_rompy == 'true' }}
     steps:
       - name: Run Trivy vulnerability scanner
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && matrix.run == 'true'
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ matrix.image }}:${{ github.sha }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image-type }}:${{ github.sha }}
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && matrix.run == 'true'
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   build-summary:
     runs-on: ubuntu-latest
@@ -285,4 +285,3 @@ jobs:
             echo "### Registry" >> $GITHUB_STEP_SUMMARY
             echo "Images are available at: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
           fi
-
