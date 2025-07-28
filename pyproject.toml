@@ -15,7 +15,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "rompy[swan,schism]>=0.5.1",
+    "rompy[swan,schism]>=0.5.3",
     "pydantic>=2.0.0",
     "pyyaml>=6.0",
     "oceanum>=1.0.11",
