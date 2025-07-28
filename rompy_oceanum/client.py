@@ -495,7 +495,7 @@ class PraxClient:
         """
         url = f"{self.base_url}/api/projects"
         response = self._make_request("GET", url)
-        return response.get("projects", [])
+        return response if isinstance(response, list) else response.get("projects", [])
     
     def get_project(self, project_name: str):
         """Get details of a specific project.

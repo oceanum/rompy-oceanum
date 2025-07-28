@@ -5,8 +5,20 @@ from .init import init
 from .status import status
 from .logs import logs
 from .sync import sync
-from .pipelines import pipelines
-from .projects import projects
+from .create import create_resource
+from .list import list_resources
+from .describe import describe_resource
+from .delete import delete_resource
 
 # Export the command for entry point discovery
-__all__ = ["run", "init", "status", "logs", "sync", "pipelines", "projects"]
+__all__ = [
+    "run", 
+    "init", 
+    "status", 
+    "logs", 
+    "sync",
+    "create_resource",
+    "list_resources",
+    "describe_resource",
+    "delete_resource",
+]
