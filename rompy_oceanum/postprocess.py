@@ -4,12 +4,14 @@ DataMesh postprocessor for rompy-oceanum.
 This module provides the DataMeshPostprocessor that implements the rompy postprocess
 interface for registering model outputs with Oceanum's DataMesh system.
 """
+
 import json
 import logging
-from pathlib import Path
-from typing import Dict, Any, Optional, List, Union
-import requests
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
+import requests
 
 from .config import DataMeshConfig
 
@@ -22,22 +24,25 @@ class DataMeshPostprocessor:
     This postprocessor registers model outputs and metadata with Oceanum's
     DataMesh data catalog system for discovery and access.
     """
-    
+
     def __init__(self, config: Optional[Union[Dict[str, Any], DataMeshConfig]] = None):
         """Initialize the DataMeshPostprocessor.
-        
+
         Args:
             config: DataMesh configuration (dict or DataMeshConfig instance)
         """
         self.config = config
 
-    def process(self, model_run,
-                datamesh_config: Optional[Union[Dict[str, Any], DataMeshConfig]] = None,
-                dataset_name: Optional[str] = None,
-                tags: Optional[List[str]] = None,
-                metadata: Optional[Dict[str, Any]] = None,
-                output_patterns: Optional[List[str]] = None,
-                **kwargs) -> Dict[str, Any]:
+    def process(
+        self,
+        model_run,
+        datamesh_config: Optional[Union[Dict[str, Any], DataMeshConfig]] = None,
+        dataset_name: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        output_patterns: Optional[List[str]] = None,
+        **kwargs,
+    ) -> Dict[str, Any]:
         """Process model outputs and register with DataMesh.
 
         Args:
@@ -59,7 +64,7 @@ class DataMeshPostprocessor:
         if not model_run:
             raise ValueError("model_run cannot be None")
 
-        if not hasattr(model_run, 'run_id'):
+        if not hasattr(model_run, "run_id"):
             raise ValueError("model_run must have a run_id attribute")
 
         # Initialize configuration
@@ -67,7 +72,9 @@ class DataMeshPostprocessor:
             try:
                 datamesh_config = DataMeshConfig.from_env()
             except Exception as e:
-                raise ValueError(f"Failed to load DataMesh configuration from environment: {e}")
+                raise ValueError(
+                    f"Failed to load DataMesh configuration from environment: {e}"
+                )
         elif isinstance(datamesh_config, dict):
             datamesh_config = DataMeshConfig.from_dict(datamesh_config)
 
@@ -85,7 +92,7 @@ class DataMeshPostprocessor:
             "processor": "datamesh",
             "run_id": model_run.run_id,
             "dataset_name": dataset_name,
-            "stages_completed": []
+            "stages_completed": [],
         }
 
         try:
@@ -113,8 +120,7 @@ class DataMeshPostprocessor:
             logger.info("Registering dataset with DataMesh")
 
             registration_result = self._register_dataset(
-                datamesh_config, dataset_name, output_files,
-                combined_metadata, tags
+                datamesh_config, dataset_name, output_files, combined_metadata, tags
             )
             process_results["registration_result"] = registration_result
             process_results["stages_completed"].append("register")
@@ -134,7 +140,9 @@ class DataMeshPostprocessor:
             process_results["message"] = "DataMesh registration completed successfully"
             process_results["dataset_url"] = registration_result.get("dataset_url")
 
-            logger.info(f"DataMesh registration completed successfully for run_id: {model_run.run_id}")
+            logger.info(
+                f"DataMesh registration completed successfully for run_id: {model_run.run_id}"
+            )
             return process_results
 
         except Exception as e:
@@ -143,7 +151,7 @@ class DataMeshPostprocessor:
                 **process_results,
                 "stage": "processing",
                 "message": f"DataMesh processing error: {str(e)}",
-                "error": str(e)
+                "error": str(e),
             }
 
     def _discover_output_files(self, model_run, patterns: List[str]) -> List[Path]:
@@ -159,23 +167,25 @@ class DataMeshPostprocessor:
         output_files = []
 
         # Get output directory - handle both local and Prax pipeline contexts
-        if hasattr(model_run, 'output_dir'):
+        if hasattr(model_run, "output_dir"):
             base_output_dir = Path(model_run.output_dir)
 
             # Check if we're in a Prax pipeline context (output_dir is /app)
             # and run_id_subdir is False
-            config_dict = getattr(model_run, 'config', {})
-            if hasattr(config_dict, 'dict'):
+            config_dict = getattr(model_run, "config", {})
+            if hasattr(config_dict, "dict"):
                 config_dict = config_dict.dict()
-            elif hasattr(config_dict, 'model_dump'):
+            elif hasattr(config_dict, "model_dump"):
                 config_dict = config_dict.model_dump()
 
-            run_id_subdir = config_dict.get('run_id_subdir', True)
+            run_id_subdir = config_dict.get("run_id_subdir", True)
 
-            if str(base_output_dir) == '/app' and not run_id_subdir:
-                # Prax pipeline context - files are directly in /app
+            if str(base_output_dir) == "/tmp/rompy" and not run_id_subdir:
+                # Prax pipeline context - files are directly in /tmp/rompy
                 output_dir = base_output_dir
-                logger.info(f"Prax pipeline context detected - looking for files in: {output_dir}")
+                logger.info(
+                    f"Prax pipeline context detected - looking for files in: {output_dir}"
+                )
             else:
                 # Local context - files are in output_dir/run_id
                 output_dir = base_output_dir / model_run.run_id
@@ -206,7 +216,9 @@ class DataMeshPostprocessor:
         output_files = sorted(list(set(output_files)))
 
         if not output_files:
-            error_msg = f"No output files found matching patterns {patterns} in {output_dir}"
+            error_msg = (
+                f"No output files found matching patterns {patterns} in {output_dir}"
+            )
             logger.error(error_msg)
             raise FileNotFoundError(error_msg)
 
@@ -228,14 +240,16 @@ class DataMeshPostprocessor:
             "processing_time": datetime.utcnow().isoformat(),
             "processor": "rompy-oceanum",
             "file_count": len(output_files),
-            "total_size_bytes": sum(f.stat().st_size for f in output_files if f.exists())
+            "total_size_bytes": sum(
+                f.stat().st_size for f in output_files if f.exists()
+            ),
         }
 
         # Add model-specific metadata
-        if hasattr(model_run, 'config'):
-            metadata["model_type"] = getattr(model_run.config, 'model_type', 'unknown')
+        if hasattr(model_run, "config"):
+            metadata["model_type"] = getattr(model_run.config, "model_type", "unknown")
 
-        if hasattr(model_run, 'period'):
+        if hasattr(model_run, "period"):
             metadata["start_time"] = str(model_run.period.start)
             metadata["end_time"] = str(model_run.period.end)
             metadata["duration"] = str(model_run.period.end - model_run.period.start)
@@ -248,18 +262,20 @@ class DataMeshPostprocessor:
                     "name": output_file.name,
                     "path": str(output_file.relative_to(output_file.parent.parent)),
                     "size_bytes": output_file.stat().st_size,
-                    "modified": datetime.fromtimestamp(output_file.stat().st_mtime).isoformat(),
-                    "extension": output_file.suffix
+                    "modified": datetime.fromtimestamp(
+                        output_file.stat().st_mtime
+                    ).isoformat(),
+                    "extension": output_file.suffix,
                 }
 
                 # Add format-specific metadata
-                if output_file.suffix.lower() == '.nc':
+                if output_file.suffix.lower() == ".nc":
                     file_info["format"] = "netcdf"
                     file_info["type"] = "gridded_data"
-                elif output_file.suffix.lower() == '.csv':
+                elif output_file.suffix.lower() == ".csv":
                     file_info["format"] = "csv"
                     file_info["type"] = "tabular_data"
-                elif output_file.suffix.lower() == '.json':
+                elif output_file.suffix.lower() == ".json":
                     file_info["format"] = "json"
                     file_info["type"] = "structured_data"
 
@@ -269,9 +285,14 @@ class DataMeshPostprocessor:
 
         return metadata
 
-    def _register_dataset(self, config: DataMeshConfig, dataset_name: str,
-                         output_files: List[Path], metadata: Dict[str, Any],
-                         tags: List[str]) -> Dict[str, Any]:
+    def _register_dataset(
+        self,
+        config: DataMeshConfig,
+        dataset_name: str,
+        output_files: List[Path],
+        metadata: Dict[str, Any],
+        tags: List[str],
+    ) -> Dict[str, Any]:
         """Register dataset with DataMesh.
 
         Args:
@@ -294,17 +315,17 @@ class DataMeshPostprocessor:
                 {
                     "name": f.name,
                     "size": f.stat().st_size if f.exists() else 0,
-                    "type": self._get_file_type(f)
+                    "type": self._get_file_type(f),
                 }
                 for f in output_files
-            ]
+            ],
         }
 
         # Make registration request
         url = f"{config.base_url}/api/v1/datasets"
         headers = {
             "Authorization": f"Bearer {config.token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         try:
@@ -312,7 +333,9 @@ class DataMeshPostprocessor:
 
             if response.status_code in [200, 201]:
                 result = response.json()
-                logger.info(f"Dataset registered successfully: {result.get('dataset_id')}")
+                logger.info(
+                    f"Dataset registered successfully: {result.get('dataset_id')}"
+                )
                 return result
             else:
                 error_msg = f"Failed to register dataset. Status: {response.status_code}, Response: {response.text}"
@@ -323,7 +346,9 @@ class DataMeshPostprocessor:
             logger.error(f"Error registering dataset: {e}")
             raise
 
-    def _upload_files(self, output_files: List[Path], upload_urls: Dict[str, str]) -> Dict[str, Any]:
+    def _upload_files(
+        self, output_files: List[Path], upload_urls: Dict[str, str]
+    ) -> Dict[str, Any]:
         """Upload files to DataMesh storage.
 
         Args:
@@ -333,11 +358,7 @@ class DataMeshPostprocessor:
         Returns:
             Upload results dictionary
         """
-        upload_results = {
-            "uploaded": [],
-            "failed": [],
-            "total": len(output_files)
-        }
+        upload_results = {"uploaded": [], "failed": [], "total": len(output_files)}
 
         for output_file in output_files:
             file_name = output_file.name
@@ -345,15 +366,14 @@ class DataMeshPostprocessor:
 
             if not upload_url:
                 logger.warning(f"No upload URL provided for file: {file_name}")
-                upload_results["failed"].append({
-                    "file": file_name,
-                    "error": "No upload URL provided"
-                })
+                upload_results["failed"].append(
+                    {"file": file_name, "error": "No upload URL provided"}
+                )
                 continue
 
             try:
                 # Upload file
-                with open(output_file, 'rb') as f:
+                with open(output_file, "rb") as f:
                     response = requests.put(upload_url, data=f, timeout=300)
 
                 if response.status_code in [200, 201]:
@@ -361,17 +381,13 @@ class DataMeshPostprocessor:
                     logger.info(f"Successfully uploaded: {file_name}")
                 else:
                     error_msg = f"Upload failed with status {response.status_code}"
-                    upload_results["failed"].append({
-                        "file": file_name,
-                        "error": error_msg
-                    })
+                    upload_results["failed"].append(
+                        {"file": file_name, "error": error_msg}
+                    )
                     logger.error(f"Failed to upload {file_name}: {error_msg}")
 
             except Exception as e:
-                upload_results["failed"].append({
-                    "file": file_name,
-                    "error": str(e)
-                })
+                upload_results["failed"].append({"file": file_name, "error": str(e)})
                 logger.error(f"Error uploading {file_name}: {e}")
 
         return upload_results
@@ -388,13 +404,13 @@ class DataMeshPostprocessor:
         extension = file_path.suffix.lower()
 
         type_map = {
-            '.nc': 'netcdf',
-            '.csv': 'csv',
-            '.json': 'json',
-            '.yaml': 'yaml',
-            '.yml': 'yaml',
-            '.txt': 'text',
-            '.log': 'log'
+            ".nc": "netcdf",
+            ".csv": "csv",
+            ".json": "json",
+            ".yaml": "yaml",
+            ".yml": "yaml",
+            ".txt": "text",
+            ".log": "log",
         }
 
-        return type_map.get(extension, 'unknown')
+        return type_map.get(extension, "unknown")
