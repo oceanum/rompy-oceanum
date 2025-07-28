@@ -178,7 +178,7 @@ class DataMeshPostprocessor:
             elif hasattr(config_dict, "model_dump"):
                 config_dict = config_dict.model_dump()
 
-            run_id_subdir = config_dict.get("run_id_subdir", True)
+            run_id_subdir = config_dict.get("run_id_subdir", False)
 
             if str(base_output_dir) == "/tmp/rompy" and not run_id_subdir:
                 # Prax pipeline context - files are directly in /tmp/rompy
