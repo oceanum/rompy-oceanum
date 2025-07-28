@@ -140,7 +140,7 @@ Submit your model using the oceanum CLI:
    oceanum rompy projects create my-project.yaml
 
    # Deploy the default pipeline template
-   oceanum rompy pipelines --deploy-default --project-name my-project
+   oceanum rompy pipelines deploy-default --project my-project
 
    # Execute model via Prax pipeline
    oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
@@ -254,7 +254,7 @@ Complete Workflow Example
    oceanum rompy init swan --template operational --domain "perth_coast"
 
    # 4. Deploy the default pipeline template
-   oceanum rompy pipelines --deploy-default --project-name wave-project
+   oceanum rompy pipelines deploy-default --project wave-project
 
    # 5. Execute model
    oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project wave-project
@@ -280,7 +280,7 @@ Individual Commands
    oceanum rompy projects create my-project.yaml
 
    # Deploy the default pipeline template
-   oceanum rompy pipelines --deploy-default --project-name my-project
+   oceanum rompy pipelines deploy-default --project my-project
 
    # Submit pipeline execution
    oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
@@ -521,7 +521,7 @@ Complete workflow automation using the oceanum CLI:
 
    # Deploy the default pipeline template
    echo "🔧 Deploying default pipeline template..."
-   oceanum rompy pipelines --deploy-default --project-name ${PROJECT} || echo "Pipeline may already be deployed"
+   oceanum rompy pipelines deploy-default --project rompy-oceanum || echo "Pipeline may already be deployed"
 
    # Generate configuration
    echo "📝 Generating ${MODEL} configuration..."
@@ -559,7 +559,7 @@ Process multiple configurations:
 
    # Deploy the default pipeline template
    echo "🔧 Deploying default pipeline template..."
-   oceanum rompy pipelines --deploy-default --project-name ${PROJECT} || echo "Pipeline may already be deployed"
+   oceanum rompy pipelines deploy-default --project rompy-oceanum || echo "Pipeline may already be deployed"
 
    for domain in "${DOMAINS[@]}"; do
        echo "🔄 Processing domain: ${domain}"

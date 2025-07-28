@@ -6,7 +6,7 @@ from .status import status
 from .logs import logs
 from .sync import sync
 from .pipelines import pipelines
-from .pipeline_crud import pipeline_crud
+from .projects import projects
 
 # Export the command for entry point discovery
-__all__ = ["run", "init", "status", "logs", "sync", "pipelines", "pipeline_crud"]
+__all__ = ["run", "init", "status", "logs", "sync", "pipelines", "projects"]

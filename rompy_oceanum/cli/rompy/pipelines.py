@@ -1,406 +1,301 @@
-"""Pipeline template management command for rompy-oceanum CLI."""
+"""Pipeline management commands for rompy-oceanum CLI."""
 
+import sys
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Optional
 
 import click
 import yaml
 from oceanum.cli.models import ContextObject
 
+from ...client import PraxClient
+from ...config import PraxConfig
+
 logger = logging.getLogger(__name__)
 
-
-@click.command()
-@click.option(
-    "--model-type",
-    type=click.Choice(["swan", "schism", "ww3"]),
-    help="Model type for template selection",
+# Common options for pipeline commands
+project_option = click.option(
+    "--project",
+    default="rompy-oceanum",
+    help="Prax project name (default: rompy-oceanum)",
 )
-@click.option(
-    "--show-templates", is_flag=True, help="Show available pipeline templates"
+org_option = click.option(
+    "--org",
+    help="Prax organization name (overrides oceanum context)",
 )
-@click.option("--create-template", help="Create a new pipeline template file")
-@click.option(
-    "--project-name",
-    default="rompy-pipelines",
-    help="Prax project name for rompy pipelines (default: rompy-pipelines)",
+user_option = click.option(
+    "--user",
+    help="Prax user email (overrides oceanum context)",
 )
-@click.option("--run-image", help="Custom Docker image for the run task")
-@click.option("--cpu", help="CPU resources for the run task (e.g., '4')")
-@click.option("--memory", help="Memory resources for the run task (e.g., '8G')")
-@click.pass_obj
-def pipelines(
-    obj: ContextObject,
-    model_type,
-    show_templates,
-    create_template,
-    project_name,
-    run_image,
-    cpu,
-    memory,
-):
-    """Manage pipeline templates for rompy execution.
+stage_option = click.option(
+    "--stage",
+    default="dev",
+    help="Prax stage name (default: dev)",
+)
 
-    This command focuses on template management. Pipelines need to be deployed to a Prax project.
-    
-    First, create a project:
-        oceanum rompy projects create my-project.yaml
-    
-    Then, create pipeline templates:
-        oceanum rompy pipelines --create-template my-template.yaml --model-type swan
-    
-    Finally, deploy pipelines to your project:
-        oceanum rompy pipelines create my-template.yaml --project my-project
 
+@click.group(name="pipelines", help="Manage rompy pipelines in Prax projects")
+def pipelines():
+    """Manage rompy pipelines in Prax projects.
+    
+    Pipelines are resources within a Prax project. You need to create a project first,
+    then deploy pipelines to that project.
+    
     Examples:
-        oceanum rompy pipelines --show-templates
-        oceanum rompy pipelines --create-template my-template.yaml --model-type swan
-
-    For pipeline deployment and management, you can also use the 'oceanum prax' commands:
-        oceanum prax --project {project_name} list pipelines
-        oceanum prax --project {project_name} create pipeline --help
-        oceanum prax --project {project_name} submit pipeline <pipeline-name>
+        oceanum rompy projects create my-project.yaml
+        oceanum rompy pipelines create swan-pipeline.yaml --project my-project
+        oceanum rompy pipelines list --project my-project
     """
-
-    if show_templates:
-        _show_available_templates()
-        return
-
-    if create_template:
-        _create_pipeline_template(create_template, model_type, run_image, cpu, memory)
-        return
-
-    # Default action - show help
-    click.echo("💡 Use --help to see available options")
-    click.echo("Quick commands:")
-    click.echo("  oceanum rompy pipelines --show-templates")
-    click.echo(
-        "  oceanum rompy pipelines --create-template my-template.yaml --model-type swan"
-    )
-    click.echo(
-        f"\nFor pipeline deployment and management, use the 'oceanum prax' commands:"
-    )
-    click.echo(f"  oceanum prax --project {project_name} list pipelines")
-    click.echo(f"  oceanum prax --project {project_name} create pipeline --help")
+    pass
 
 
-def _show_available_templates():
-    """Show available pipeline templates."""
-    click.echo("📚 Available Pipeline Templates:")
-    click.echo()
-
-    # Check for built-in templates
-    template_dir = Path(__file__).parent.parent.parent / "pipeline_templates"
-
-    if template_dir.exists():
-        templates = list(template_dir.glob("*.yaml")) + list(template_dir.glob("*.yml"))
-
-        if templates:
-            click.echo("🔧 Built-in templates:")
-            for template in templates:
-                try:
-                    with open(template, "r") as f:
-                        template_data = yaml.safe_load(f)
-
-                    name = template.stem
-                    desc = template_data.get("metadata", {}).get(
-                        "description", "No description"
-                    )
-                    model_type = (
-                        template_data.get("metadata", {})
-                        .get("labels", {})
-                        .get("model-type", "generic")
-                    )
-
-                    click.echo(f"   📋 {name}.yaml - {model_type}")
-                    click.echo(f"      {desc}")
-
-                except Exception:
-                    click.echo(f"   📋 {template.name}")
-
-            click.echo()
-        else:
-            click.echo("⚠️  No built-in templates found")
-
-    # Show example usage
-    click.echo("💡 Usage:")
-    click.echo("   oceanum rompy run config.yml swan --pipeline-name my-pipeline")
-    click.echo(
-        "   oceanum rompy pipelines --create-template my-template.yaml --model-type swan"
-    )
-
-
-def _show_available_templates():
-    """Show available pipeline templates."""
-    click.echo("📚 Available Pipeline Templates:")
-    click.echo()
-
-    # Check for built-in templates
-    template_dir = Path(__file__).parent.parent.parent / "pipeline_templates"
-
-    if template_dir.exists():
-        templates = list(template_dir.glob("*.yaml")) + list(template_dir.glob("*.yml"))
-
-        if templates:
-            click.echo("🔧 Built-in templates:")
-            for template in templates:
-                try:
-                    with open(template, "r") as f:
-                        template_data = yaml.safe_load(f)
-
-                    name = template.stem
-                    desc = template_data.get("metadata", {}).get(
-                        "description", "No description"
-                    )
-                    model_type = (
-                        template_data.get("metadata", {})
-                        .get("labels", {})
-                        .get("model-type", "generic")
-                    )
-
-                    click.echo(f"   📋 {name}.yaml - {model_type}")
-                    click.echo(f"      {desc}")
-
-                except Exception:
-                    click.echo(f"   📋 {template.name}")
-
-            click.echo()
-        else:
-            click.echo("⚠️  No built-in templates found")
-
-    # Show example usage
-    click.echo("💡 Usage:")
-    click.echo("   oceanum rompy run config.yml swan --pipeline-name my-pipeline")
-    click.echo(
-        "   oceanum rompy pipelines --create-template my-template.yaml --model-type swan"
-    )
-
-
-def _create_pipeline_template(
-    template_path: str,
-    model_type: str = None,
-    run_image: str = None,
-    cpu: str = None,
-    memory: str = None,
+@pipelines.command(name="create", help="Create/deploy a pipeline template to a project")
+@click.argument("template_file", type=click.Path(exists=True))
+@click.option("--name", help="Pipeline name (defaults to filename without extension)")
+@project_option
+@org_option
+@user_option
+@stage_option
+@click.pass_obj
+def create_pipeline(
+    obj: ContextObject,
+    template_file: str,
+    name: Optional[str],
+    project: str,
+    org: Optional[str],
+    user: Optional[str],
+    stage: str,
 ):
-    """Create a new pipeline template file."""
-    click.echo(f"📝 Creating pipeline template: {template_path}")
-
-    if not model_type:
-        model_type = click.prompt(
-            "Model type", type=click.Choice(["swan", "schism", "ww3", "generic"])
-        )
-
-    template_data = _get_template_structure(model_type, run_image, cpu, memory)
-
+    """Create/deploy a pipeline template to a project."""
     try:
-        output_file = Path(template_path)
-        output_file.parent.mkdir(parents=True, exist_ok=True)
+        # Load template
+        with open(template_file, "r") as f:
+            template_data = yaml.safe_load(f)
 
-        with open(output_file, "w") as f:
-            yaml.dump(template_data, f, default_flow_style=False, indent=2)
+        # Use provided name or derive from filename
+        if not name:
+            name = Path(template_file).stem
 
-        click.echo(f"✅ Template created: {output_file}")
-        click.echo("💡 Customize the template and deploy with oceanum prax commands:")
-        click.echo(f"   oceanum prax deloy {template_path}")
+        # Set name in template if not already set
+        if "name" not in template_data:
+            template_data["name"] = name
+
+        # Get Prax configuration
+        prax_config_data = {
+            "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
+            "project": project,
+            "stage": stage,
+        }
+
+        # Use oceanum's token for authentication
+        if obj.token and obj.token.access_token:
+            prax_config_data["token"] = obj.token.access_token
+
+        prax_config = PraxConfig.from_env(**prax_config_data)
+        client = PraxClient(prax_config)
+
+        # Submit pipeline template
+        result = client.submit_pipeline_template(template_data)
+
+        click.echo(f"✅ Pipeline '{name}' created successfully in project '{project}'")
+        click.echo(f"📝 Pipeline details: {result}")
 
     except Exception as e:
-        click.echo(f"❌ Failed to create template: {e}", err=True)
+        click.echo(f"❌ Failed to create pipeline: {e}", err=True)
+        sys.exit(1)
 
 
-def _get_template_structure(
-    model_type: str, run_image: str = None, cpu: str = None, memory: str = None
-) -> Dict[str, Any]:
-    """Get template structure for a model type."""
+@pipelines.command(name="list", help="List pipelines in a project")
+@project_option
+@org_option
+@user_option
+@stage_option
+@click.pass_obj
+def list_pipelines(
+    obj: ContextObject, project: str, org: Optional[str], user: Optional[str], stage: str
+):
+    """List pipelines in a project."""
+    try:
+        # Get Prax configuration
+        prax_config_data = {
+            "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
+            "project": project,
+            "stage": stage,
+        }
 
-    # Model-specific configurations
-    model_configs = {
-        "swan": {
-            "generate_image": "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest",
-            "run_image": run_image
-            or "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest",
-            "run_command": "mpirun -n 2 /usr/local/bin/swan.exe",
-            "cpu": cpu or "4",
-            "memory": memory or "2G",
-            "env_vars": {
-                "ROMPY_MODEL": "swan",
-                "OMPI_ALLOW_RUN_AS_ROOT": "1",
-                "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
-                "OMP_NUM_THREADS": "2",
-            },
-        },
-        "schism": {
-            "generate_image": "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest",
-            "run_image": run_image
-            or "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/schism:latest",
-            "run_command": "mpirun -n 4 /usr/local/bin/pschism",
-            "cpu": cpu or "8",
-            "memory": memory or "16G",
-            "env_vars": {
-                "ROMPY_MODEL": "schism",
-                "OMPI_ALLOW_RUN_AS_ROOT": "1",
-                "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
-                "OMP_NUM_THREADS": "4",
-            },
-        },
-        "ww3": {
-            "generate_image": "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest",
-            "run_image": run_image
-            or "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/ww3:latest",
-            "run_command": "mpirun -n 2 /usr/local/bin/ww3_shel",
-            "cpu": cpu or "4",
-            "memory": memory or "8G",
-            "env_vars": {
-                "ROMPY_MODEL": "ww3",
-                "OMPI_ALLOW_RUN_AS_ROOT": "1",
-                "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
-                "OMP_NUM_THREADS": "2",
-            },
-        },
-    }
+        # Use oceanum's token for authentication
+        if obj.token and obj.token.access_token:
+            prax_config_data["token"] = obj.token.access_token
 
-    # Get model config or use generic defaults
-    model_config = model_configs.get(
-        model_type,
-        {
-            "generate_image": "us-central1-docker.pkg.dev/oceanum-procd/oceanum-public/rompy:latest",
-            "run_image": run_image
-            or "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest",
-            "run_command": "python -m rompy run",
-            "cpu": cpu or "2",
-            "memory": memory or "4G",
-            "env_vars": {"ROMPY_MODEL": model_type},
-        },
-    )
+        prax_config = PraxConfig.from_env(**prax_config_data)
+        client = PraxClient(prax_config)
 
-    base_template = {
-        "name": f"rompy-{model_type}",
-        "resources": {
-            "tasks": [
-                {
-                    "name": "generate",
-                    "image": model_config["generate_image"],
-                    "command": "rompy generate --config-from-env -v",
-                    "outputs": {
-                        "artifacts": [{"name": "workspace", "path": "/tmp/rompy"}]
-                    },
-                    "resources": {"cpu": "1", "memory": "1G"},
-                    "env": [
-                        {"name": "ROMPY_MODEL", "value": model_type},
-                        {"name": "ROMPY_LOG_LEVEL", "value": "INFO"},
-                    ],
-                },
-                {
-                    "name": "run",
-                    "image": model_config["run_image"],
-                    "inputs": {
-                        "artifacts": [{"name": "workspace", "path": "/tmp/rompy"}]
-                    },
-                    "command": f"rompy run --config-from-env --run-backend local -v",
-                    "resources": {
-                        "cpu": model_config["cpu"],
-                        "memory": model_config["memory"],
-                    },
-                    "outputs": {
-                        "artifacts": [{"name": "output", "path": "/tmp/rompy"}]
-                    },
-                    "env": [
-                        {"name": "ROMPY_MODEL", "value": model_type},
-                        {"name": "ROMPY_BACKEND_TYPE", "value": "local"},
-                        {
-                            "name": "ROMPY_BACKEND_COMMAND",
-                            "value": model_config["run_command"],
-                        },
-                        {"name": "ROMPY_BACKEND_SHELL", "value": "true"},
-                        {"name": "ROMPY_BACKEND_CAPTURE_OUTPUT", "value": "true"},
-                    ]
-                    + [
-                        {"name": k, "value": v}
-                        for k, v in model_config["env_vars"].items()
-                    ],
-                },
-                {
-                    "name": "register",
-                    "image": model_config["generate_image"],
-                    "command": "rompy postprocess --config-from-env --processor datamesh -v",
-                    "inputs": {"artifacts": [{"name": "output", "path": "/tmp/rompy"}]},
-                    "resources": {"cpu": "1", "memory": "1G"},
-                    "env": [
-                        {"name": "ROMPY_MODEL", "value": model_type},
-                        {"name": "DATAMESH_PROCESSOR", "value": "datamesh"},
-                        {
-                            "name": "DATAMESH_OUTPUT_PATTERNS",
-                            "value": "*.nc,*.dat,*.csv,*.log",
-                        },
-                        {
-                            "name": "DATAMESH_TAGS",
-                            "value": f"{model_type},wave-model,oceanum,rompy",
-                        },
-                    ],
-                },
-            ],
-            "pipelines": [
-                {
-                    "name": f"{model_type}-from-rompy",
-                    "arguments": {
-                        "parameters": [
-                            {"name": "datamesh-token", "env": "DATAMESH_TOKEN"},
-                            {"name": "rompy-config", "env": "ROMPY_CONFIG"},
-                        ]
-                    },
-                    "defaults": {
-                        "env": [{"name": "ROMPY_MODEL", "value": model_type}]
-                        + [
-                            {"name": k, "value": v}
-                            for k, v in model_config["env_vars"].items()
-                        ],
-                        "retryStrategy": {"limit": 1},
-                    },
-                    "dag": [
-                        {"name": "generate", "taskRef": "generate", "dependencies": []},
-                        {
-                            "name": "run",
-                            "taskRef": "run",
-                            "arguments": {
-                                "artifacts": [
-                                    {
-                                        "name": "workspace",
-                                        "stepRef": {
-                                            "name": "generate",
-                                            "artifactRef": "workspace",
-                                        },
-                                    }
-                                ]
-                            },
-                            "dependencies": [{"name": "generate"}],
-                        },
-                        {
-                            "name": "register",
-                            "taskRef": "register",
-                            "arguments": {
-                                "artifacts": [
-                                    {
-                                        "name": "output",
-                                        "stepRef": {
-                                            "name": "run",
-                                            "artifactRef": "output",
-                                        },
-                                    }
-                                ]
-                            },
-                            "dependencies": [{"name": "run"}],
-                        },
-                    ],
-                }
-            ],
-            "stages": [
-                {
-                    "name": "dev",
-                    "resources": {"pipelines": [f"{model_type}-from-rompy"]},
-                }
-            ],
-        },
-    }
+        # List pipelines
+        pipelines = client.list_pipelines()
 
-    return base_template
+        if not pipelines:
+            click.echo("📭 No pipelines found in project")
+            return
+
+        click.echo(f"📋 Pipelines in project '{project}':")
+        # Handle both list of dicts and list of objects
+        for pipeline in pipelines:
+            # Extract information from the pipeline object
+            name = getattr(pipeline, 'name', 'Unknown')
+            
+            # Get last run status if available
+            last_run_status = "Unknown"
+            if hasattr(pipeline, 'last_run') and pipeline.last_run:
+                last_run_status = getattr(pipeline.last_run, 'status', 'Unknown')
+            
+            click.echo(f"   📋 {name} - Last Run Status: {last_run_status}")
+
+    except Exception as e:
+        click.echo(f"❌ Failed to list pipelines: {e}", err=True)
+        sys.exit(1)
+
+
+@pipelines.command(name="describe", help="Describe a pipeline")
+@click.argument("pipeline_name")
+@project_option
+@org_option
+@user_option
+@stage_option
+@click.pass_obj
+def describe_pipeline(
+    obj: ContextObject,
+    pipeline_name: str,
+    project: str,
+    org: Optional[str],
+    user: Optional[str],
+    stage: str,
+):
+    """Describe a pipeline."""
+    try:
+        # Get Prax configuration
+        prax_config_data = {
+            "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
+            "project": project,
+            "stage": stage,
+        }
+
+        # Use oceanum's token for authentication
+        if obj.token and obj.token.access_token:
+            prax_config_data["token"] = obj.token.access_token
+
+        prax_config = PraxConfig.from_env(**prax_config_data)
+        client = PraxClient(prax_config)
+
+        # Get pipeline details
+        pipeline = client.get_pipeline(pipeline_name)
+
+        click.echo(f"📋 Details for pipeline '{pipeline_name}':")
+        click.echo(yaml.dump(pipeline, default_flow_style=False, indent=2))
+
+    except Exception as e:
+        click.echo(f"❌ Failed to describe pipeline: {e}", err=True)
+        sys.exit(1)
+
+
+@pipelines.command(name="delete", help="Delete a pipeline from a project")
+@click.argument("pipeline_name")
+@project_option
+@org_option
+@user_option
+@stage_option
+@click.confirmation_option(
+    prompt="Are you sure you want to delete this pipeline from the project?"
+)
+@click.pass_obj
+def delete_pipeline(
+    obj: ContextObject,
+    pipeline_name: str,
+    project: str,
+    org: Optional[str],
+    user: Optional[str],
+    stage: str,
+):
+    """Delete a pipeline from a project."""
+    try:
+        # Get Prax configuration
+        prax_config_data = {
+            "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
+            "project": project,
+            "stage": stage,
+        }
+
+        # Use oceanum's token for authentication
+        if obj.token and obj.token.access_token:
+            prax_config_data["token"] = obj.token.access_token
+
+        prax_config = PraxConfig.from_env(**prax_config_data)
+        client = PraxClient(prax_config)
+
+        # Delete pipeline
+        client.delete_pipeline(pipeline_name)
+
+        click.echo(f"✅ Pipeline '{pipeline_name}' deleted successfully from project '{project}'")
+
+    except Exception as e:
+        click.echo(f"❌ Failed to delete pipeline: {e}", err=True)
+        sys.exit(1)
+
+
+@pipelines.command(name="deploy-default", help="Deploy the default pipeline template")
+@project_option
+@org_option
+@user_option
+@stage_option
+@click.pass_obj
+def deploy_default(
+    obj: ContextObject, project: str, org: Optional[str], user: Optional[str], stage: str
+):
+    """Deploy the default pipeline template to a project."""
+    try:
+        click.echo(f"🚀 Deploying default pipeline template to project: {project}")
+
+        # Get the path to the default template
+        template_path = (
+            Path(__file__).parent.parent.parent / "pipeline_templates" / "swan.yaml"
+        )
+
+        if not template_path.exists():
+            click.echo(f"❌ Default template not found at {template_path}", err=True)
+            sys.exit(1)
+
+        # Load template
+        with open(template_path, "r") as f:
+            template_data = yaml.safe_load(f)
+
+        # Get Prax configuration
+        prax_config_data = {
+            "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
+            "project": project,
+            "stage": stage,
+        }
+
+        # Use oceanum's token for authentication
+        if obj.token and obj.token.access_token:
+            prax_config_data["token"] = obj.token.access_token
+
+        # Get user email from context if available
+        if user:
+            prax_config_data["user"] = user
+        elif obj.token and hasattr(obj.token, "email"):
+            prax_config_data["user"] = obj.token.email
+
+        prax_config = PraxConfig.from_env(**prax_config_data)
+        client = PraxClient(prax_config)
+
+        # Submit pipeline template
+        result = client.submit_pipeline_template(template_data)
+
+        click.echo("✅ Default pipeline template deployed successfully!")
+        click.echo(
+            f"💡 You can now run models using: oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project {project}"
+        )
+
+    except Exception as e:
+        click.echo(f"❌ Failed to deploy default pipeline template: {e}", err=True)
+        sys.exit(1)

@@ -182,11 +182,30 @@ class PraxClientWrapper:
         
         if isinstance(result, models.ErrorResponse):
             raise Exception(f"Failed to submit pipeline: {result.detail}")
+            
+        return result.name
+
+    def list_pipelines(self, ctx=None):
+        """List pipelines in the project.
         
-        if result.last_run:
-            return result.last_run.name
-        else:
-            raise Exception("Pipeline submitted but no run ID returned")
+        Args:
+            ctx: Click context (optional)
+            
+        Returns:
+            List of pipeline dictionaries
+        """
+        client = self._get_client(ctx)
+        
+        result = client.list_pipelines(
+            org=self.prax_config.org,
+            project=self.prax_config.project,
+            stage=self.prax_config.stage
+        )
+        
+        if isinstance(result, models.ErrorResponse):
+            raise Exception(f"Failed to list pipelines: {result.detail}")
+            
+        return result
     
     def get_run_status(self, run_name: str, ctx=None) -> Dict[str, Any]:
         """Get pipeline run status.

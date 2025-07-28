@@ -18,7 +18,6 @@ class TestPraxResult:
         return PraxResult(
             run_id="test-run-id",
             pipeline_name="test-pipeline",
-            user="test-user",
             org="test-org",
             project="test-project",
             stage="dev",
@@ -41,14 +40,9 @@ class TestPraxResult:
         assert status["name"] == "test-run-id"
         assert status["status"] == "Running"
 
-        # Check client call
+        # Check client call - now using the new signature
         prax_result.client.get_run_status.assert_called_once_with(
-            run_id="test-run-id",
-            pipeline_name="test-pipeline",
-            user="test-user",
-            org="test-org",
-            project="test-project",
-            stage="dev"
+            run_name="test-run-id"
         )
 
     def test_get_status_no_client(self):
@@ -56,7 +50,6 @@ class TestPraxResult:
         result = PraxResult(
             run_id="test-run-id",
             pipeline_name="test-pipeline",
-            user="test-user",
             org="test-org",
             project="test-project",
             stage="dev",
@@ -70,39 +63,28 @@ class TestPraxResult:
     def test_get_logs(self, prax_result):
         """Test getting logs from a pipeline run."""
         # Set up mock response
-        prax_result.client.get_run_logs.return_value = {
-            "logs": "Test logs content"
-        }
+        prax_result.client.get_run_logs.return_value = [
+            "Log line 1",
+            "Log line 2"
+        ]
 
         # Get logs
         logs = prax_result.get_logs()
 
         # Check result
-        assert logs["logs"] == "Test logs content"
+        assert logs == ["Log line 1", "Log line 2"]
 
-        # Check client call
+        # Check client call - now using the new signature
         prax_result.client.get_run_logs.assert_called_once_with(
-            run_id="test-run-id",
-            pipeline_name="test-pipeline",
-            user="test-user",
-            org="test-org",
-            project="test-project",
-            stage="dev",
-            task_name=None
+            run_name="test-run-id"
         )
 
-        # Test with task name
+        # Test with task name (should be ignored with new client)
         prax_result.client.get_run_logs.reset_mock()
         prax_result.get_logs(task_name="test-task")
-
+        
         prax_result.client.get_run_logs.assert_called_once_with(
-            run_id="test-run-id",
-            pipeline_name="test-pipeline",
-            user="test-user",
-            org="test-org",
-            project="test-project",
-            stage="dev",
-            task_name="test-task"
+            run_name="test-run-id"
         )
 
     def test_wait_for_completion(self, prax_result):
@@ -156,16 +138,26 @@ class TestPraxResult:
             # Check result
             assert downloaded_files == ["/tmp/test-artifact1", "/tmp/test-artifact2"]
 
-            # Check client call
+            # Check client call - now using the new signature
             prax_result.client.download_run_artifacts.assert_called_once_with(
-                run_id="test-run-id",
-                pipeline_name="test-pipeline",
-                user="test-user",
-                org="test-org",
-                project="test-project",
-                stage="dev",
+                run_name="test-run-id",
                 target_dir="/tmp/outputs"
             )
 
             # Check directory creation
             mock_makedirs.assert_called_once_with("/tmp/outputs", exist_ok=True)
+
+    def test_download_outputs_no_client(self):
+        """Test error handling when downloading outputs without a client."""
+        result = PraxResult(
+            run_id="test-run-id",
+            pipeline_name="test-pipeline",
+            org="test-org",
+            project="test-project",
+            stage="dev",
+            status="submitted",
+            client=None
+        )
+
+        with pytest.raises(ValueError, match="No client configured"):
+            result.download_outputs(target_dir="/tmp/outputs")

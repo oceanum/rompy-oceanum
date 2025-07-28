@@ -120,7 +120,7 @@ Generate optimized rompy configuration files from templates.
    oceanum rompy projects create my-project.yaml
 
    # 2. Deploy the default pipeline template
-   oceanum rompy pipelines --deploy-default --project-name my-project
+   oceanum rompy pipelines deploy-default --project my-project
 
    # 3. Generate configuration
    oceanum rompy init swan --template operational --domain "perth_coast"
@@ -198,7 +198,7 @@ Before running pipelines, you need to create a project and deploy a pipeline tem
    oceanum rompy projects create my-project.yaml
 
    # Deploy the default pipeline template
-   oceanum rompy pipelines --deploy-default --project-name my-project
+   oceanum rompy pipelines deploy-default --project my-project
 
    # Execute model
    oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
@@ -312,50 +312,6 @@ Logs are displayed with timestamps:
    2024-01-15T10:35:22Z [WARN] High wave heights detected in domain
    2024-01-15T10:42:18Z [INFO] Model execution completed successfully
 
-pipeline-crud
-~~~~~~~~~~~~~
-
-Manage pipeline templates and deployments for rompy execution.
-
-**Syntax:**
-
-.. code-block:: bash
-
-   oceanum rompy pipeline-crud [OPTIONS] COMMAND [ARGS]...
-
-**Options:**
-
-* ``--project TEXT``: Prax project name (default: rompy-pipelines)
-* ``--org TEXT``: Prax organization name (overrides oceanum context)
-
-**Commands:**
-
-* ``create TEMPLATE_FILE``: Create a new pipeline from a template file
-* ``list-pipelines``: List all pipelines in the project
-* ``get PIPELINE_NAME``: Get details of a specific pipeline
-* ``update PIPELINE_NAME TEMPLATE_FILE``: Update an existing pipeline with a new template
-* ``delete PIPELINE_NAME``: Delete a pipeline from the project
-
-**Examples:**
-
-.. code-block:: bash
-
-   # Create a pipeline from a template
-   oceanum rompy pipeline-crud create my-pipeline.yaml --project my-project
-
-   # List all pipelines in a project
-   oceanum rompy pipeline-crud list-pipelines --project my-project
-
-   # Get details of a specific pipeline
-   oceanum rompy pipeline-crud get my-pipeline --project my-project
-
-   # Update an existing pipeline
-   oceanum rompy pipeline-crud update my-pipeline my-updated-pipeline.yaml --project my-project
-
-   # Delete a pipeline
-   oceanum rompy pipeline-crud delete my-pipeline --project my-project
-
-
 projects
 ~~~~~~~~
 
@@ -371,12 +327,13 @@ Manage Prax projects for rompy pipelines.
 
 * ``create SPEC_FILE``: Create a new project from a spec file
 * ``list``: List all projects accessible to the user
-* ``get PROJECT_NAME``: Get details of a specific project
+* ``describe PROJECT_NAME``: Describe a project
 * ``delete PROJECT_NAME``: Delete a project
 
 **Options for all commands:**
 
 * ``--org TEXT``: Prax organization name (overrides oceanum context)
+* ``--user TEXT``: Prax user email (overrides oceanum context)
 
 **Examples:**
 
@@ -388,11 +345,57 @@ Manage Prax projects for rompy pipelines.
    # List all projects
    oceanum rompy projects list
 
-   # Get project details
-   oceanum rompy projects get my-project
+   # Describe a project
+   oceanum rompy projects describe my-project
 
    # Delete a project
    oceanum rompy projects delete my-project
+
+
+pipelines
+~~~~~~~~~
+
+Manage pipeline templates and deployments for rompy execution.
+
+**Syntax:**
+
+.. code-block:: bash
+
+   oceanum rompy pipelines [OPTIONS] COMMAND [ARGS]...
+
+**Commands:**
+
+* ``create TEMPLATE_FILE``: Create/deploy a pipeline template to a project
+* ``list``: List pipelines in a project
+* ``describe PIPELINE_NAME``: Describe a pipeline
+* ``delete PIPELINE_NAME``: Delete a pipeline from a project
+* ``deploy-default``: Deploy the default pipeline template
+
+**Options for all commands:**
+
+* ``--project TEXT``: Prax project name (default: rompy-pipelines)
+* ``--org TEXT``: Prax organization name (overrides oceanum context)
+* ``--user TEXT``: Prax user email (overrides oceanum context)
+* ``--stage TEXT``: Prax stage name (default: dev)
+
+**Examples:**
+
+.. code-block:: bash
+
+   # Deploy the default pipeline template
+   oceanum rompy pipelines deploy-default --project rompy-oceanum
+
+   # Create a pipeline from a template
+   oceanum rompy pipelines create my-pipeline.yaml --project rompy-oceanum
+
+   # List all pipelines in a project
+   oceanum rompy pipelines list --project rompy-oceanum
+
+   # Describe a pipeline
+   oceanum rompy pipelines describe my-pipeline --project rompy-oceanum
+
+   # Delete a pipeline
+   oceanum rompy pipelines delete my-pipeline --project rompy-oceanum
 
 
 Output Formats
@@ -500,7 +503,7 @@ Bash Script Example
 
    # Deploy the default pipeline template
    echo "🔧 Deploying default pipeline template..."
-   oceanum rompy pipelines --deploy-default --project-name ${PROJECT} || echo "Pipeline may already be deployed"
+   oceanum rompy pipelines deploy-default --project ${PROJECT} || echo "Pipeline may already be deployed"
 
    # Generate configuration
    echo "📝 Generating ${MODEL} configuration..."
@@ -635,7 +638,7 @@ Python Script Example
        # Deploy the default pipeline template
        print("🔧 Deploying default pipeline template...")
        try:
-           run_command(f"oceanum rompy pipelines --deploy-default --project-name {project}")
+           run_command("oceanum rompy pipelines deploy-default --project rompy-oceanum")
        except:
            print("Pipeline may already be deployed")
 
@@ -714,13 +717,13 @@ If pipeline execution fails:
    python -c "import yaml; yaml.safe_load(open('config.yml'))"
 
    # Check pipeline template availability
-   oceanum rompy pipeline-crud list-pipelines --project my-project
+   oceanum rompy pipelines list --project my-project
 
    # Check project exists
    oceanum rompy projects list
 
    # Deploy default pipeline template if needed
-   oceanum rompy pipelines --deploy-default --project-name my-project
+   oceanum rompy pipelines deploy-default --project rompy-oceanum
 
 **Download Issues**
 

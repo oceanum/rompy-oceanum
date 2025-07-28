@@ -151,7 +151,7 @@ oceanum rompy init swan --template operational --domain "perth_coast"
 oceanum rompy projects create wave-project.yaml
 
 # Deploy the default pipeline template
-oceanum rompy pipelines --deploy-default --project-name wave-project
+oceanum rompy pipelines deploy-default --project wave-project
 
 # Execute model
 RUN_ID=$(oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project wave-project | grep "Prax run ID:" | cut -d' ' -f4)
@@ -173,13 +173,10 @@ oceanum rompy init swan --template basic --domain "my_domain"
 oceanum rompy projects create my-project.yaml
 
 # Deploy the default pipeline template
-oceanum rompy pipelines --deploy-default --project-name my-project
+   oceanum rompy pipelines deploy-default --project rompy-oceanum
 
 # Or create a custom pipeline template
-oceanum rompy pipelines --create-template my-pipeline.yaml --model-type swan
-
-# Deploy custom pipeline to your project
-oceanum rompy pipeline-crud create my-pipeline.yaml --project my-project
+oceanum rompy pipelines create my-pipeline.yaml --project my-project
 
 # Execute model via Prax pipeline
 oceanum rompy run config.yml swan --pipeline-name swan-from-rompy --project my-project
@@ -237,7 +234,7 @@ for domain in "perth" "sydney" "melbourne"; do
     oceanum rompy init swan --template operational --domain "$domain" --output "${domain}_config.yml"
     
     # Deploy the default pipeline template if not already done
-    oceanum rompy pipelines --deploy-default --project-name wave-project 2>/dev/null || true
+    oceanum rompy pipelines deploy-default --project wave-project 2>/dev/null || true
     
     oceanum rompy run "${domain}_config.yml" swan --pipeline-name swan-from-rompy --project wave-project &
 done
