@@ -23,10 +23,10 @@ resources:
         artifacts:
           - name: workspace
             path: /tmp/rompy
-      command: bach -c "cd /tmp/rompy && mpirun --allow-run-as-root -n 4 /usr/local/bin/swan.exe"
+      command: bash -c "cd /tmp/rompy && mpirun --allow-run-as-root -n 2 /usr/local/bin/swan.exe"
       resources:
-        cpu: 4
-        memory: 2G
+        cpu: 2
+        memory: 5G
       outputs:
         artifacts:
           - name: grid
