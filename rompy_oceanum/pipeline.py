@@ -98,6 +98,7 @@ class PraxPipelineBackend:
         download_outputs: bool = False,
         output_dir: Optional[str] = None,
         parameters: Optional[Dict[str, Any]] = None,
+        ctx=None,
         **kwargs,
     ) -> Dict[str, Any]:
         """Execute the model pipeline on Prax.
@@ -218,9 +219,13 @@ class PraxPipelineBackend:
                     pipeline_name,
                     user=getattr(prax_config, "user", "unknown"),
                     parameters=prax_parameters,
+                    ctx=ctx,
                 )
                 prax_run_id = result.run_id
+                prax_run_name = result.run_name if hasattr(result, "run_name") else prax_run_id
+                logger.debug(f"Submitted pipeline, got run ID: {prax_run_id}, run name: {prax_run_name}")
                 pipeline_results["prax_run_id"] = prax_run_id
+                pipeline_results["prax_run_name"] = prax_run_name
                 pipeline_results["stages_completed"].append("submit")
 
                 logger.info(

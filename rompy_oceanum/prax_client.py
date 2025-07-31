@@ -142,29 +142,35 @@ class PraxClientWrapper:
     def _get_client(self, ctx=None):
         """Get or create the PRAX client."""
         if self._client is None:
-            # Create a minimal context object for the PRAXClient
-            # In a real implementation, this would come from click
-            class MockContext:
-                def __init__(self, prax_config):
-                    class MockObj:
-                        def __init__(self, prax_config):
-                            # Use the same domain format as the oceanum CLI
-                            self.domain = "oceanum.io"
+            if ctx is not None:
+                # Use the provided click context
+                logger.debug("Using provided click context")
+                self._client = PRAXClient(ctx)
+            else:
+                # Create a minimal context object for the PRAXClient
+                # In a real implementation, this would come from click
+                logger.debug("Creating mock context")
+                class MockContext:
+                    def __init__(self, prax_config):
+                        class MockObj:
+                            def __init__(self, prax_config):
+                                # Use the same domain format as the oceanum CLI
+                                self.domain = "oceanum.io"
 
-                            class MockToken:
-                                def __init__(self, token):
-                                    self.access_token = token
+                                class MockToken:
+                                    def __init__(self, token):
+                                        self.access_token = token
 
-                            self.token = (
-                                MockToken(prax_config.token)
-                                if prax_config.token
-                                else None
-                            )
+                                self.token = (
+                                    MockToken(prax_config.token)
+                                    if prax_config.token
+                                    else None
+                                )
 
-                    self.obj = MockObj(prax_config)
+                        self.obj = MockObj(prax_config)
 
-            mock_ctx = MockContext(self.prax_config)
-            self._client = PRAXClient(mock_ctx)
+                mock_ctx = MockContext(self.prax_config)
+                self._client = PRAXClient(mock_ctx)
         return self._client
 
     def submit_pipeline(
@@ -193,11 +199,24 @@ class PraxClientWrapper:
             project=self.prax_config.project,
             stage=self.prax_config.stage,
         )
+        
+        # Log result at debug level to reduce verbosity
+        logger.debug(f"Pipeline submission result: {result}")
 
         if isinstance(result, models.ErrorResponse):
             raise Exception(f"Failed to submit pipeline: {result.detail}")
 
-        return result.name
+        # Extract the actual run name from the last_run property
+        if hasattr(result, "last_run") and result.last_run is not None:
+            run_name = result.last_run.name
+            logger.debug(f"Got run name from last_run.name: {run_name}")
+        else:
+            # Fallback to the pipeline name if we can't get the run name
+            run_name = result.name
+            logger.debug(f"Falling back to pipeline name as run name: {run_name}")
+        
+        logger.debug(f"Returning run name: {run_name}")
+        return run_name
 
     def list_pipelines(self, ctx=None):
         """List pipelines in the project.
@@ -247,13 +266,14 @@ class PraxClientWrapper:
         """Get pipeline run status.
 
         Args:
-            run_name: Pipeline run identifier
+            run_name: Pipeline run name
             ctx: Click context (optional)
 
         Returns:
             Status dictionary
         """
         client = self._get_client(ctx)
+        logger.info(f"Getting run status for {run_name}")
         run = client.get_pipeline_run(
             run_name,
             org=self.prax_config.org,
@@ -262,6 +282,7 @@ class PraxClientWrapper:
         )
 
         if isinstance(run, models.ErrorResponse):
+            logger.info(f"Run {run_name} not found: {run.detail}")
             if "not found" in str(run.detail).lower():
                 # Return a mock status for testing
                 logger.warning(f"Run {run_name} not found, returning mock status")
@@ -277,12 +298,13 @@ class PraxClientWrapper:
             raise Exception(f"Failed to get run status: {run.detail}")
 
         # Handle both object attributes and dictionary keys
-        status = getattr(run, "status", None) or run.get("status", "unknown")
-        started_at = getattr(run, "started_at", None) or run.get("started_at")
-        finished_at = getattr(run, "finished_at", None) or run.get("finished_at")
-        message = getattr(run, "message", None) or run.get("message")
-        name = getattr(run, "name", None) or run.get("name", run_name)
-        details = getattr(run, "details", None) or run.get("details", {})
+        # For Pydantic models, we need to use getattr, not .get()
+        status = getattr(run, "status", "unknown")
+        started_at = getattr(run, "started_at", None)
+        finished_at = getattr(run, "finished_at", None)
+        message = getattr(run, "message", None)
+        name = getattr(run, "name", run_name)
+        details = getattr(run, "details", {})
 
         return {
             "status": status.lower() if status else "unknown",
@@ -298,7 +320,7 @@ class PraxClientWrapper:
         """Get pipeline run logs.
 
         Args:
-            run_name: Pipeline run identifier
+            run_name: Pipeline run name
             tail: Number of log lines to retrieve
             ctx: Click context (optional)
 
@@ -306,6 +328,7 @@ class PraxClientWrapper:
             List of log lines
         """
         client = self._get_client(ctx)
+        logger.info(f"Getting logs for run {run_name}")
         logs = []
 
         # Get logs using the client's method
@@ -320,6 +343,7 @@ class PraxClientWrapper:
 
         for line in log_generator:
             if isinstance(line, models.ErrorResponse):
+                logger.info(f"Error getting logs for run {run_name}: {line.detail}")
                 if "not found" in str(line.detail).lower():
                     # Return mock logs for testing
                     logger.warning(
@@ -333,6 +357,7 @@ class PraxClientWrapper:
                 raise Exception(f"Failed to get logs: {line.detail}")
             logs.append(str(line))
 
+        logger.info(f"Returning {len(logs)} log lines for run {run_name}")
         return logs
 
 

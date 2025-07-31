@@ -15,12 +15,13 @@ logger = logging.getLogger(__name__)
 class PraxResult:
     """Result object for tracking Prax pipeline execution."""
     
-    def __init__(self, run_id: str, pipeline_name: str, org: str, project: str, 
+    def __init__(self, run_id: str, run_name: str, pipeline_name: str, org: str, project: str, 
                  stage: str, status: str = "submitted", client=None):
         """Initialize the PraxResult.
         
         Args:
             run_id: Pipeline run identifier
+            run_name: Pipeline run name
             pipeline_name: Name of the pipeline
             org: Organization name
             project: Project name
@@ -29,6 +30,7 @@ class PraxResult:
             client: PraxClient instance
         """
         self.run_id = run_id
+        self.run_name = run_name
         self.pipeline_name = pipeline_name
         self.org = org
         self.project = project
@@ -192,7 +194,7 @@ class PraxClient:
     
     def submit_pipeline(self, pipeline_name: str, user: str, org: Optional[str] = None, 
                         project: Optional[str] = None, stage: Optional[str] = None,
-                        parameters: Optional[Dict[str, Any]] = None):
+                        parameters: Optional[Dict[str, Any]] = None, ctx=None):
         """Submit a pipeline for execution.
         
         Args:
@@ -202,6 +204,7 @@ class PraxClient:
             project: Project name (defaults to config)
             stage: Stage name (defaults to config)
             parameters: Pipeline parameters
+            ctx: Click context (optional)
             
         Returns:
             PraxResult object for tracking the pipeline execution
@@ -216,13 +219,15 @@ class PraxClient:
             wrapper = PraxClientWrapper(self.prax_config)
             
             # Submit pipeline using the wrapper
-            run_id = wrapper.submit_pipeline(
+            run_name = wrapper.submit_pipeline(
                 pipeline_name=pipeline_name,
-                parameters=parameters or {}
+                parameters=parameters or {},
+                ctx=ctx
             )
             
             return PraxResult(
-                run_id=run_id,
+                run_id=run_name,  # For now, use run_name as run_id
+                run_name=run_name,
                 pipeline_name=pipeline_name,
                 org=org,
                 project=project,
@@ -245,6 +250,7 @@ class PraxClient:
             
             return PraxResult(
                 run_id=response.get("run_id", "unknown"),
+                run_name=response.get("run_id", "unknown"),  # For now, use run_id as run_name
                 pipeline_name=pipeline_name,
                 org=org,
                 project=project,
@@ -254,7 +260,7 @@ class PraxClient:
             )
     
     def get_run_status(self, run_id: str, pipeline_name: str, org: Optional[str] = None,
-                       project: Optional[str] = None, stage: Optional[str] = None):
+                       project: Optional[str] = None, stage: Optional[str] = None, ctx=None):
         """Get pipeline run status.
         
         Args:
@@ -263,6 +269,7 @@ class PraxClient:
             org: Organization name (defaults to config)
             project: Project name (defaults to config)
             stage: Stage name (defaults to config)
+            ctx: Click context (optional)
             
         Returns:
             Status dictionary
@@ -276,13 +283,14 @@ class PraxClient:
             from .prax_client import PraxClientWrapper
             wrapper = PraxClientWrapper(self.prax_config)
             
-            # Get run status using the wrapper
-            return wrapper.get_run_status(run_name=run_id)
+            # Get run status using the wrapper (use run_id as run_name)
+            return wrapper.get_run_status(run_name=run_id, ctx=ctx)
         except Exception as e:
             # Fallback to our custom implementation
             logger.warning(f"Falling back to custom implementation: {e}")
             
-            url = f"{self.base_url}/api/pipelines/{pipeline_name}/runs/{run_id}"
+            # Use the correct endpoint pattern: pipeline-runs/{run_id}
+            url = f"{self.base_url}/api/pipeline-runs/{run_id}"
             params = {
                 "org": org,
                 "project": project,
@@ -293,7 +301,7 @@ class PraxClient:
     
     def get_run_logs(self, run_id: str, pipeline_name: str, 
                      org: Optional[str] = None, project: Optional[str] = None,
-                     stage: Optional[str] = None, task_name: Optional[str] = None):
+                     stage: Optional[str] = None, task_name: Optional[str] = None, ctx=None):
         """Get pipeline run logs.
         
         Args:
@@ -303,6 +311,7 @@ class PraxClient:
             project: Project name (defaults to config)
             stage: Stage name (defaults to config)
             task_name: Optional task name to get logs for specific task
+            ctx: Click context (optional)
             
         Returns:
             List of log lines
@@ -316,16 +325,17 @@ class PraxClient:
             from .prax_client import PraxClientWrapper
             wrapper = PraxClientWrapper(self.prax_config)
             
-            # Get run logs using the wrapper
-            return wrapper.get_run_logs(run_name=run_id)
+            # Get run logs using the wrapper (use run_id as run_name)
+            return wrapper.get_run_logs(run_name=run_id, ctx=ctx)
         except Exception as e:
             # Fallback to our custom implementation
             logger.warning(f"Falling back to custom implementation: {e}")
             
+            # Use the correct endpoint pattern: pipeline-runs/{run_id}/logs
             if task_name:
-                url = f"{self.base_url}/api/pipelines/{pipeline_name}/runs/{run_id}/tasks/{task_name}/logs"
+                url = f"{self.base_url}/api/pipeline-runs/{run_id}/tasks/{task_name}/logs"
             else:
-                url = f"{self.base_url}/api/pipelines/{pipeline_name}/runs/{run_id}/logs"
+                url = f"{self.base_url}/api/pipeline-runs/{run_id}/logs"
                 
             params = {
                 "org": org,
@@ -410,9 +420,12 @@ class PraxClient:
             logger.error(f"Failed to submit pipeline template: {e}")
             raise
 
-    def list_pipelines(self):
+    def list_pipelines(self, ctx=None):
         """List pipelines in the project.
         
+        Args:
+            ctx: Click context (optional)
+            
         Returns:
             List of pipeline dictionaries
         """
@@ -422,7 +435,7 @@ class PraxClient:
             wrapper = PraxClientWrapper(self.prax_config)
             
             # List pipelines using the wrapper
-            return wrapper.list_pipelines()
+            return wrapper.list_pipelines(ctx=ctx)
         except Exception as e:
             # Fallback to our custom implementation
             logger.warning(f"Falling back to custom implementation: {e}")
@@ -535,11 +548,12 @@ class PraxClient:
             logger.error(f"Failed to submit pipeline template: {e}")
             raise
     
-    def list_projects(self, search: Optional[str] = None):
+    def list_projects(self, search: Optional[str] = None, ctx=None):
         """List all projects accessible to the user.
         
         Args:
             search: Optional search filter for project names
+            ctx: Click context (optional)
             
         Returns:
             List of projects
@@ -553,7 +567,7 @@ class PraxClient:
             filters = {}
             if search:
                 filters["search"] = search
-            return wrapper.list_projects(**filters)
+            return wrapper.list_projects(ctx=ctx, **filters)
         except Exception as e:
             # Fallback to our custom implementation
             logger.warning(f"Falling back to custom implementation: {e}")

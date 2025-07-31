@@ -12,6 +12,7 @@ from oceanum.cli.models import ContextObject
 
 from ...config import DataMeshConfig, PraxConfig
 from ...pipeline import PraxPipelineBackend
+from ...client import PraxClient
 
 # Import model classes for different types
 try:
@@ -54,6 +55,11 @@ logger = logging.getLogger(__name__)
     is_flag=True,
     help="Run the model locally using Docker instead of submitting to Prax",
 )
+@click.option(
+    "--follow",
+    is_flag=True,
+    help="Follow logs after submission",
+)
 @click.pass_obj
 def run(
     obj: ContextObject,
@@ -65,6 +71,7 @@ def run(
     wait,
     timeout,
     local,
+    follow,
 ):
     """Submit rompy configuration to Prax for execution or run locally with Docker.
 
@@ -73,6 +80,7 @@ def run(
         model: Model type (swan, schism, ww3)
         pipeline_name: Name of the Prax pipeline to execute (required unless --local is specified)
         local: If True, run the model locally using Docker instead of submitting to Prax
+        follow: If True, follow logs after submission
 
     Usage:
         oceanum rompy run config.yml swan --pipeline-name my-swan-pipeline
@@ -224,6 +232,7 @@ def run(
             wait_for_completion=wait,
             timeout=timeout,
             download_outputs=False,  # Downloading should be done with oceanum prax commands
+            ctx=click.get_current_context(),  # Pass the click context
         )
 
         if result["success"]:
@@ -232,12 +241,122 @@ def run(
             # Check if prax_run_id is available
             if result.get("prax_run_id"):
                 click.echo(f"🆔 Prax run ID: {result['prax_run_id']}")
+                # Use run name for logs and status if available
+                run_identifier = result.get('prax_run_name', result['prax_run_id'])
                 click.echo(
-                    f"💡 Monitor with: oceanum prax logs pipeline-runs {result['prax_run_id']}"
+                    f"💡 Monitor with: oceanum prax logs pipeline-runs {run_identifier}"
                 )
                 click.echo(
-                    f"💡 Check status with: oceanum prax describe pipeline-runs {result['prax_run_id']}"
+                    f"💡 Check status with: oceanum prax describe pipeline-runs {run_identifier}"
                 )
+                
+                # Follow logs if requested
+                if follow:
+                    click.echo(f"\n📋 Following logs for run {run_identifier}:")
+                    try:
+                        # Create Prax client for log following
+                        prax_client = PraxClient(prax_config)
+                        ctx = click.get_current_context()
+                        logger.info("Created PraxClient for log following")
+                        
+                        # Wait a moment for the run to be registered
+                        time.sleep(2)
+                        
+                        # Show initialization message
+                        click.echo("⏳ Pipeline is initializing. Waiting for logs...")
+                        
+                        # Follow logs until interrupted or run completes
+                        last_log_time = time.time()
+                        logs_shown = False
+                        while True:
+                            try:
+                                # Get logs (last 100 lines)
+                                logger.info(f"Getting logs for run {run_identifier}")
+                                logs = prax_client.get_run_logs(
+                                    run_id=run_identifier,
+                                    pipeline_name=pipeline_name,
+                                    org=prax_config.org,
+                                    project=prax_config.project,
+                                    stage=prax_config.stage,
+                                    task_name=None,  # Get all task logs
+                                    ctx=ctx,  # Pass the click context
+                                )
+                                
+                                # Print new log lines
+                                if logs:
+                                    # Filter out unhelpful initialization messages
+                                    filtered_logs = []
+                                    for line in logs:
+                                        # Skip container initialization errors
+                                        if "container" in line and "waiting to start" in line and "PodInitializing" in line:
+                                            if not logs_shown:
+                                                click.echo("⏳ Pipeline containers are still initializing...")
+                                            continue
+                                        # Skip namespace errors
+                                        if "No related containers found in namespace" in line:
+                                            if not logs_shown:
+                                                click.echo("⏳ Waiting for pipeline containers to start...")
+                                            continue
+                                        filtered_logs.append(line)
+                                    
+                                    # Print filtered logs
+                                    if filtered_logs:
+                                        if not logs_shown:
+                                            click.echo("\n📋 Pipeline logs:")
+                                            logs_shown = True
+                                        for line in filtered_logs:
+                                            # Clean up byte string representation if needed
+                                            if isinstance(line, bytes):
+                                                line = line.decode('utf-8', errors='ignore')
+                                            click.echo(line)
+                                        last_log_time = time.time()
+                                    elif not logs_shown:
+                                        # Still show waiting message if no useful logs yet
+                                        click.echo("⏳ Waiting for pipeline to generate logs...")
+                                elif not logs_shown:
+                                    # Still show waiting message if no logs yet
+                                    click.echo("⏳ Waiting for pipeline to generate logs...")
+                                
+                                # Check if run has completed
+                                logger.info(f"Getting status for run {run_identifier}")
+                                status = prax_client.get_run_status(
+                                    run_id=run_identifier,
+                                    pipeline_name=pipeline_name,
+                                    org=prax_config.org,
+                                    project=prax_config.project,
+                                    stage=prax_config.stage,
+                                    ctx=ctx,  # Pass the click context
+                                )
+                                logger.info(f"Run status: {status.get('status', 'unknown')}")
+                                
+                                # If run has completed, stop following logs
+                                if status.get("status") in ["completed", "succeeded", "failed", "error"]:
+                                    if not logs_shown and status.get("status") in ["completed", "succeeded"]:
+                                        click.echo("\n✅ Pipeline completed successfully!")
+                                    elif not logs_shown:
+                                        click.echo(f"\n❌ Pipeline failed with status: {status.get('status')}")
+                                    else:
+                                        click.echo(f"\n🏁 Run completed with status: {status.get('status')}\n")
+                                    break
+                                
+                                # Wait before next log check
+                                time.sleep(5)
+                                
+                                # Timeout if no new logs for a while
+                                if time.time() - last_log_time > 300:  # 5 minutes
+                                    click.echo("\n⚠️  No new logs for 5 minutes. Stopping log following.\n")
+                                    break
+                                    
+                            except KeyboardInterrupt:
+                                click.echo("\n🛑 Log following interrupted by user.\n")
+                                break
+                            except Exception as e:
+                                logger.exception(f"Error following logs: {e}")
+                                click.echo(f"\n⚠️  Error following logs: {e}\n")
+                                break
+                    except Exception as e:
+                        logger.exception(f"Failed to follow logs: {e}")
+                        click.echo(f"\n⚠️  Failed to follow logs: {e}\n")
             else:
                 click.echo("⚠️  No Prax run ID returned")
 
