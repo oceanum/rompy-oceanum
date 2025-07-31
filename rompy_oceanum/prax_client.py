@@ -273,7 +273,7 @@ class PraxClientWrapper:
             Status dictionary
         """
         client = self._get_client(ctx)
-        logger.info(f"Getting run status for {run_name}")
+        logger.debug(f"Getting run status for {run_name}")
         run = client.get_pipeline_run(
             run_name,
             org=self.prax_config.org,
@@ -282,7 +282,7 @@ class PraxClientWrapper:
         )
 
         if isinstance(run, models.ErrorResponse):
-            logger.info(f"Run {run_name} not found: {run.detail}")
+            logger.debug(f"Run {run_name} not found: {run.detail}")
             if "not found" in str(run.detail).lower():
                 # Return a mock status for testing
                 logger.warning(f"Run {run_name} not found, returning mock status")
@@ -328,7 +328,7 @@ class PraxClientWrapper:
             List of log lines
         """
         client = self._get_client(ctx)
-        logger.info(f"Getting logs for run {run_name}")
+        logger.debug(f"Getting logs for run {run_name}")
         logs = []
 
         # Get logs using the client's method
@@ -343,7 +343,7 @@ class PraxClientWrapper:
 
         for line in log_generator:
             if isinstance(line, models.ErrorResponse):
-                logger.info(f"Error getting logs for run {run_name}: {line.detail}")
+                logger.debug(f"Error getting logs for run {run_name}: {line.detail}")
                 if "not found" in str(line.detail).lower():
                     # Return mock logs for testing
                     logger.warning(
@@ -357,7 +357,7 @@ class PraxClientWrapper:
                 raise Exception(f"Failed to get logs: {line.detail}")
             logs.append(str(line))
 
-        logger.info(f"Returning {len(logs)} log lines for run {run_name}")
+        logger.debug(f"Returning {len(logs)} log lines for run {run_name}")
         return logs
 
 

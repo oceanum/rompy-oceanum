@@ -305,9 +305,18 @@ def run(
                                             click.echo("\n📋 Pipeline logs:")
                                             logs_shown = True
                                         for line in filtered_logs:
-                                            # Clean up byte string representation if needed
+                                            # Ensure line is a string
                                             if isinstance(line, bytes):
-                                                line = line.decode('utf-8', errors='ignore')
+                                                # Try to decode as UTF-8, fallback to latin-1 if that fails
+                                                try:
+                                                    line = line.decode('utf-8')
+                                                except UnicodeDecodeError:
+                                                    line = line.decode('latin-1', errors='ignore')
+                                            elif not isinstance(line, str):
+                                                # Convert to string if it's not already
+                                                line = str(line)
+                                            
+                                            # Print the line
                                             click.echo(line)
                                         last_log_time = time.time()
                                     elif not logs_shown:
