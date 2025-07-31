@@ -67,17 +67,26 @@ def list_resources(
             prax_config = PraxConfig.from_env(**prax_config_data)
             client = PraxClient(prax_config)
 
-            # List projects
-            projects = client.list_projects()
+            # List projects with "rompy" filter
+            projects = client.list_projects(search="rompy")
 
             if not projects:
-                click.echo("📭 No projects found")
+                click.echo("📭 No rompy projects found")
                 return
 
-            click.echo("📋 Projects:")
+            click.echo("📋 Rompy Projects:")
             for project_item in projects:
-                name = project_item.get("name", "Unknown")
-                status = project_item.get("status", "Unknown")
+                # Handle both dict and object representations
+                if hasattr(project_item, 'name'):
+                    name = project_item.name
+                else:
+                    name = project_item.get("name", "Unknown")
+                    
+                if hasattr(project_item, 'status'):
+                    status = project_item.status
+                else:
+                    status = project_item.get("status", "Unknown")
+                    
                 click.echo(f"   📋 {name} - Status: {status}")
                 
         elif resource_type == "pipelines":

@@ -487,15 +487,35 @@ class PraxClient:
             
         return response
     
-    def list_projects(self):
+    def list_projects(self, search: Optional[str] = None):
         """List all projects accessible to the user.
         
+        Args:
+            search: Optional search filter for project names
+            
         Returns:
             List of projects
         """
-        url = f"{self.base_url}/api/projects"
-        response = self._make_request("GET", url)
-        return response if isinstance(response, list) else response.get("projects", [])
+        # Try to use our PraxClientWrapper which uses the oceanum-prax client
+        try:
+            from .prax_client import PraxClientWrapper
+            wrapper = PraxClientWrapper(self.prax_config)
+            
+            # List projects using the wrapper with search filter
+            filters = {}
+            if search:
+                filters["search"] = search
+            return wrapper.list_projects(**filters)
+        except Exception as e:
+            # Fallback to our custom implementation
+            logger.warning(f"Falling back to custom implementation: {e}")
+            
+            url = f"{self.base_url}/api/projects"
+            params = {}
+            if search:
+                params["search"] = search
+            response = self._make_request("GET", url, params=params)
+            return response if isinstance(response, list) else response.get("projects", [])
     
     def get_project(self, project_name: str):
         """Get details of a specific project.
