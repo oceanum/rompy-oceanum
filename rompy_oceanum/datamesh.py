@@ -6,7 +6,7 @@ import traceback
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-import typer
+import click
 import xarray as xr
 from cloudpathlib import AnyPath
 from oceanum.datamesh import Connector
@@ -119,25 +119,13 @@ class DatameshWriter(BaseModel):
         )
 
 
-# Create typer apps
-app = typer.Typer(
-    help="DataMesh CLI for working with grid and spectra data",
-    rich_markup_mode="none",  # Disable rich markup to avoid terminal characters
-    pretty_exceptions_enable=False,
-    pretty_exceptions_show_locals=False,
-    no_args_is_help=True,
-)
-write_app = typer.Typer(help="Write data to DataMesh")
-app.add_typer(write_app, name="write")
-
-
-@app.callback()
-def callback(
-    debug: bool = typer.Option(
-        False, "--debug", help="Enable debug mode with detailed logging"
-    )
-):
+@click.group(help="DataMesh CLI for working with grid and spectra data")
+@click.option("--debug", is_flag=True, help="Enable debug mode with detailed logging")
+@click.pass_context
+def app(ctx, debug):
     """DataMesh CLI with debugging options."""
+    ctx.ensure_object(dict)
+    ctx.obj['DEBUG'] = debug
     if debug:
         # Set logging level to DEBUG for more verbose output
         logging.basicConfig(level=logging.DEBUG, format="%(message)s")
@@ -145,19 +133,24 @@ def callback(
         print("Debug mode enabled")
 
 
-@write_app.command("grid")
-def write_grid(
-    file: Path = typer.Argument(..., help="Path to the NetCDF file", exists=True),
-    datasource_id: str = typer.Option("rompy", help="DataMesh datasource ID"),
-    name: str = typer.Option("ROMPY Data", help="Name for the dataset"),
-    description: str = typer.Option(
-        "ROMPY generated dataset", help="Description for the dataset"
-    ),
-    tags: Optional[List[str]] = typer.Option(None, help="Tags for the dataset"),
-    labels: Optional[List[str]] = typer.Option(None, help="Labels for the dataset"),
-):
+@ app.group(help="Write data to DataMesh")
+@click.pass_context
+def write(ctx):
+    """Write data to DataMesh."""
+    pass
+
+
+@write.command("grid")
+@click.argument("file", type=click.Path(exists=True, path_type=Path))
+@click.option("--datasource-id", default="rompy", help="DataMesh datasource ID")
+@click.option("--name", default="ROMPY Data", help="Name for the dataset")
+@click.option("--description", default="ROMPY generated dataset", help="Description for the dataset")
+@click.option("--tags", multiple=True, help="Tags for the dataset")
+@click.option("--labels", multiple=True, help="Labels for the dataset")
+@click.pass_context
+def write_grid(ctx, file, datasource_id, name, description, tags, labels):
     """Write grid data to DataMesh."""
-    tags = tags or []
+    tags = list(tags) if tags else []
     try:
         writer = DatameshWriter(
             datasource_id=datasource_id,
@@ -172,24 +165,22 @@ def write_grid(
         print("✓ Grid data written successfully")
     except Exception as e:
         print(f"Error: {str(e)}")
-        if logger.level <= logging.DEBUG:  # Only show traceback in debug mode
+        if ctx.obj.get('DEBUG', False):  # Only show traceback in debug mode
             print("Debug traceback:")
             traceback.print_exc()
-        raise typer.Exit(code=1)
+        sys.exit(1)
 
 
-@write_app.command("spectra")
-def write_spectra(
-    file: Path = typer.Argument(..., help="Path to the NetCDF file", exists=True),
-    datasource_id: str = typer.Option("rompy", help="DataMesh datasource ID"),
-    name: str = typer.Option("ROMPY Data", help="Name for the dataset"),
-    description: str = typer.Option(
-        "ROMPY generated dataset", help="Description for the dataset"
-    ),
-    tags: Optional[List[str]] = typer.Option(None, help="Tags for the dataset"),
-):
+@write.command("spectra")
+@click.argument("file", type=click.Path(exists=True, path_type=Path))
+@click.option("--datasource-id", default="rompy", help="DataMesh datasource ID")
+@click.option("--name", default="ROMPY Data", help="Name for the dataset")
+@click.option("--description", default="ROMPY generated dataset", help="Description for the dataset")
+@click.option("--tags", multiple=True, help="Tags for the dataset")
+@click.pass_context
+def write_spectra(ctx, file, datasource_id, name, description, tags):
     """Write spectra data to DataMesh."""
-    tags = tags or []
+    tags = list(tags) if tags else []
     try:
         writer = DatameshWriter(
             datasource_id=datasource_id, name=name, description=description, tags=tags
@@ -200,10 +191,10 @@ def write_spectra(
         print("✓ Spectra data written successfully")
     except Exception as e:
         print(f"Error: {str(e)}")
-        if logger.level <= logging.DEBUG:  # Only show traceback in debug mode
+        if ctx.obj.get('DEBUG', False):  # Only show traceback in debug mode
             print("Debug traceback:")
             traceback.print_exc()
-        raise typer.Exit(code=1)
+        sys.exit(1)
 
 
 def load_rompy_config(config_path: Optional[str] = None) -> Dict:
@@ -246,17 +237,12 @@ def load_rompy_config(config_path: Optional[str] = None) -> Dict:
         raise ValueError(f"Config file not found: {config_path}")
 
 
-@write_app.command("from-config")
-def write_from_config(
-    config_path: Optional[str] = typer.Argument(
-        None,
-        help="Path to rompy config file, if not provided will use ROMPY_CONFIG env var",
-    ),
-    org: str = typer.Option("", help="Organisation name for dataset naming"),
-    tags: Optional[List[str]] = typer.Option(
-        None, help="Additional tags for the datasets"
-    ),
-):
+@write.command("from-config")
+@click.argument("config_path", required=False, type=click.Path(exists=True))
+@click.option("--org", default="", help="Organisation name for dataset naming")
+@click.option("--tags", multiple=True, help="Additional tags for the datasets")
+@click.pass_context
+def write_from_config(ctx, config_path, org, tags):
     """
     Write both grid and spectra data to DataMesh based on a rompy config file.
 
@@ -265,7 +251,7 @@ def write_from_config(
     2. Load the model configuration data
     3. Register the grid and spectra data with DataMesh
     """
-    tags = tags or []
+    tags = list(tags) if tags else []
 
     try:
         # Load config from file or environment variable
@@ -348,10 +334,18 @@ def write_from_config(
 def main():
     """Main entry point for the CLI."""
     try:
-        app(prog_name="datamesh")
+        app(obj={})
     except Exception as e:
         # Simplified error output
-        if logger.level <= logging.DEBUG:
+        debug_mode = False
+        # Try to get debug mode from context if available
+        try:
+            ctx = click.get_current_context()
+            debug_mode = ctx.obj.get('DEBUG', False) if ctx.obj else False
+        except RuntimeError:
+            pass  # No context available
+            
+        if debug_mode:
             print("Error:")
             traceback.print_exc()
         else:
