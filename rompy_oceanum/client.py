@@ -359,16 +359,17 @@ class PraxClient:
         response.raise_for_status()
         return response.json() if response.content else None
     
-    def submit_pipeline_template(self, template_data: Dict[str, Any]):
+    def submit_pipeline_template(self, template_data: Dict[str, Any], wait: bool = True):
         """Submit a pipeline template to Prax.
         
         Args:
             template_data: Pipeline template data
+            wait: Whether to wait for deployment to complete
             
         Returns:
             Response from the API
         """
-        # For deploying projects, we'll use the oceanum CLI's prax client directly
+        # For deploying pipelines, we'll use the oceanum CLI's prax client directly
         # since it handles authentication properly
         try:
             from oceanum.cli.prax.client import PRAXClient
@@ -386,6 +387,22 @@ class PraxClient:
             
             # Deploy the template
             result = client.deploy_project(spec)
+            
+            if isinstance(result, models.ErrorResponse):
+                raise Exception(f"Failed to deploy pipeline template: {result.detail}")
+            
+            if wait:
+                # Wait for deployment to complete
+                click.echo("⏳ Waiting for pipeline deployment to complete...")
+                get_params = {
+                    'project_name': result.name,
+                    'org': self.org,
+                }
+                if self.user:
+                    get_params['user'] = self.user
+                    
+                client.wait_project_deployment(**get_params)
+                click.echo("✅ Pipeline deployment completed successfully!")
             
             return result
                 
@@ -477,15 +494,46 @@ class PraxClient:
         Returns:
             Response from the API
         """
-        url = f"{self.base_url}/api/projects"
-        response = self._make_request("POST", url, json=spec_data)
-        
-        if wait and "name" in response:
-            # Wait for project deployment to complete
-            project_name = response["name"]
-            self._wait_for_project_deployment(project_name)
+        # For deploying projects, we'll use the oceanum CLI's prax client directly
+        # since it handles authentication properly
+        try:
+            from oceanum.cli.prax.client import PRAXClient
+            from oceanum.cli.prax import models
+            import click
+            import yaml
             
-        return response
+            # Use the oceanum CLI's prax client to deploy the template
+            # This avoids authentication issues with our custom client
+            ctx = click.get_current_context()
+            client = PRAXClient(ctx)
+            
+            # Convert spec_data to ProjectSpec object
+            spec = models.ProjectSpec(**spec_data)
+            
+            # Deploy the template
+            result = client.deploy_project(spec)
+            
+            if isinstance(result, models.ErrorResponse):
+                raise Exception(f"Failed to deploy project: {result.detail}")
+            
+            if wait:
+                # Wait for deployment to complete
+                click.echo("⏳ Waiting for project deployment to complete...")
+                get_params = {
+                    'project_name': result.name,
+                    'org': self.org,
+                }
+                if self.user:
+                    get_params['user'] = self.user
+                    
+                client.wait_project_deployment(**get_params)
+                click.echo("✅ Project deployment completed successfully!")
+            
+            return result
+                
+        except Exception as e:
+            logger.error(f"Failed to submit pipeline template: {e}")
+            raise
     
     def list_projects(self, search: Optional[str] = None):
         """List all projects accessible to the user.
@@ -541,31 +589,6 @@ class PraxClient:
         """
         url = f"{self.base_url}/api/projects/{project_name}"
         self._make_request("DELETE", url)
-    
-    def _wait_for_project_deployment(self, project_name: str, timeout: int = 300):
-        """Wait for project deployment to complete.
-        
-        Args:
-            project_name: Name of the project
-            timeout: Maximum time to wait (seconds)
-        """
-        url = f"{self.base_url}/api/projects/{project_name}"
-        start_time = time.time()
-        
-        while time.time() - start_time < timeout:
-            try:
-                response = self._make_request("GET", url)
-                status = response.get("status", "unknown")
-                if status in ["active", "ready"]:
-                    return
-                elif status in ["error", "failed"]:
-                    raise Exception(f"Project deployment failed with status: {status}")
-            except Exception:
-                pass  # Continue waiting if there's an error checking status
-                
-            time.sleep(5)
-            
-        raise TimeoutError(f"Project {project_name} deployment did not complete within {timeout} seconds")
     
     def download_run_artifacts(self, run_id: str, pipeline_name: str, user: str,
                                org: str, project: str, stage: str, target_dir: str):

@@ -134,7 +134,7 @@ def create_resource(
                 client = PraxClient(prax_config)
 
                 # Submit pipeline template
-                result = client.submit_pipeline_template(spec_data)
+                result = client.submit_pipeline_template(spec_data, wait=wait)
 
                 click.echo(
                     f"✅ Pipeline '{name}' created successfully in project '{project}'"
@@ -185,7 +185,7 @@ def create_resource(
                 client = PraxClient(prax_config)
 
                 # Submit pipeline template
-                result = client.submit_pipeline_template(spec_data)
+                result = client.submit_pipeline_template(spec_data, wait=wait)
 
                 click.echo("✅ Default pipeline template deployed successfully!")
                 click.echo(
