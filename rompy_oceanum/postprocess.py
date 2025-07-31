@@ -45,7 +45,7 @@ class DataMeshPostprocessor:
         Args:
             model_run: The ModelRun instance that was executed
             datamesh_config: DataMesh configuration (dict or DataMeshConfig instance)
-            dataset_name: Name for the dataset (defaults to run_id)
+            dataset_name: Name for the dataset (defaults to rompy-{model_run.run_id})
             tags: Tags to apply to the dataset
             metadata: Additional metadata to include
             **kwargs: Additional parameters

@@ -1,4 +1,4 @@
-run_id: run_id  # This has to be run_id for now - fix coming
+run_id: rompy-swan-test  # This has to be run_id for now - fix coming
 output_dir: /app
 period:
   start: 20230101T000000
