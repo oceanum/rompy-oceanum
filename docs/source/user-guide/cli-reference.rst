@@ -178,6 +178,10 @@ Initialize rompy configurations for Oceanum Prax pipeline execution or run local
    # Run locally with Docker
    oceanum rompy run config.yml swan --local
 
+**Log Streaming Behavior:**
+
+When using the ``--follow`` option, the CLI will automatically poll for the new run for up to 60 seconds after submission, streaming logs as soon as they become available. If the run is not registered within this window, a clear error is shown and you can retry the command. This matches the behavior of the official Prax CLI and ensures a robust user experience even if the backend is briefly delayed in registering the run.
+
 **Output:**
 
 The command returns rich terminal output with execution details:
