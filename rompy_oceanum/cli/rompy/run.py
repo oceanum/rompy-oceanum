@@ -268,6 +268,22 @@ def run(
                         # Follow logs until interrupted or run completes
                         last_log_time = time.time()
                         logs_shown = False
+                        def decode_logs(obj):
+                            """Recursively decode bytes to str in any structure."""
+                            if isinstance(obj, bytes):
+                                try:
+                                    return obj.decode('utf-8')
+                                except UnicodeDecodeError:
+                                    return obj.decode('latin-1', errors='ignore')
+                            elif isinstance(obj, str):
+                                return obj
+                            elif isinstance(obj, dict):
+                                return {decode_logs(k): decode_logs(v) for k, v in obj.items()}
+                            elif isinstance(obj, (list, tuple, set)):
+                                return type(obj)(decode_logs(x) for x in obj)
+                            else:
+                                return str(obj)
+
                         while True:
                             try:
                                 # Get logs (last 100 lines)
@@ -281,13 +297,24 @@ def run(
                                     task_name=None,  # Get all task logs
                                     ctx=ctx,  # Pass the click context
                                 )
-                                
+
+                                # Recursively decode all bytes in logs
+                                try:
+                                    logs_decoded = decode_logs(logs)
+                                except Exception as e:
+                                    click.echo(f"\n⚠️  Failed to decode logs: {e}\nrepr(logs): {repr(logs)}\n")
+                                    logs_decoded = logs
+
+                                # Always print the raw log API response for debugging until logs are shown
+                                if not logs_shown:
+                                    click.echo(f"[DEBUG] repr(logs): {repr(logs)}\n")
+
                                 # Print new log lines if any, regardless of status
-                                if logs is None:
+                                if logs_decoded is None:
                                     if not logs_shown:
                                         click.echo("⏳ Waiting for pipeline to generate logs...")
-                                elif isinstance(logs, (str, bytes)):
-                                    log_str = logs.decode('utf-8', errors='ignore') if isinstance(logs, bytes) else logs
+                                elif isinstance(logs_decoded, str):
+                                    log_str = logs_decoded
                                     if 'Error' in log_str or 'error' in log_str:
                                         click.echo(f"\n⚠️  Error streaming logs: {log_str}\n")
                                         break
@@ -302,23 +329,13 @@ def run(
                                             click.echo(log_str)
                                             run.last_log_str = log_str
                                         last_log_time = time.time()
-                                elif isinstance(logs, dict):
-                                    click.echo(f"\n⚠️  Unexpected log API response (dict): {logs}\n")
+                                elif isinstance(logs_decoded, dict):
+                                    click.echo(f"\n⚠️  Unexpected log API response (dict): {logs_decoded}\n")
                                     break
-                                elif hasattr(logs, '__iter__'):
+                                elif hasattr(logs_decoded, '__iter__') and not isinstance(logs_decoded, (str, bytes, dict)):
                                     # Filter out unhelpful initialization messages
                                     filtered_logs = []
-                                    for line in logs:
-                                        # Skip container initialization errors
-                                        if "container" in str(line) and "waiting to start" in str(line) and "PodInitializing" in str(line):
-                                            if not logs_shown:
-                                                click.echo("⏳ Pipeline containers are still initializing...")
-                                            continue
-                                        # Skip namespace errors
-                                        if "No related containers found in namespace" in str(line):
-                                            if not logs_shown:
-                                                click.echo("⏳ Waiting for pipeline containers to start...")
-                                            continue
+                                    for line in logs_decoded:
                                         filtered_logs.append(line)
                                     # Warn if logs are very large
                                     if len(filtered_logs) > 100:
@@ -334,22 +351,17 @@ def run(
                                             click.echo("\n📋 Pipeline logs:")
                                             logs_shown = True
                                         for line in filtered_logs:
-                                            # Ensure line is a string
-                                            if isinstance(line, bytes):
-                                                try:
-                                                    line = line.decode('utf-8')
-                                                except UnicodeDecodeError:
-                                                    line = line.decode('latin-1', errors='ignore')
-                                            elif not isinstance(line, str):
-                                                line = str(line)
                                             click.echo(line)
                                         run.last_log_lines = filtered_logs
                                         last_log_time = time.time()
                                     elif not logs_shown:
                                         click.echo("⏳ Waiting for pipeline to generate logs...")
                                 else:
-                                    click.echo(f"\n⚠️  Unexpected log API response type: {type(logs)} value: {logs}\n")
+                                    click.echo(f"\n⚠️  Unexpected log API response type: {type(logs_decoded)} value: {logs_decoded}\n")
+                                    click.echo(f"[DEBUG] repr(logs): {repr(logs)}\n")
                                     break
+
+
                                 
                                 # Check if run has completed
                                 logger.info(f"Getting status for run {run_identifier}")
