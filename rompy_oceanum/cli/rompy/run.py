@@ -268,11 +268,17 @@ def run(
                     try:
                         for line in log_stream:
                             try:
+                                # Handle bytes, and also string representations of bytes (e.g. "b'...'")
+                                import ast
                                 if isinstance(line, bytes):
+                                    line = line.decode('utf-8', errors='replace')
+                                elif isinstance(line, str) and line.startswith("b'") and line.endswith("'"):
                                     try:
-                                        line = line.decode('utf-8')
-                                    except UnicodeDecodeError:
-                                        line = line.decode('latin-1', errors='ignore')
+                                        # Safely evaluate as bytes literal, then decode
+                                        line = ast.literal_eval(line).decode('utf-8', errors='replace')
+                                    except Exception:
+                                        # Fallback: leave as-is if parsing fails
+                                        pass
                                 elif not isinstance(line, str):
                                     line = str(line)
                                 # Filter out empty lines and container init noise
