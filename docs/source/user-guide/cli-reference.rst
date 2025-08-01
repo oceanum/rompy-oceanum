@@ -155,6 +155,8 @@ Initialize rompy configurations for Oceanum Prax pipeline execution or run local
 * ``--wait/--no-wait``: Wait for pipeline completion (default: --no-wait)
 * ``--timeout INTEGER``: Execution timeout in seconds
 * ``--local``: Run the model locally using Docker instead of submitting to Prax
+* ``--follow``: Stream logs in real time after submission (mutually exclusive with ``--watch``)
+* ``--watch``: Watch and print pipeline task statuses in a live-updating table after submission (mutually exclusive with ``--follow``)
 
 **Examples:**
 
@@ -178,23 +180,45 @@ Initialize rompy configurations for Oceanum Prax pipeline execution or run local
    # Run locally with Docker
    oceanum rompy run config.yml swan --local
 
-**Log Streaming Behavior:**
+**Log Streaming and Task Monitoring:**
 
-When using the ``--follow`` option, the CLI will automatically poll for the new run for up to 60 seconds after submission, streaming logs as soon as they become available. If the run is not registered within this window, a clear error is shown and you can retry the command. This matches the behavior of the official Prax CLI and ensures a robust user experience even if the backend is briefly delayed in registering the run.
+* ``--follow``:
+  Stream logs in real time after submission. The CLI will display live log output from the pipeline as soon as it becomes available, matching the behavior of the official Prax CLI. This is useful for debugging and monitoring detailed model execution.
 
-**Output:**
+* ``--watch``:
+  Watch and print pipeline task statuses in a live-updating table after submission. The CLI will show a table of logical pipeline tasks (such as ``generate``, ``run``, ``register``) and their current status (e.g., Pending, Running, Succeeded, Failed). This provides a high-level overview of pipeline progress without streaming all logs.
 
-The command returns rich terminal output with execution details:
+.. note::
+   ``--follow`` and ``--watch`` are mutually exclusive. Only one may be used at a time.
+
+**Output Examples:**
+
+*With ``--follow``:*
 
 .. code-block:: text
 
-   🚀 Initializing pipeline: swan-operational
-   📊 Model: swan, Run ID: perth_coast_swan_basic
-   🏢 Org: oceanum, Project: wave-forecasting, Stage: dev
-   ✅ ModelRun created successfully: run_id
-   📤 Submitting to pipeline: swan-operational
-   🆔 Prax run ID: pipeline-swan-operational-run-id-dev-xyz123
-   💡 Monitor with: oceanum prax --project wave-forecasting logs pipeline-runs pipeline-swan-operational-run-id-dev-xyz123
+   📋 Pipeline logs (streaming):
+   2025-08-01 14:16:22 [INFO] rompy.swan.config   : ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   2025-08-01 14:16:23 [INFO] rompy.swan.config   : Model configuration generated.
+   ...
+
+*With ``--watch``:*
+
+.. code-block:: text
+
+   👀 Watching tasks for latest run of pipeline swan-from-rompy (matches official client):
+
+   ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+   ┃ Pipeline Run: pipeline-swan-from-rompy-d891-dev-8tcrc       ┃
+   ┡━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+   │ Task          │ Status       │ Message                      │
+   ├───────────────┼──────────────┼──────────────────────────────┤
+   │ generate      │ Succeeded    │                              │
+   │ run           │ Running      │                              │
+   │ register      │ Pending      │                              │
+   └───────────────┴──────────────┴──────────────────────────────┘
+
+   ✅ Pipeline run completed. Final task statuses above.
 
 **Local Execution:**
 
@@ -612,7 +636,7 @@ Python Script Example
            try:
                status_json = run_command(cmd)
                status_data = json.loads(status_json)
-               
+
                # Extract status - this might vary based on actual API response
                current_status = status_data.get('status', 'UNKNOWN')
                print(f"🔄 Status: {current_status}")

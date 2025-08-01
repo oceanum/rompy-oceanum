@@ -24,9 +24,10 @@ The integration provides both CLI and programmatic interfaces:
    # CLI workflow
    oceanum auth login
    oceanum rompy init swan --template basic
-   oceanum rompy run config.yml swan --pipeline-name my-pipeline
-   oceanum rompy status <run-id>
-   oceanum rompy sync <run-id> ./outputs
+   oceanum rompy run examples/example_swan.yaml swan --pipeline-name swan-from-rompy --project rompy-oceanum
+
+Runs can then be monitored using oceanum prax commands. Alternatively, passing --follow will stream logs, or --watch will show interactive status
+
 
 .. code-block:: python
 
