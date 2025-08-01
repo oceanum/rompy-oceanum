@@ -282,49 +282,74 @@ def run(
                                     ctx=ctx,  # Pass the click context
                                 )
                                 
-                                # Print new log lines
-                                if logs:
+                                # Print new log lines if any, regardless of status
+                                if logs is None:
+                                    if not logs_shown:
+                                        click.echo("⏳ Waiting for pipeline to generate logs...")
+                                elif isinstance(logs, (str, bytes)):
+                                    log_str = logs.decode('utf-8', errors='ignore') if isinstance(logs, bytes) else logs
+                                    if 'Error' in log_str or 'error' in log_str:
+                                        click.echo(f"\n⚠️  Error streaming logs: {log_str}\n")
+                                        break
+                                    else:
+                                        # Print as log output
+                                        if not logs_shown:
+                                            click.echo("\n📋 Pipeline logs:")
+                                            logs_shown = True
+                                        if hasattr(run, 'last_log_str') and run.last_log_str == log_str:
+                                            click.echo("⚠️  Duplicate log output detected. No new logs since last check.")
+                                        else:
+                                            click.echo(log_str)
+                                            run.last_log_str = log_str
+                                        last_log_time = time.time()
+                                elif isinstance(logs, dict):
+                                    click.echo(f"\n⚠️  Unexpected log API response (dict): {logs}\n")
+                                    break
+                                elif hasattr(logs, '__iter__'):
                                     # Filter out unhelpful initialization messages
                                     filtered_logs = []
                                     for line in logs:
                                         # Skip container initialization errors
-                                        if "container" in line and "waiting to start" in line and "PodInitializing" in line:
+                                        if "container" in str(line) and "waiting to start" in str(line) and "PodInitializing" in str(line):
                                             if not logs_shown:
                                                 click.echo("⏳ Pipeline containers are still initializing...")
                                             continue
                                         # Skip namespace errors
-                                        if "No related containers found in namespace" in line:
+                                        if "No related containers found in namespace" in str(line):
                                             if not logs_shown:
                                                 click.echo("⏳ Waiting for pipeline containers to start...")
                                             continue
                                         filtered_logs.append(line)
-                                    
-                                    # Print filtered logs
-                                    if filtered_logs:
+                                    # Warn if logs are very large
+                                    if len(filtered_logs) > 100:
+                                        click.echo(f"⚠️  Large log output ({len(filtered_logs)} lines). Showing only the latest logs. Use 'oceanum prax logs' for full output.")
+                                    # Warn if logs appear truncated or paginated
+                                    if filtered_logs and ("truncated" in str(filtered_logs[-1]).lower() or "next page" in str(filtered_logs[-1]).lower()):
+                                        click.echo("⚠️  Log output may be truncated or paginated. Use 'oceanum prax logs' for full logs.")
+                                    # Avoid printing duplicate logs
+                                    if hasattr(run, 'last_log_lines') and filtered_logs == run.last_log_lines:
+                                        click.echo("⚠️  Duplicate log output detected. No new logs since last check.")
+                                    elif filtered_logs:
                                         if not logs_shown:
                                             click.echo("\n📋 Pipeline logs:")
                                             logs_shown = True
                                         for line in filtered_logs:
                                             # Ensure line is a string
                                             if isinstance(line, bytes):
-                                                # Try to decode as UTF-8, fallback to latin-1 if that fails
                                                 try:
                                                     line = line.decode('utf-8')
                                                 except UnicodeDecodeError:
                                                     line = line.decode('latin-1', errors='ignore')
                                             elif not isinstance(line, str):
-                                                # Convert to string if it's not already
                                                 line = str(line)
-                                            
-                                            # Print the line
                                             click.echo(line)
+                                        run.last_log_lines = filtered_logs
                                         last_log_time = time.time()
                                     elif not logs_shown:
-                                        # Still show waiting message if no useful logs yet
                                         click.echo("⏳ Waiting for pipeline to generate logs...")
-                                elif not logs_shown:
-                                    # Still show waiting message if no logs yet
-                                    click.echo("⏳ Waiting for pipeline to generate logs...")
+                                else:
+                                    click.echo(f"\n⚠️  Unexpected log API response type: {type(logs)} value: {logs}\n")
+                                    break
                                 
                                 # Check if run has completed
                                 logger.info(f"Getting status for run {run_identifier}")
@@ -338,24 +363,26 @@ def run(
                                 )
                                 logger.info(f"Run status: {status.get('status', 'unknown')}")
                                 
-                                # If run has completed, stop following logs
-                                if status.get("status") in ["completed", "succeeded", "failed", "error"]:
-                                    if not logs_shown and status.get("status") in ["completed", "succeeded"]:
+                                # Only stop following logs if run has completed
+                                terminal_statuses = ["completed", "succeeded", "failed", "error"]
+                                current_status = status.get("status", "unknown")
+                                if current_status in terminal_statuses:
+                                    if not logs_shown and current_status in ["completed", "succeeded"]:
                                         click.echo("\n✅ Pipeline completed successfully!")
                                     elif not logs_shown:
-                                        click.echo(f"\n❌ Pipeline failed with status: {status.get('status')}")
+                                        click.echo(f"\n❌ Pipeline failed with status: {current_status}")
                                     else:
-                                        click.echo(f"\n🏁 Run completed with status: {status.get('status')}\n")
+                                        click.echo(f"\n🏁 Run completed with status: {current_status}\n")
                                     break
                                 
                                 # Wait before next log check
                                 time.sleep(5)
-                                
+
                                 # Timeout if no new logs for a while
                                 if time.time() - last_log_time > 300:  # 5 minutes
                                     click.echo("\n⚠️  No new logs for 5 minutes. Stopping log following.\n")
                                     break
-                                    
+
                             except KeyboardInterrupt:
                                 click.echo("\n🛑 Log following interrupted by user.\n")
                                 break
