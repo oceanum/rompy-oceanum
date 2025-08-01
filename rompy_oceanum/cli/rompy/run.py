@@ -248,7 +248,7 @@ def run(
             if result.get("prax_run_id"):
                 click.echo(f"🆔 Prax run ID: {result['prax_run_id']}")
                 # Use run name for logs and status if available
-                run_identifier = result.get('prax_run_name', result['prax_run_id'])
+                run_identifier = result.get("prax_run_name", result["prax_run_id"])
                 click.echo(
                     f"💡 Monitor with: oceanum prax logs pipeline-runs {run_identifier}"
                 )
@@ -263,37 +263,49 @@ def run(
                 return
 
             if follow and result.get("prax_run_id"):
-                click.echo(f"\n📋 Following logs for latest run of pipeline {pipeline_name} (matches official client):")
+                click.echo(
+                    f"\n📋 Following logs for latest run of pipeline {pipeline_name} (matches official client):"
+                )
                 try:
                     # Create PraxClientWrapper for log following
-                    click.echo(f'PraxClientWrapper service URL: {prax_config.base_url}')
+                    click.echo(f"PraxClientWrapper service URL: {prax_config.base_url}")
                     prax_client_wrapper = PraxClientWrapper(prax_config)
-                    logger.info("Created PraxClientWrapper for log following (pipeline mode)")
+                    logger.info(
+                        "Created PraxClientWrapper for log following (pipeline mode)"
+                    )
 
                     log_stream = prax_client_wrapper.get_run_logs(
-                        run_name=result['prax_run_id'],
+                        run_name=result["prax_run_id"],
                         tail=100,
                         follow=True,
                     )
                     click.echo("\n📋 Pipeline logs (streaming):")
                     import time
+
                     last_log_time = time.time()
                     log_received = False
                     progress_interval = 10  # seconds
                     last_progress = time.time()
-                    run_id = result['prax_run_id']
+                    run_id = result["prax_run_id"]
                     prax_client_wrapper = PraxClientWrapper(prax_config)
                     try:
                         for line in log_stream:
                             try:
                                 # Handle bytes, and also string representations of bytes (e.g. "b'...'")
                                 import ast
+
                                 if isinstance(line, bytes):
-                                    line = line.decode('utf-8', errors='replace')
-                                elif isinstance(line, str) and line.startswith("b'") and line.endswith("'"):
+                                    line = line.decode("utf-8", errors="replace")
+                                elif (
+                                    isinstance(line, str)
+                                    and line.startswith("b'")
+                                    and line.endswith("'")
+                                ):
                                     try:
                                         # Safely evaluate as bytes literal, then decode
-                                        line = ast.literal_eval(line).decode('utf-8', errors='replace')
+                                        line = ast.literal_eval(line).decode(
+                                            "utf-8", errors="replace"
+                                        )
                                     except Exception:
                                         # Fallback: leave as-is if parsing fails
                                         pass
@@ -303,32 +315,51 @@ def run(
                                 if not line.strip():
                                     continue
                                 if (
-                                    "container" in line and "waiting to start" in line and "PodInitializing" in line
-                                ) or ("No related containers found in namespace" in line):
+                                    "container" in line
+                                    and "waiting to start" in line
+                                    and "PodInitializing" in line
+                                ) or (
+                                    "No related containers found in namespace" in line
+                                ):
                                     continue
-                                print(f"[DEBUG] CLI log streaming: received line: {repr(line)}")
                                 click.echo(line)
                                 log_received = True
                                 last_log_time = time.time()
                             except Exception as e:
-                                click.echo(f"\n⚠️  Error decoding log line: {e}\n[DEBUG] raw line: {repr(line)}\n")
+                                click.echo(
+                                    f"\n⚠️  Error decoding log line: {e}\n[DEBUG] raw line: {repr(line)}\n"
+                                )
                             # Show progress if no logs for a while
-                            if not log_received and (time.time() - last_progress) > progress_interval:
-                                print("[DEBUG] CLI log streaming: no logs yet, showing progress message")
-                                click.echo("⏳ Waiting for containers to start... (no logs yet, try --watch for task status)")
+                            if (
+                                not log_received
+                                and (time.time() - last_progress) > progress_interval
+                            ):
+                                click.echo(
+                                    "⏳ Waiting for containers to start... (no logs yet, try --watch for task status)"
+                                )
                                 last_progress = time.time()
                         # After log stream ends, check if any logs were received
-                        print(f"[DEBUG] CLI log streaming: log stream ended, log_received={log_received}")
                         if not log_received:
                             # Poll run status one last time
                             status = prax_client_wrapper.get_run_status(run_id)
-                            print(f"[DEBUG] CLI log streaming: final run status: {status}")
                             overall_status = status.get("status", "").lower()
-                            terminal_states = ("succeeded", "failed", "error", "cancelled", "completed", "success", "finished")
+                            terminal_states = (
+                                "succeeded",
+                                "failed",
+                                "error",
+                                "cancelled",
+                                "completed",
+                                "success",
+                                "finished",
+                            )
                             if overall_status in terminal_states:
-                                click.echo("⚠️  No logs were received, but the run has completed. Try --watch for task status.")
+                                click.echo(
+                                    "⚠️  No logs were received, but the run has completed. Try --watch for task status."
+                                )
                             else:
-                                click.echo("⚠️  No logs were received. The job may still be starting. Try --watch for task status.")
+                                click.echo(
+                                    "⚠️  No logs were received. The job may still be starting. Try --watch for task status."
+                                )
                     except KeyboardInterrupt:
                         click.echo("\n🛑 Log following interrupted by user.\n")
                     except Exception as e:
@@ -341,13 +372,16 @@ def run(
 
             elif watch and result.get("prax_run_id"):
                 import time
-                from rich.table import Table
+
                 from rich.console import Console
                 from rich.live import Live
+                from rich.table import Table
 
-                click.echo(f"\n👀 Watching tasks for latest run of pipeline {pipeline_name} (matches official client):")
+                click.echo(
+                    f"\n👀 Watching tasks for latest run of pipeline {pipeline_name} (matches official client):"
+                )
                 prax_client_wrapper = PraxClientWrapper(prax_config)
-                run_id = result['prax_run_id']
+                run_id = result["prax_run_id"]
                 console = Console()
                 poll_interval = 5  # seconds
 
@@ -363,11 +397,15 @@ def run(
                             # Only include actual execution steps (Pods)
                             if info.get("type") == "Pod":
                                 # Prefer templateName, fallback to cleaned displayName
-                                task_name = info.get("templateName") or info.get("displayName", "")
+                                task_name = info.get("templateName") or info.get(
+                                    "displayName", ""
+                                )
                                 # Remove numeric suffixes like (0)
                                 if isinstance(task_name, str):
                                     task_name = task_name.replace("(0)", "").strip()
-                                status = info.get("phase", info.get("status", "unknown"))
+                                status = info.get(
+                                    "phase", info.get("status", "unknown")
+                                )
                                 msg = info.get("message", "")
                                 logical_tasks.append((task_name, status, msg))
                     # Sort tasks by name for stable display
@@ -381,15 +419,26 @@ def run(
                         live.update(render_status_table(status))
                         overall_status = status.get("status", "").lower()
                         # Consider run finished if all logical tasks are in a terminal state
-                        terminal_states = ("succeeded", "failed", "error", "cancelled", "completed", "success", "finished")
+                        terminal_states = (
+                            "succeeded",
+                            "failed",
+                            "error",
+                            "cancelled",
+                            "completed",
+                            "success",
+                            "finished",
+                        )
                         logical_task_phases = [
                             info.get("phase", "").lower()
                             for info in status.get("details", {}).values()
                             if info.get("type") == "Pod"
                         ]
-                        if (
-                            overall_status in terminal_states
-                            or (logical_task_phases and all(phase in terminal_states for phase in logical_task_phases))
+                        if overall_status in terminal_states or (
+                            logical_task_phases
+                            and all(
+                                phase in terminal_states
+                                for phase in logical_task_phases
+                            )
                         ):
                             break
                         time.sleep(poll_interval)
