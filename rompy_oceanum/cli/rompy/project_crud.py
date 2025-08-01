@@ -9,7 +9,7 @@ import click
 import yaml
 from oceanum.cli.models import ContextObject
 
-from ...client import PraxClient
+from oceanum.cli.prax.client import PRAXClient
 from ...config import PraxConfig
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ def create(ctx: click.Context, spec_file: str, name: str, wait: bool):
             prax_config_data["token"] = obj.token.access_token
         
         prax_config = PraxConfig.from_env(**prax_config_data)
-        client = PraxClient(prax_config)
+        client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
         
         # Submit project spec
         result = client.submit_project_spec(spec_data, wait=wait)
@@ -100,7 +100,7 @@ def list_projects(ctx: click.Context):
             prax_config_data["token"] = obj.token.access_token
         
         prax_config = PraxConfig.from_env(**prax_config_data)
-        client = PraxClient(prax_config)
+        client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
         
         # List projects
         projects = client.list_projects()
@@ -137,7 +137,7 @@ def get(ctx: click.Context, project_name: str):
             prax_config_data["token"] = obj.token.access_token
         
         prax_config = PraxConfig.from_env(**prax_config_data)
-        client = PraxClient(prax_config)
+        client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
         
         # Get project details
         project = client.get_project(project_name)
@@ -168,7 +168,7 @@ def delete(ctx: click.Context, project_name: str):
             prax_config_data["token"] = obj.token.access_token
         
         prax_config = PraxConfig.from_env(**prax_config_data)
-        client = PraxClient(prax_config)
+        client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
         
         # Delete project
         client.delete_project(project_name)

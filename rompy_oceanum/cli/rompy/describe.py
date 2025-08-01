@@ -8,7 +8,7 @@ import click
 import yaml
 from oceanum.cli.models import ContextObject
 
-from ...client import PraxClient
+from oceanum.cli.prax.client import PRAXClient
 from ...config import PraxConfig
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ def describe_resource(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PraxClient(prax_config)
+            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
             # Get project details
             project_details = client.get_project(resource_name)
@@ -89,7 +89,7 @@ def describe_resource(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PraxClient(prax_config)
+            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
             # Get pipeline details
             pipeline = client.get_pipeline(resource_name)

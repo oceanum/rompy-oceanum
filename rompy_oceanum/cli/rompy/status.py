@@ -8,7 +8,7 @@ import click
 from oceanum.cli.models import ContextObject
 
 from ...config import PraxConfig
-from ...client import PraxClient
+from oceanum.cli.prax.client import PRAXClient
 
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ def status(
         click.echo(f"❌ Configuration error: {e}", err=True)
         return
 
-    client = PraxClient(prax_config)
+    client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
     def _display_status():
         """Display status information."""

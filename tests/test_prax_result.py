@@ -17,6 +17,7 @@ class TestPraxResult:
         mock_client = MagicMock()
         return PraxResult(
             run_id="test-run-id",
+            run_name="test-run-id",
             pipeline_name="test-pipeline",
             org="test-org",
             project="test-project",
@@ -49,6 +50,7 @@ class TestPraxResult:
         """Test error handling when getting status without a client."""
         result = PraxResult(
             run_id="test-run-id",
+            run_name="test-run-id",
             pipeline_name="test-pipeline",
             org="test-org",
             project="test-project",
@@ -82,7 +84,7 @@ class TestPraxResult:
         # Test with task name (should be ignored with new client)
         prax_result.client.get_run_logs.reset_mock()
         prax_result.get_logs(task_name="test-task")
-        
+
         prax_result.client.get_run_logs.assert_called_once_with(
             run_name="test-run-id"
         )
@@ -151,6 +153,7 @@ class TestPraxResult:
         """Test error handling when downloading outputs without a client."""
         result = PraxResult(
             run_id="test-run-id",
+            run_name="test-run-id",
             pipeline_name="test-pipeline",
             org="test-org",
             project="test-project",

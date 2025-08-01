@@ -12,7 +12,7 @@ from oceanum.cli.models import ContextObject
 
 from ...config import DataMeshConfig, PraxConfig
 from ...pipeline import PraxPipelineBackend
-from ...client import PraxClient
+from ...prax_client import PraxClientWrapper
 
 # Import model classes for different types
 try:
@@ -249,163 +249,53 @@ def run(
                 click.echo(
                     f"💡 Check status with: oceanum prax describe pipeline-runs {run_identifier}"
                 )
-                
-                # Follow logs if requested
-                if follow:
-                    click.echo(f"\n📋 Following logs for run {run_identifier}:")
+
+            # Follow logs if requested (must be outside the if result.get("prax_run_id") block)
+            if follow and result.get("prax_run_id"):
+                click.echo(f"\n📋 Following logs for latest run of pipeline {pipeline_name} (matches official client):")
+                try:
+                    # Create PraxClientWrapper for log following
+                    click.echo(f'PraxClientWrapper service URL: {prax_config.base_url}')
+                    prax_client_wrapper = PraxClientWrapper(prax_config)
+                    logger.info("Created PraxClientWrapper for log following (pipeline mode)")
+
+                    log_stream = prax_client_wrapper.get_run_logs(
+                        run_name=result['prax_run_id'],
+                        tail=100,
+                        follow=True,
+                    )
+                    click.echo("\n📋 Pipeline logs (streaming):")
                     try:
-                        # Create Prax client for log following
-                        prax_client = PraxClient(prax_config)
-                        ctx = click.get_current_context()
-                        logger.info("Created PraxClient for log following")
-                        
-                        # Wait a moment for the run to be registered
-                        time.sleep(2)
-                        
-                        # Show initialization message
-                        click.echo("⏳ Pipeline is initializing. Waiting for logs...")
-                        
-                        # Follow logs until interrupted or run completes
-                        last_log_time = time.time()
-                        logs_shown = False
-                        def decode_logs(obj):
-                            """Recursively decode bytes to str in any structure."""
-                            if isinstance(obj, bytes):
-                                try:
-                                    return obj.decode('utf-8')
-                                except UnicodeDecodeError:
-                                    return obj.decode('latin-1', errors='ignore')
-                            elif isinstance(obj, str):
-                                return obj
-                            elif isinstance(obj, dict):
-                                return {decode_logs(k): decode_logs(v) for k, v in obj.items()}
-                            elif isinstance(obj, (list, tuple, set)):
-                                return type(obj)(decode_logs(x) for x in obj)
-                            else:
-                                return str(obj)
-
-                        while True:
+                        for line in log_stream:
                             try:
-                                # Get logs (last 100 lines)
-                                logger.info(f"Getting logs for run {run_identifier}")
-                                logs = prax_client.get_run_logs(
-                                    run_id=run_identifier,
-                                    pipeline_name=pipeline_name,
-                                    org=prax_config.org,
-                                    project=prax_config.project,
-                                    stage=prax_config.stage,
-                                    task_name=None,  # Get all task logs
-                                    ctx=ctx,  # Pass the click context
-                                )
-
-                                # Recursively decode all bytes in logs
-                                try:
-                                    logs_decoded = decode_logs(logs)
-                                except Exception as e:
-                                    click.echo(f"\n⚠️  Failed to decode logs: {e}\nrepr(logs): {repr(logs)}\n")
-                                    logs_decoded = logs
-
-                                # Always print the raw log API response for debugging until logs are shown
-                                if not logs_shown:
-                                    click.echo(f"[DEBUG] repr(logs): {repr(logs)}\n")
-
-                                # Print new log lines if any, regardless of status
-                                if logs_decoded is None:
-                                    if not logs_shown:
-                                        click.echo("⏳ Waiting for pipeline to generate logs...")
-                                elif isinstance(logs_decoded, str):
-                                    log_str = logs_decoded
-                                    if 'Error' in log_str or 'error' in log_str:
-                                        click.echo(f"\n⚠️  Error streaming logs: {log_str}\n")
-                                        break
-                                    else:
-                                        # Print as log output
-                                        if not logs_shown:
-                                            click.echo("\n📋 Pipeline logs:")
-                                            logs_shown = True
-                                        if hasattr(run, 'last_log_str') and run.last_log_str == log_str:
-                                            click.echo("⚠️  Duplicate log output detected. No new logs since last check.")
-                                        else:
-                                            click.echo(log_str)
-                                            run.last_log_str = log_str
-                                        last_log_time = time.time()
-                                elif isinstance(logs_decoded, dict):
-                                    click.echo(f"\n⚠️  Unexpected log API response (dict): {logs_decoded}\n")
-                                    break
-                                elif hasattr(logs_decoded, '__iter__') and not isinstance(logs_decoded, (str, bytes, dict)):
-                                    # Filter out unhelpful initialization messages
-                                    filtered_logs = []
-                                    for line in logs_decoded:
-                                        filtered_logs.append(line)
-                                    # Warn if logs are very large
-                                    if len(filtered_logs) > 100:
-                                        click.echo(f"⚠️  Large log output ({len(filtered_logs)} lines). Showing only the latest logs. Use 'oceanum prax logs' for full output.")
-                                    # Warn if logs appear truncated or paginated
-                                    if filtered_logs and ("truncated" in str(filtered_logs[-1]).lower() or "next page" in str(filtered_logs[-1]).lower()):
-                                        click.echo("⚠️  Log output may be truncated or paginated. Use 'oceanum prax logs' for full logs.")
-                                    # Avoid printing duplicate logs
-                                    if hasattr(run, 'last_log_lines') and filtered_logs == run.last_log_lines:
-                                        click.echo("⚠️  Duplicate log output detected. No new logs since last check.")
-                                    elif filtered_logs:
-                                        if not logs_shown:
-                                            click.echo("\n📋 Pipeline logs:")
-                                            logs_shown = True
-                                        for line in filtered_logs:
-                                            click.echo(line)
-                                        run.last_log_lines = filtered_logs
-                                        last_log_time = time.time()
-                                    elif not logs_shown:
-                                        click.echo("⏳ Waiting for pipeline to generate logs...")
-                                else:
-                                    click.echo(f"\n⚠️  Unexpected log API response type: {type(logs_decoded)} value: {logs_decoded}\n")
-                                    click.echo(f"[DEBUG] repr(logs): {repr(logs)}\n")
-                                    break
-
-
-                                
-                                # Check if run has completed
-                                logger.info(f"Getting status for run {run_identifier}")
-                                status = prax_client.get_run_status(
-                                    run_id=run_identifier,
-                                    pipeline_name=pipeline_name,
-                                    org=prax_config.org,
-                                    project=prax_config.project,
-                                    stage=prax_config.stage,
-                                    ctx=ctx,  # Pass the click context
-                                )
-                                logger.info(f"Run status: {status.get('status', 'unknown')}")
-                                
-                                # Only stop following logs if run has completed
-                                terminal_statuses = ["completed", "succeeded", "failed", "error"]
-                                current_status = status.get("status", "unknown")
-                                if current_status in terminal_statuses:
-                                    if not logs_shown and current_status in ["completed", "succeeded"]:
-                                        click.echo("\n✅ Pipeline completed successfully!")
-                                    elif not logs_shown:
-                                        click.echo(f"\n❌ Pipeline failed with status: {current_status}")
-                                    else:
-                                        click.echo(f"\n🏁 Run completed with status: {current_status}\n")
-                                    break
-                                
-                                # Wait before next log check
-                                time.sleep(5)
-
-                                # Timeout if no new logs for a while
-                                if time.time() - last_log_time > 300:  # 5 minutes
-                                    click.echo("\n⚠️  No new logs for 5 minutes. Stopping log following.\n")
-                                    break
-
-                            except KeyboardInterrupt:
-                                click.echo("\n🛑 Log following interrupted by user.\n")
-                                break
+                                if isinstance(line, bytes):
+                                    try:
+                                        line = line.decode('utf-8')
+                                    except UnicodeDecodeError:
+                                        line = line.decode('latin-1', errors='ignore')
+                                elif not isinstance(line, str):
+                                    line = str(line)
+                                # Filter out empty lines and container init noise
+                                if not line.strip():
+                                    continue
+                                if (
+                                    "container" in line and "waiting to start" in line and "PodInitializing" in line
+                                ) or ("No related containers found in namespace" in line):
+                                    continue
+                                click.echo(line)
                             except Exception as e:
-                                logger.exception(f"Error following logs: {e}")
-                                click.echo(f"\n⚠️  Error following logs: {e}\n")
-                                break
+                                click.echo(f"\n⚠️  Error decoding log line: {e}\n[DEBUG] raw line: {repr(line)}\n")
+                    except KeyboardInterrupt:
+                        click.echo("\n🛑 Log following interrupted by user.\n")
                     except Exception as e:
                         logger.exception(f"Failed to follow logs: {e}")
                         click.echo(f"\n⚠️  Failed to follow logs: {e}\n")
-            else:
+
+                except Exception as e:
+                    logger.exception(f"Failed to follow logs: {e}")
+                    click.echo(f"\n⚠️  Failed to follow logs: {e}\n")
+
+            elif follow:
                 click.echo("⚠️  No Prax run ID returned")
 
             click.echo(f"📋 Completed stages: {', '.join(result['stages_completed'])}")

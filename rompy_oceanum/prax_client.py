@@ -199,7 +199,7 @@ class PraxClientWrapper:
             project=self.prax_config.project,
             stage=self.prax_config.stage,
         )
-        
+
         # Log result at debug level to reduce verbosity
         logger.debug(f"Pipeline submission result: {result}")
 
@@ -214,7 +214,7 @@ class PraxClientWrapper:
             # Fallback to the pipeline name if we can't get the run name
             run_name = result.name
             logger.debug(f"Falling back to pipeline name as run name: {run_name}")
-        
+
         logger.debug(f"Returning run name: {run_name}")
         return run_name
 
@@ -316,49 +316,62 @@ class PraxClientWrapper:
             "details": details or {},
         }
 
-    def get_run_logs(self, run_name: str, tail: int = 100, ctx=None) -> List[str]:
-        """Get pipeline run logs.
+    def get_run_logs(self, run_name: str, tail: int = 100, ctx=None, follow: bool = False):
+        """Get pipeline run logs, optionally streaming (generator) if follow=True.
 
         Args:
             run_name: Pipeline run name
             tail: Number of log lines to retrieve
             ctx: Click context (optional)
+            follow: If True, stream logs as they arrive (generator)
 
         Returns:
-            List of log lines
+            List of log lines (if follow=False) or generator (if follow=True)
         """
         client = self._get_client(ctx)
-        logger.debug(f"Getting logs for run {run_name}")
-        logs = []
+        logger.debug(f"Getting logs for run {run_name} (follow={follow})")
 
-        # Get logs using the client's method
         log_generator = client.get_pipeline_run_logs(
             run_name,
             lines=tail,
-            follow=False,
+            follow=follow,
             org=self.prax_config.org,
             project=self.prax_config.project,
             stage=self.prax_config.stage,
         )
 
-        for line in log_generator:
-            if isinstance(line, models.ErrorResponse):
-                logger.debug(f"Error getting logs for run {run_name}: {line.detail}")
-                if "not found" in str(line.detail).lower():
-                    # Return mock logs for testing
-                    logger.warning(
-                        f"Logs for run {run_name} not found, returning mock logs"
-                    )
-                    return [
-                        f"[2023-01-01 00:00:00] INFO: Pipeline {run_name} started",
-                        f"[2023-01-01 00:01:00] INFO: Executing rompy model",
-                        f"[2023-01-01 00:02:00] INFO: Model execution in progress...",
-                    ]
-                raise Exception(f"Failed to get logs: {line.detail}")
-            logs.append(str(line))
-
-        logger.debug(f"Returning {len(logs)} log lines for run {run_name}")
-        return logs
+        if follow:
+            for line in log_generator:
+                if isinstance(line, models.ErrorResponse):
+                    logger.debug(f"Error getting logs for run {run_name}: {line.detail}")
+                    if "not found" in str(line.detail).lower():
+                        logger.warning(
+                            f"Logs for run {run_name} not found, returning mock logs"
+                        )
+                        yield f"[2023-01-01 00:00:00] INFO: Pipeline {run_name} started"
+                        yield f"[2023-01-01 00:01:00] INFO: Executing rompy model"
+                        yield f"[2023-01-01 00:02:00] INFO: Model execution in progress..."
+                        return
+                    raise Exception(f"Failed to get logs: {line.detail}")
+                yield str(line)
+        else:
+            logs = []
+            for line in log_generator:
+                if isinstance(line, models.ErrorResponse):
+                    logger.debug(f"Error getting logs for run {run_name}: {line.detail}")
+                    if "not found" in str(line.detail).lower():
+                        logger.warning(
+                            f"Logs for run {run_name} not found, returning mock logs"
+                        )
+                        return [
+                            f"[2023-01-01 00:00:00] INFO: Pipeline {run_name} started",
+                            f"[2023-01-01 00:01:00] INFO: Executing rompy model",
+                            f"[2023-01-01 00:02:00] INFO: Model execution in progress...",
+                        ]
+                    raise Exception(f"Failed to get logs: {line.detail}")
+                logs.append(str(line))
+            logger.debug(f"Returning {len(logs)} log lines for run {run_name}")
+            return logs
 
 
 def parse_parameters(parameters: list[str] | None) -> dict | None:

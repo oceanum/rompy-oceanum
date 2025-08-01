@@ -8,7 +8,7 @@ import click
 import yaml
 from oceanum.cli.models import ContextObject
 
-from ...client import PraxClient
+from oceanum.cli.prax.client import PRAXClient
 from ...config import PraxConfig
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ def delete_resource(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PraxClient(prax_config)
+            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
             # Delete project
             client.delete_project(resource_name)
@@ -89,7 +89,7 @@ def delete_resource(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PraxClient(prax_config)
+            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
             # Delete pipeline
             client.delete_pipeline(resource_name)

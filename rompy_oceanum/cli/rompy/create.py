@@ -9,7 +9,7 @@ import click
 import yaml
 from oceanum.cli.models import ContextObject
 
-from ...client import PraxClient
+from oceanum.cli.prax.client import PRAXClient
 from ...config import PraxConfig
 
 logger = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ def create_resource(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PraxClient(prax_config)
+            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
             # Submit project spec
             result = client.submit_project_spec(spec_data, wait=wait)
@@ -131,7 +131,7 @@ def create_resource(
                     prax_config_data["token"] = obj.token.access_token
 
                 prax_config = PraxConfig.from_env(**prax_config_data)
-                client = PraxClient(prax_config)
+                client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
                 # Submit pipeline template
                 result = client.submit_pipeline_template(spec_data, wait=wait)
@@ -182,7 +182,7 @@ def create_resource(
                     prax_config_data["user"] = obj.token.email
 
                 prax_config = PraxConfig.from_env(**prax_config_data)
-                client = PraxClient(prax_config)
+                client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
                 # Submit pipeline template
                 result = client.submit_pipeline_template(spec_data, wait=wait)

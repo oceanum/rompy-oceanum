@@ -7,7 +7,7 @@ import click
 from oceanum.cli.models import ContextObject
 
 from ...config import PraxConfig
-from ...client import PraxClient
+from oceanum.cli.prax.client import PRAXClient
 
 
 logger = logging.getLogger(__name__)
@@ -100,7 +100,7 @@ def logs(
         click.echo(f"❌ Configuration error: {e}", err=True)
         return
 
-    client = PraxClient(prax_config)
+    client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
 
     def _format_log_line(log_entry):
         """Format a single log line for display."""
