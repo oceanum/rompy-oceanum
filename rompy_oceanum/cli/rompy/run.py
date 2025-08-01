@@ -60,6 +60,11 @@ logger = logging.getLogger(__name__)
     is_flag=True,
     help="Follow logs after submission",
 )
+@click.option(
+    "--watch",
+    is_flag=True,
+    help="Watch and print task statuses after submission (mutually exclusive with --follow)",
+)
 @click.pass_obj
 def run(
     obj: ContextObject,
@@ -72,6 +77,7 @@ def run(
     timeout,
     local,
     follow,
+    watch,
 ):
     """Submit rompy configuration to Prax for execution or run locally with Docker.
 
@@ -251,6 +257,11 @@ def run(
                 )
 
             # Follow logs if requested (must be outside the if result.get("prax_run_id") block)
+            # Mutually exclusive: --follow and --watch
+            if follow and watch:
+                click.echo("❌ --follow and --watch cannot be used together.", err=True)
+                return
+
             if follow and result.get("prax_run_id"):
                 click.echo(f"\n📋 Following logs for latest run of pipeline {pipeline_name} (matches official client):")
                 try:
@@ -265,6 +276,13 @@ def run(
                         follow=True,
                     )
                     click.echo("\n📋 Pipeline logs (streaming):")
+                    import time
+                    last_log_time = time.time()
+                    log_received = False
+                    progress_interval = 10  # seconds
+                    last_progress = time.time()
+                    run_id = result['prax_run_id']
+                    prax_client_wrapper = PraxClientWrapper(prax_config)
                     try:
                         for line in log_stream:
                             try:
@@ -288,9 +306,29 @@ def run(
                                     "container" in line and "waiting to start" in line and "PodInitializing" in line
                                 ) or ("No related containers found in namespace" in line):
                                     continue
+                                print(f"[DEBUG] CLI log streaming: received line: {repr(line)}")
                                 click.echo(line)
+                                log_received = True
+                                last_log_time = time.time()
                             except Exception as e:
                                 click.echo(f"\n⚠️  Error decoding log line: {e}\n[DEBUG] raw line: {repr(line)}\n")
+                            # Show progress if no logs for a while
+                            if not log_received and (time.time() - last_progress) > progress_interval:
+                                print("[DEBUG] CLI log streaming: no logs yet, showing progress message")
+                                click.echo("⏳ Waiting for containers to start... (no logs yet, try --watch for task status)")
+                                last_progress = time.time()
+                        # After log stream ends, check if any logs were received
+                        print(f"[DEBUG] CLI log streaming: log stream ended, log_received={log_received}")
+                        if not log_received:
+                            # Poll run status one last time
+                            status = prax_client_wrapper.get_run_status(run_id)
+                            print(f"[DEBUG] CLI log streaming: final run status: {status}")
+                            overall_status = status.get("status", "").lower()
+                            terminal_states = ("succeeded", "failed", "error", "cancelled", "completed", "success", "finished")
+                            if overall_status in terminal_states:
+                                click.echo("⚠️  No logs were received, but the run has completed. Try --watch for task status.")
+                            else:
+                                click.echo("⚠️  No logs were received. The job may still be starting. Try --watch for task status.")
                     except KeyboardInterrupt:
                         click.echo("\n🛑 Log following interrupted by user.\n")
                     except Exception as e:
@@ -300,6 +338,62 @@ def run(
                 except Exception as e:
                     logger.exception(f"Failed to follow logs: {e}")
                     click.echo(f"\n⚠️  Failed to follow logs: {e}\n")
+
+            elif watch and result.get("prax_run_id"):
+                import time
+                from rich.table import Table
+                from rich.console import Console
+                from rich.live import Live
+
+                click.echo(f"\n👀 Watching tasks for latest run of pipeline {pipeline_name} (matches official client):")
+                prax_client_wrapper = PraxClientWrapper(prax_config)
+                run_id = result['prax_run_id']
+                console = Console()
+                poll_interval = 5  # seconds
+
+                def render_status_table(status_dict):
+                    table = Table(title=f"Pipeline Run: {run_id}", show_lines=True)
+                    table.add_column("Task", style="cyan", no_wrap=True)
+                    table.add_column("Status", style="magenta")
+                    table.add_column("Message", style="green")
+                    details = status_dict.get("details", {})
+                    logical_tasks = []
+                    if isinstance(details, dict):
+                        for info in details.values():
+                            # Only include actual execution steps (Pods)
+                            if info.get("type") == "Pod":
+                                # Prefer templateName, fallback to cleaned displayName
+                                task_name = info.get("templateName") or info.get("displayName", "")
+                                # Remove numeric suffixes like (0)
+                                if isinstance(task_name, str):
+                                    task_name = task_name.replace("(0)", "").strip()
+                                status = info.get("phase", info.get("status", "unknown"))
+                                msg = info.get("message", "")
+                                logical_tasks.append((task_name, status, msg))
+                    # Sort tasks by name for stable display
+                    for task_name, status, msg in sorted(logical_tasks):
+                        table.add_row(str(task_name), str(status), str(msg))
+                    return table
+
+                with Live(console=console, refresh_per_second=2) as live:
+                    while True:
+                        status = prax_client_wrapper.get_run_status(run_id)
+                        live.update(render_status_table(status))
+                        overall_status = status.get("status", "").lower()
+                        # Consider run finished if all logical tasks are in a terminal state
+                        terminal_states = ("succeeded", "failed", "error", "cancelled", "completed", "success", "finished")
+                        logical_task_phases = [
+                            info.get("phase", "").lower()
+                            for info in status.get("details", {}).values()
+                            if info.get("type") == "Pod"
+                        ]
+                        if (
+                            overall_status in terminal_states
+                            or (logical_task_phases and all(phase in terminal_states for phase in logical_task_phases))
+                        ):
+                            break
+                        time.sleep(poll_interval)
+                click.echo("\n✅ Pipeline run completed. Final task statuses above.")
 
             elif follow:
                 click.echo("⚠️  No Prax run ID returned")
