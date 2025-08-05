@@ -100,7 +100,10 @@ def logs(
         click.echo(f"❌ Configuration error: {e}", err=True)
         return
 
-    client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
+    if not getattr(prax_config, 'base_url', None):
+    click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
+    return
+client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
     def _format_log_line(log_entry):
         """Format a single log line for display."""

@@ -56,20 +56,20 @@ config:
         x: lon
         y: lat
     input:
-      - var: wind
-        source:
-          model_type: datamesh
-          datasource: era5_wind10m
-          token: null
-        buffer: 2.0
-        filter:
-          sort:
-            coords: [latitude]
-        z1: u10
-        z2: v10
-        coords:
-          x: longitude
-          y: latitude
+    - var: wind
+      source:
+        model_type: datamesh
+        datasource: era5_wind10m
+        token: null
+      buffer: 2.0
+      filter:
+        sort:
+          coords: [latitude]
+      z1: u10
+      z2: v10
+      coords:
+        x: longitude
+        y: latitude
 
   boundary:
     model_type: boundspec

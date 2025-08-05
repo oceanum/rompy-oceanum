@@ -8,7 +8,7 @@ import click
 import yaml
 from oceanum.cli.models import ContextObject
 
-from oceanum.cli.prax.client import PRAXClient
+from ...prax_client import PraxClientWrapper
 from ...config import PraxConfig
 
 logger = logging.getLogger(__name__)
@@ -65,8 +65,11 @@ def list_resources(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
-
+            click.echo(f"[DEBUG] prax_config.base_url: {prax_config.base_url}")
+            if not getattr(prax_config, 'base_url', None):
+                click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
+                sys.exit(1)
+            client = PraxClientWrapper(prax_config)
             # List projects with "rompy" filter
             projects = client.list_projects(search="rompy")
 
@@ -102,8 +105,11 @@ def list_resources(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
-
+            click.echo(f"[DEBUG] prax_config.base_url: {prax_config.base_url}")
+            if not getattr(prax_config, 'base_url', None):
+                click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
+                sys.exit(1)
+            client = PraxClientWrapper(prax_config)
             # List pipelines
             pipelines = client.list_pipelines()
 

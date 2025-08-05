@@ -71,7 +71,10 @@ def create(ctx: click.Context, spec_file: str, name: str, wait: bool):
             prax_config_data["token"] = obj.token.access_token
         
         prax_config = PraxConfig.from_env(**prax_config_data)
-        client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
+        if not getattr(prax_config, 'base_url', None):
+    click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
+    raise click.Abort()
+client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
         
         # Submit project spec
         result = client.submit_project_spec(spec_data, wait=wait)
@@ -100,7 +103,10 @@ def list_projects(ctx: click.Context):
             prax_config_data["token"] = obj.token.access_token
         
         prax_config = PraxConfig.from_env(**prax_config_data)
-        client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
+        if not getattr(prax_config, 'base_url', None):
+    click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
+    raise click.Abort()
+client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
         
         # List projects
         projects = client.list_projects()
@@ -137,7 +143,10 @@ def get(ctx: click.Context, project_name: str):
             prax_config_data["token"] = obj.token.access_token
         
         prax_config = PraxConfig.from_env(**prax_config_data)
-        client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
+        if not getattr(prax_config, 'base_url', None):
+    click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
+    raise click.Abort()
+client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
         
         # Get project details
         project = client.get_project(project_name)
@@ -168,7 +177,10 @@ def delete(ctx: click.Context, project_name: str):
             prax_config_data["token"] = obj.token.access_token
         
         prax_config = PraxConfig.from_env(**prax_config_data)
-        client = PRAXClient(token=prax_config.token, service=prax_config.api_url)
+        if not getattr(prax_config, 'base_url', None):
+    click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
+    raise click.Abort()
+client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
         
         # Delete project
         client.delete_project(project_name)
