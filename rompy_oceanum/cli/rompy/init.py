@@ -164,7 +164,7 @@ def init(
         click.echo(f"\n💡 Next steps:")
         click.echo(f"  1. Review and customize: {output_path}")
         click.echo(
-            f"  2. Execute via Prax: oceanum rompy run {output_path} {model} --pipeline-name my-pipeline"
+            f"  2. Execute via Prax: oceanum rompy run {output_path} {model} --pipeline-name swan-from-rompy --project rompy-oceanum --follow"
         )
 
         # Show template-specific guidance

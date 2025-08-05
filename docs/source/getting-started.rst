@@ -63,17 +63,17 @@ Here's a minimal example using the oceanum CLI integration:
    # 1. Authenticate with oceanum
    oceanum auth login
 
-   # 2. Create optimized rompy configuration
+   # 2. Deploy default SWAN pipeline
+   oceanum rompy create pipeline 
+
+   # 3. Create optimized rompy configuration
    oceanum rompy init swan --template basic --domain "my_domain"
 
-   # 3. Execute model via Prax pipeline
-   oceanum rompy run config.yml swan --pipeline-name my-pipeline
+   # 4. Execute model via Prax pipeline (and follow logs)
+   oceanum rompy run rompy_config_swan_basic.yml swan --pipeline-name swan-from-rompy --project rompy-oceanum --follow
 
-   # 4. Monitor execution
-   oceanum rompy status <run-id>
-
-   # 5. Download results when complete
-   oceanum rompy sync <run-id> ./outputs --organize
+   # 5. Check for dataset registration in datamesh
+   oceanum datamesh list datasources --search "rompy"
 
 For programmatic usage:
 
