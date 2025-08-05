@@ -72,6 +72,11 @@ Here's a minimal example using the oceanum CLI integration:
    # 4. Execute model via Prax pipeline (and follow logs)
    oceanum rompy run rompy_config_swan_basic.yml swan --pipeline-name swan-from-rompy --project rompy-oceanum --follow
 
+   # 4 (a). Alternatively, you can run the pipeline locally for testing with the --local flag. 
+   #        This runs the generate command locally with rompy and the model run using the docker specified in the 
+   #        pipeline
+   oceanum rompy run rompy_config_swan_basic.yml swan --pipeline-name swan-from-rompy --project rompy-oceanum --local
+
    # 5. Check for dataset registration in datamesh
    oceanum datamesh list datasources --search "rompy"
 
