@@ -65,7 +65,6 @@ def list_resources(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            click.echo(f"[DEBUG] prax_config.base_url: {prax_config.base_url}")
             if not getattr(prax_config, 'base_url', None):
                 click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
                 sys.exit(1)
@@ -105,7 +104,6 @@ def list_resources(
                 prax_config_data["token"] = obj.token.access_token
 
             prax_config = PraxConfig.from_env(**prax_config_data)
-            click.echo(f"[DEBUG] prax_config.base_url: {prax_config.base_url}")
             if not getattr(prax_config, 'base_url', None):
                 click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
                 sys.exit(1)

@@ -8,8 +8,9 @@ from typing import Optional
 import click
 import yaml
 from oceanum.cli.models import ContextObject
-
 from oceanum.cli.prax.client import PRAXClient
+from oceanum.cli.prax.models import ProjectSpec
+
 from ...config import PraxConfig
 
 logger = logging.getLogger(__name__)
@@ -85,21 +86,12 @@ def create_resource(
             if "name" not in spec_data:
                 spec_data["name"] = name
 
-            # Get Prax configuration
-            prax_config_data = {
-                "org": org
-                or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
-            }
+            # Create PRAXClient with oceanum context for proper URL construction
+            client = PRAXClient(ctx=click.get_current_context(), token=None, service=None)
 
-            # Use oceanum's token for authentication
-            if obj.token and obj.token.access_token:
-                prax_config_data["token"] = obj.token.access_token
-
-            prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
-
-            # Submit project spec
-            result = client.submit_project_spec(spec_data, wait=wait)
+            # Convert dict to ProjectSpec and submit project spec
+            spec = ProjectSpec(**spec_data)
+            result = client.deploy_project(spec)
 
             click.echo(f"✅ Project '{name}' created successfully")
             click.echo(f"📝 Project details: {result}")
@@ -118,23 +110,13 @@ def create_resource(
                 if "name" not in spec_data:
                     spec_data["name"] = name
 
-                # Get Prax configuration
-                prax_config_data = {
-                    "org": org
-                    or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
-                    "project": project,
-                    "stage": stage,
-                }
+                # Create PRAXClient with oceanum context for proper URL construction
+                client = PRAXClient(ctx=click.get_current_context(), token=None, service=None)
 
-                # Use oceanum's token for authentication
-                if obj.token and obj.token.access_token:
-                    prax_config_data["token"] = obj.token.access_token
-
-                prax_config = PraxConfig.from_env(**prax_config_data)
-                client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
-
+                # Convert dict to ProjectSpec
+                spec = ProjectSpec(**spec_data)
                 # Submit pipeline template
-                result = client.submit_pipeline_template(spec_data, wait=wait)
+                result = client.deploy_project(spec)
 
                 click.echo(
                     f"✅ Pipeline '{name}' created successfully in project '{project}'"
@@ -163,29 +145,18 @@ def create_resource(
                 with open(template_path, "r") as f:
                     spec_data = yaml.safe_load(f)
 
-                # Get Prax configuration
-                prax_config_data = {
-                    "org": org
-                    or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
-                    "project": project,
-                    "stage": stage,
-                }
+                # Create PRAXClient with oceanum context for proper URL construction
+                client = PRAXClient(ctx=click.get_current_context(), token=None, service=None)
 
-                # Use oceanum's token for authentication
-                if obj.token and obj.token.access_token:
-                    prax_config_data["token"] = obj.token.access_token
-
-                # Get user email from context if available
-                if user:
-                    prax_config_data["user"] = user
-                elif obj.token and hasattr(obj.token, "email"):
-                    prax_config_data["user"] = obj.token.email
-
-                prax_config = PraxConfig.from_env(**prax_config_data)
-                client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
-
+                # Convert dict to ProjectSpec
+                spec = ProjectSpec(**spec_data)
                 # Submit pipeline template
-                result = client.submit_pipeline_template(spec_data, wait=wait)
+                result = client.deploy_project(spec)
+
+                # Check for error response
+                if hasattr(result, "detail") and "Not Found" in str(result.detail):
+                    click.echo(f"❌ Failed to deploy pipeline: {result.detail}", err=True)
+                    sys.exit(1)
 
                 click.echo("✅ Default pipeline template deployed successfully!")
                 click.echo(
