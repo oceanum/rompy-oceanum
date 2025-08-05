@@ -64,6 +64,7 @@ logger = logging.getLogger(__name__)
     "--exclude",
     multiple=True,
     help="Exclude log lines containing these patterns (can be used multiple times with --follow)",
+    default=['[wait]'],
 )
 @click.option(
     "--watch",
@@ -270,118 +271,119 @@ def run(
 
             if follow and result.get("prax_run_id"):
                 click.echo(
-                    f"\n📋 Following logs for latest run of pipeline {pipeline_name} (matches official client):"
+                    f"\n📋 Following logs for latest run of pipeline {pipeline_name}:"
                 )
                 try:
                     # Create PraxClientWrapper for log following
-                    click.echo(f"PraxClientWrapper service URL: {prax_config.base_url}")
                     prax_client_wrapper = PraxClientWrapper(prax_config)
                     logger.info(
                         "Created PraxClientWrapper for log following (pipeline mode)"
                     )
-
-                    log_stream = prax_client_wrapper.get_run_logs(
-                        run_name=result["prax_run_id"],
-                        tail=100,
-                        follow=True,
-                    )
                     click.echo("\n📋 Pipeline logs (streaming):")
                     import time
 
-                    last_log_time = time.time()
-                    log_received = False
-                    progress_interval = 10  # seconds
-                    last_progress = time.time()
-                    run_id = result["prax_run_id"]
-                    prax_client_wrapper = PraxClientWrapper(prax_config)
-                    try:
-                        for line in log_stream:
-                            try:
-                                # Handle bytes, and also string representations of bytes (e.g. "b'...'")
-                                import ast
+                    for nn in range(3):
+                        logger.info(f"Logs for task {nn + 1}")
+                        log_stream = prax_client_wrapper.get_run_logs(
+                            run_name=result["prax_run_id"],
+                            tail=100,
+                            follow=True,
+                        )
 
-                                if isinstance(line, bytes):
-                                    line = line.decode("utf-8", errors="replace")
-                                elif (
-                                    isinstance(line, str)
-                                    and line.startswith("b'")
-                                    and line.endswith("'")
-                                ):
-                                    try:
-                                        # Safely evaluate as bytes literal, then decode
-                                        line = ast.literal_eval(line).decode(
-                                            "utf-8", errors="replace"
-                                        )
-                                    except Exception:
-                                        # Fallback: leave as-is if parsing fails
-                                        pass
-                                elif not isinstance(line, str):
-                                    line = str(line)
-                                # Filter out empty lines and container init noise
-                                if not line.strip():
-                                    continue
-                                if (
-                                    "container" in line
-                                    and "waiting to start" in line
-                                    and "PodInitializing" in line
-                                ) or (
-                                    "No related containers found in namespace" in line
-                                ):
-                                    continue
-                                
-                                # Filter out excluded patterns if specified
-                                if exclude:
-                                    should_exclude = False
-                                    for pattern in exclude:
-                                        if pattern in line:
-                                            should_exclude = True
-                                            break
-                                    if should_exclude:
+                        last_log_time = time.time()
+                        log_received = False
+                        progress_interval = 10  # seconds
+                        last_progress = time.time()
+                        run_id = result["prax_run_id"]
+                        prax_client_wrapper = PraxClientWrapper(prax_config)
+                        try:
+                            for line in log_stream:
+                                try:
+                                    # Handle bytes, and also string representations of bytes (e.g. "b'...'")
+                                    import ast
+
+                                    if isinstance(line, bytes):
+                                        line = line.decode("utf-8", errors="replace")
+                                    elif (
+                                        isinstance(line, str)
+                                        and line.startswith("b'")
+                                        and line.endswith("'")
+                                    ):
+                                        try:
+                                            # Safely evaluate as bytes literal, then decode
+                                            line = ast.literal_eval(line).decode(
+                                                "utf-8", errors="replace"
+                                            )
+                                        except Exception:
+                                            # Fallback: leave as-is if parsing fails
+                                            pass
+                                    elif not isinstance(line, str):
+                                        line = str(line)
+                                    # Filter out empty lines and container init noise
+                                    if not line.strip():
                                         continue
-                                
-                                click.echo(line)
-                                log_received = True
-                                last_log_time = time.time()
-                            except Exception as e:
-                                click.echo(
-                                    f"\n⚠️  Error decoding log line: {e}\n[DEBUG] raw line: {repr(line)}\n"
+                                    if (
+                                        "container" in line
+                                        and "waiting to start" in line
+                                        and "PodInitializing" in line
+                                    ) or (
+                                        "No related containers found in namespace" in line
+                                    ):
+                                        continue
+                                    
+                                    # Filter out excluded patterns if specified
+                                    if exclude:
+                                        should_exclude = False
+                                        for pattern in exclude:
+                                            if pattern in line:
+                                                should_exclude = True
+                                                break
+                                        if should_exclude:
+                                            continue
+                                    
+                                    click.echo(line)
+                                    log_received = True
+                                    last_log_time = time.time()
+                                except Exception as e:
+                                    click.echo(
+                                        f"\n⚠️  Error decoding log line: {e}\n[DEBUG] raw line: {repr(line)}\n"
+                                    )
+                                # Show progress if no logs for a while
+                                if (
+                                    not log_received
+                                    and (time.time() - last_progress) > progress_interval
+                                ):
+                                    click.echo(
+                                        "⏳ Waiting for containers to start... (no logs yet, try --watch for task status)"
+                                    )
+                                    last_progress = time.time()
+                            # After log stream ends, check if any logs were received
+                            if not log_received:
+                                # Poll run status one last time
+                                status = prax_client_wrapper.get_run_status(run_id)
+                                overall_status = status.get("status", "").lower()
+                                terminal_states = (
+                                    "succeeded",
+                                    "failed",
+                                    "error",
+                                    "cancelled",
+                                    "completed",
+                                    "success",
+                                    "finished",
                                 )
-                            # Show progress if no logs for a while
-                            if (
-                                not log_received
-                                and (time.time() - last_progress) > progress_interval
-                            ):
-                                click.echo(
-                                    "⏳ Waiting for containers to start... (no logs yet, try --watch for task status)"
-                                )
-                                last_progress = time.time()
-                        # After log stream ends, check if any logs were received
-                        if not log_received:
-                            # Poll run status one last time
-                            status = prax_client_wrapper.get_run_status(run_id)
-                            overall_status = status.get("status", "").lower()
-                            terminal_states = (
-                                "succeeded",
-                                "failed",
-                                "error",
-                                "cancelled",
-                                "completed",
-                                "success",
-                                "finished",
-                            )
-                            if overall_status in terminal_states:
-                                click.echo(
-                                    "⚠️  No logs were received, but the run has completed. Try --watch for task status."
-                                )
-                            else:
-                                click.echo(
-                                    "⚠️  No logs were received. The job may still be starting. Try --watch for task status."
-                                )
-                    except KeyboardInterrupt:
-                        click.echo("\n🛑 Log following interrupted by user.\n")
-                    except Exception as e:
-                        logger.exception(f"Failed to follow logs: {e}")
-                        click.echo(f"\n⚠️  Failed to follow logs: {e}\n")
+                                if overall_status in terminal_states:
+                                    click.echo(
+                                        "⚠️  No logs were received, but the run has completed. Try --watch for task status."
+                                    )
+                                else:
+                                    click.echo(
+                                        "⚠️  No logs were received. The job may still be starting. Try --watch for task status."
+                                    )
+                        except KeyboardInterrupt:
+                            click.echo("\n🛑 Log following interrupted by user.\n")
+                        except Exception as e:
+                            logger.exception(f"Failed to follow logs: {e}")
+                            click.echo(f"\n⚠️  Failed to follow logs: {e}\n")
 
                 except Exception as e:
                     logger.exception(f"Failed to follow logs: {e}")
