@@ -12,6 +12,7 @@ from .rompy.create import create_resource
 from .rompy.list import list_resources
 from .rompy.describe import describe_resource
 from .rompy.delete import delete_resource
+from .rompy.logs import logs
 
 @oceanum_main.group(name='rompy', help='ROMPY integration for Oceanum Prax execution.')
 @click.pass_obj
@@ -32,6 +33,7 @@ rompy.add_command(create_resource, name="create")
 rompy.add_command(list_resources, name="list")
 rompy.add_command(describe_resource, name="describe")
 rompy.add_command(delete_resource, name="delete")
+rompy.add_command(logs)
 
 # For plugin system compatibility
 cli = rompy

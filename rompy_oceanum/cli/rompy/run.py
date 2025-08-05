@@ -61,6 +61,11 @@ logger = logging.getLogger(__name__)
     help="Follow logs after submission",
 )
 @click.option(
+    "--exclude",
+    multiple=True,
+    help="Exclude log lines containing these patterns (can be used multiple times with --follow)",
+)
+@click.option(
     "--watch",
     is_flag=True,
     help="Watch and print task statuses after submission (mutually exclusive with --follow)",
@@ -77,6 +82,7 @@ def run(
     timeout,
     local,
     follow,
+    exclude,
     watch,
 ):
     """Submit rompy configuration to Prax for execution or run locally with Docker.
@@ -250,10 +256,10 @@ def run(
                 # Use run name for logs and status if available
                 run_identifier = result.get("prax_run_name", result["prax_run_id"])
                 click.echo(
-                    f"💡 Monitor with: oceanum prax logs pipeline-runs {run_identifier}"
+                    f"💡 Monitor with: oceanum prax logs pipeline-runs {run_identifier} NOT YET IMPLEMENTED"
                 )
                 click.echo(
-                    f"💡 Check status with: oceanum prax describe pipeline-runs {run_identifier}"
+                    f"💡 Check status with: oceanum prax describe pipeline-runs {run_identifier} NOT YET IMPLEMENTED"
                 )
 
             # Follow logs if requested (must be outside the if result.get("prax_run_id") block)
@@ -322,6 +328,17 @@ def run(
                                     "No related containers found in namespace" in line
                                 ):
                                     continue
+                                
+                                # Filter out excluded patterns if specified
+                                if exclude:
+                                    should_exclude = False
+                                    for pattern in exclude:
+                                        if pattern in line:
+                                            should_exclude = True
+                                            break
+                                    if should_exclude:
+                                        continue
+                                
                                 click.echo(line)
                                 log_received = True
                                 last_log_time = time.time()
@@ -443,11 +460,15 @@ def run(
                             break
                         time.sleep(poll_interval)
                 click.echo("\n✅ Pipeline run completed. Final task statuses above.")
+                click.echo("\n✅ Pipeline run completed. Final task statuses above.")
 
             elif follow:
                 click.echo("⚠️  No Prax run ID returned")
 
             click.echo(f"📋 Completed stages: {', '.join(result['stages_completed'])}")
+            click.echo(f"📋 Grid data be available at: https://ui.datamesh.oceanum.io/datasource/rompy-{model_run.run_id}-grid")
+            click.echo(f"📋 Spectra be available at:   https://ui.datamesh.oceanum.io/datasource/rompy-{model_run.run_id}-grid")
+
         else:
             click.echo(
                 f"❌ Pipeline submission failed: {result.get('message', 'Unknown error')}",

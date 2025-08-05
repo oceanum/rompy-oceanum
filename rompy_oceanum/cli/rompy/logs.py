@@ -50,6 +50,11 @@ logger = logging.getLogger(__name__)
     help="Show timestamps in log output"
 )
 @click.option(
+    "--exclude",
+    multiple=True,
+    help="Exclude log lines containing these patterns (can be used multiple times)"
+)
+@click.option(
     "--raw",
     is_flag=True,
     help="Output raw log lines without formatting"
@@ -65,6 +70,7 @@ def logs(
     level,
     since,
     timestamps,
+    exclude,
     raw
 ):
     """View logs for a rompy pipeline run.
@@ -101,9 +107,10 @@ def logs(
         return
 
     if not getattr(prax_config, 'base_url', None):
-    click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
-    return
-client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
+        click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
+        return
+    
+    client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
     def _format_log_line(log_entry):
         """Format a single log line for display."""
@@ -187,6 +194,17 @@ client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
                 ]
             except ValueError:
                 click.echo(f"⚠️  Invalid timestamp format: {since}", err=True)
+
+        # Filter out excluded patterns
+        if exclude:
+            for pattern in exclude:
+                filtered = [
+                    log for log in filtered
+                    if not (
+                        (isinstance(log, dict) and pattern in log.get('message', '')) or
+                        (isinstance(log, str) and pattern in log)
+                    )
+                ]
 
         return filtered
 
