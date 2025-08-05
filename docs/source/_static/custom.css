@@ -83,47 +83,41 @@ body {
     background-color: transparent;
 }
 
-.wy-menu-vertical a {
-    color: var(--background-color) !important;
+.wy-menu-vertical a,
+.wy-menu-vertical li a,
+.wy-menu-vertical li a:visited {
+    color: var(--text-color) !important;
     background-color: transparent;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    text-decoration: none !important;
 }
 
 .wy-menu-vertical a:hover {
     background-color: rgba(169, 220, 224, 0.15);
-    color: var(--background-color) !important;
-}
-
-/* Fix for navigation menu text visibility */
-.wy-menu-vertical li a,
-.wy-menu-vertical li a:visited {
-    color: var(--background-color) !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    text-decoration: none !important;
+    color: var(--accent-color) !important;
 }
 
 .wy-menu-vertical li span.toctree-expand {
-    color: var(--background-color) !important;
+    color: var(--text-color) !important;
 }
 
 .wy-menu-vertical li.toctree-l1 a {
-    color: var(--background-color) !important;
+    color: var(--text-color) !important;
     font-weight: 500;
 }
 
 .wy-menu-vertical li.toctree-l2 a {
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: rgba(13, 45, 63, 0.9) !important;
 }
 
 .wy-menu-vertical li.toctree-l3 a {
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: rgba(13, 45, 63, 0.8) !important;
 }
 
 .wy-menu-vertical li.toctree-l4 a {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(13, 45, 63, 0.7) !important;
 }
 
 .wy-menu-vertical li.current a {
@@ -917,7 +911,7 @@ blockquote {
 /* RTD Theme specific overrides */
 .rst-content .toctree-wrapper ul li a,
 .wy-menu-vertical ul li a {
-    color: var(--background-color) !important;
+    color: var(--text-color) !important;
 }
 
 /* Force all navigation text to be visible */
