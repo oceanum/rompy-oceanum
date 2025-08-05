@@ -60,8 +60,8 @@ class DatameshWriter(BaseModel):
             coordinates=coordinates,
             tags=self.tags + additional_tags,
             # labels=self.labels,
-            tstart=times[0],
-            tend=times[-1],
+            tstart=times.iloc[0],
+            tend=times.iloc[-1],
             geom={
                 "type": "Polygon",
                 "coordinates": [
@@ -328,7 +328,7 @@ def write_from_config(ctx, config_path, org, tags):
         if logger.level <= logging.DEBUG:  # Only show traceback in debug mode
             print("Debug traceback:")
             traceback.print_exc()
-        raise typer.Exit(code=1)
+        sys.exit(1)
 
 
 def main():
