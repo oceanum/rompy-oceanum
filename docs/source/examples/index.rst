@@ -90,7 +90,7 @@ Many examples use sample datasets available in the rompy-oceanum repository:
 .. code-block:: bash
 
    # Download example data
-   git clone https://github.com/rom-py/rompy-oceanum-examples.git
+   git clone https://github.com/oceanum/rompy-oceanum-examples.git
    cd rompy-oceanum-examples/data
 
 Available datasets include:

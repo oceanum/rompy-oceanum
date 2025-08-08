@@ -32,9 +32,9 @@ For now, please refer to:
 Quick Links
 -----------
 
-* `GitHub Repository <https://github.com/rom-py/rompy-oceanum>`_
-* `Issue Tracker <https://github.com/rom-py/rompy-oceanum/issues>`_
-* `Pull Requests <https://github.com/rom-py/rompy-oceanum/pulls>`_
+* `GitHub Repository <https://github.com/oceanum/rompy-oceanum>`_
+* `Issue Tracker <https://github.com/oceanum/rompy-oceanum/issues>`_
+* `Pull Requests <https://github.com/oceanum/rompy-oceanum/pulls>`_
 
 .. todo::
    Add comprehensive development documentation and contribution guides.

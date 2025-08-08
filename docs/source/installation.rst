@@ -72,7 +72,7 @@ For contributing to rompy-oceanum or accessing the latest features:
 .. code-block:: bash
 
    # Clone the repository
-   git clone https://github.com/rom-py/rompy-oceanum.git
+   git clone https://github.com/oceanum/rompy-oceanum.git
    cd rompy-oceanum
 
    # Install in development mode with all optional dependencies
@@ -97,7 +97,7 @@ To install the latest development version directly from GitHub:
 
 .. code-block:: bash
 
-   pip install git+https://github.com/rom-py/rompy-oceanum.git oceanum
+   pip install git+https://github.com/oceanum/rompy-oceanum.git oceanum
 
 Virtual Environment Setup
 --------------------------
@@ -373,6 +373,6 @@ Support
 
 If you continue to experience installation issues:
 
-* Check the `GitHub Issues <https://github.com/rom-py/rompy-oceanum/issues>`_
+* Check the `GitHub Issues <https://github.com/oceanum/rompy-oceanum/issues>`_
 * Review the :doc:`user-guide/troubleshooting` guide
 * Contact the development team through GitHub

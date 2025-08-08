@@ -600,7 +600,7 @@ What to Include in Support Requests
 Support Channels
 ~~~~~~~~~~~~~~~~~
 
-* **GitHub Issues**: https://github.com/rom-py/rompy-oceanum/issues
+* **GitHub Issues**: https://github.com/oceanum/rompy-oceanum/issues
 * **Documentation**: https://rompy-oceanum.readthedocs.io/
 * **rompy Community**: https://rompy.readthedocs.io/
 

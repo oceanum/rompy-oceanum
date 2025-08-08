@@ -809,7 +809,7 @@ Getting Help
 ~~~~~~~~~~~~
 
 * Use ``--help`` with any command for detailed usage information
-* Check the `GitHub Issues <https://github.com/rom-py/rompy-oceanum/issues>`_ for known issues
+* Check the `GitHub Issues <https://github.com/oceanum/rompy-oceanum/issues>`_ for known issues
 * Review the oceanum CLI documentation for platform-specific issues
 * Contact support through the oceanum platform for authentication or service issues
 

@@ -14,7 +14,7 @@ Getting Started
 
 For now, please:
 
-1. Check the `GitHub repository <https://github.com/rom-py/rompy-oceanum>`_ for current issues and discussions
+1. Check the `GitHub repository <https://github.com/oceanum/rompy-oceanum>`_ for current issues and discussions
 2. Follow the existing code style and patterns in the codebase
 3. Ensure any new features include appropriate tests
 4. Update documentation for any new functionality
@@ -25,7 +25,7 @@ Development Setup
 .. code-block:: bash
 
    # Clone the repository
-   git clone https://github.com/rom-py/rompy-oceanum.git
+   git clone https://github.com/oceanum/rompy-oceanum.git
    cd rompy-oceanum
 
    # Install in development mode

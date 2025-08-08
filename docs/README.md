@@ -298,7 +298,7 @@ rsync -av build/html/ user@server:/var/www/docs/
 5. **GitHub Pages Deployment Issues**
    ```bash
    # Check workflow status
-   # Go to: https://github.com/rom-py/rompy-oceanum/actions
+   # Go to: https://github.com/oceanum/rompy-oceanum/actions
    
    # Test locally with same build process
    cd docs && make clean && make html
@@ -318,11 +318,11 @@ rsync -av build/html/ user@server:/var/www/docs/
 ### Getting Help
 
 - **Live Documentation**: https://rom-py.github.io/rompy-oceanum/
-- **GitHub Actions Logs**: https://github.com/rom-py/rompy-oceanum/actions
+- **GitHub Actions Logs**: https://github.com/oceanum/rompy-oceanum/actions
 - **Sphinx Documentation**: https://www.sphinx-doc.org/
 - **reStructuredText Guide**: https://docutils.sourceforge.io/rst.html
 - **MyST Parser**: https://myst-parser.readthedocs.io/
-- **Project Issues**: https://github.com/rom-py/rompy-oceanum/issues
+- **Project Issues**: https://github.com/oceanum/rompy-oceanum/issues
 
 ## 📋 Contributing
 

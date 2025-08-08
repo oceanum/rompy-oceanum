@@ -32,7 +32,7 @@ For development installation:
 
 .. code-block:: bash
 
-   git clone https://github.com/rom-py/rompy-oceanum
+   git clone https://github.com/oceanum/rompy-oceanum
    cd rompy-oceanum
    pip install -e ".[dev,docs]"
    pip install oceanum
@@ -257,6 +257,6 @@ For more detailed troubleshooting, see :doc:`user-guide/troubleshooting`.
 Getting Help
 ------------
 
-* `GitHub Issues <https://github.com/rom-py/rompy-oceanum/issues>`_ - Report bugs or request features
+* `GitHub Issues <https://github.com/oceanum/rompy-oceanum/issues>`_ - Report bugs or request features
 * `rompy Documentation <https://rompy.readthedocs.io/>`_ - Learn about the underlying framework
 * `Oceanum Platform <https://oceanum.science/>`_ - Platform documentation and support

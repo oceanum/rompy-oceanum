@@ -21,7 +21,7 @@ pip install rompy-oceanum
 For development, you can install the package in editable mode:
 
 ```bash
-git clone https://github.com/rom-py/rompy-oceanum.git
+git clone https://github.com/oceanum/rompy-oceanum.git
 cd rompy-oceanum
 pip install -e .
 ```

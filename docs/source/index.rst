@@ -140,7 +140,7 @@ Or for development:
 
 .. code-block:: bash
 
-   git clone https://github.com/rom-py/rompy-oceanum
+   git clone https://github.com/oceanum/rompy-oceanum
    cd rompy-oceanum
    pip install -e ".[dev,docs]"
    pip install oceanum
@@ -195,7 +195,7 @@ Table of Contents
    :maxdepth: 1
    :caption: Links
 
-   GitHub Repository <https://github.com/rom-py/rompy-oceanum>
+   GitHub Repository <https://github.com/oceanum/rompy-oceanum>
    rompy Documentation <https://rompy.readthedocs.io/>
    Oceanum Platform <https://oceanum.science/>
 
