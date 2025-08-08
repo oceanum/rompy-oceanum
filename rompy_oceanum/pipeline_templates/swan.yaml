@@ -3,7 +3,7 @@ resources:
   tasks:
     - name: generate
       image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
-      command: rompy generate --config-from-env -v
+      command: rompy generate --config-from-env -v  --simple-logs
       outputs:
         artifacts:
           - name: workspace
@@ -53,7 +53,7 @@ resources:
 
     - name: register
       image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
-      command: rompy postprocess --config-from-env --processor datamesh -v
+      command: rompy postprocess --config-from-env --processor datamesh -v --simple-logs
       inputs:
         artifacts:
           - name: grid
