@@ -142,6 +142,11 @@ dmypy.json
 *.code-workspace
 .windsurf/*
 .zed/*
+AGENTS.md
+GEMINI.md
+QWEN.md
+PLANNING.md
+prax_spec.json
 
 # Git Task Manager - branch-specific task files
 TASK.md
