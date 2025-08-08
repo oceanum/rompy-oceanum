@@ -25,11 +25,14 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["rompy_oceanum"]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
 
 [tool.setuptools.package-data]
 "rompy_oceanum" = ["pipeline_templates/*.yaml"]
+
 
 
 [project.urls]
