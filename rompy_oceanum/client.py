@@ -211,7 +211,7 @@ class PraxClient:
     def submit_pipeline(
         self,
         pipeline_name: str,
-        user: str,
+        user: Optional[str] = None,
         org: Optional[str] = None,
         project: Optional[str] = None,
         stage: Optional[str] = None,
@@ -463,9 +463,7 @@ class PraxClient:
             return result
 
         except Exception as e:
-            logger.error(
-                f"Failed to submit pipeline template: {e} - \nPlease set environment variable DATAMESH_TOKEN"
-            )
+            logger.error(f"Failed to submit pipeline template: {e}")
             raise
 
     def list_pipelines(self, ctx=None):
