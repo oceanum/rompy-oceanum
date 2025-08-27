@@ -217,13 +217,16 @@ class PraxPipelineBackend:
             try:
                 result = client.submit_pipeline(
                     pipeline_name,
-                    user=getattr(prax_config, "user", "unknown"),
                     parameters=prax_parameters,
                     ctx=ctx,
                 )
                 prax_run_id = result.run_id
-                prax_run_name = result.run_name if hasattr(result, "run_name") else prax_run_id
-                logger.debug(f"Submitted pipeline, got run ID: {prax_run_id}, run name: {prax_run_name}")
+                prax_run_name = (
+                    result.run_name if hasattr(result, "run_name") else prax_run_id
+                )
+                logger.debug(
+                    f"Submitted pipeline, got run ID: {prax_run_id}, run name: {prax_run_name}"
+                )
                 pipeline_results["prax_run_id"] = prax_run_id
                 pipeline_results["prax_run_name"] = prax_run_name
                 pipeline_results["stages_completed"].append("submit")
@@ -367,7 +370,10 @@ class PraxPipelineBackend:
             datamesh_token = os.getenv("DATAMESH_TOKEN")
             if datamesh_token:
                 parameters["datamesh-token"] = datamesh_token
-
+            else:
+                raise ValueError(
+                    "DataMesh token is required- \nPlease set environment variable DATAMESH_TOKEN"
+                )
         return parameters
 
     def _serialize_config(self, obj):
