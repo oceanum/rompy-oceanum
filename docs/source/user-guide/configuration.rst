@@ -40,7 +40,7 @@ Configure authentication for Oceanum Prax services:
    export PRAX_TOKEN="your-authentication-token"
 
    # API endpoint
-   export PRAX_BASE_URL="https://prax.oceanum.science"
+   export PRAX_BASE_URL="https://prax.oceanum.io"
 
    # Organization and project
    export PRAX_ORG="your-organization"
@@ -56,7 +56,7 @@ Configure authentication for Oceanum Prax services:
    # ~/.rompy-oceanum/config.yaml
    prax:
      token: "${PRAX_TOKEN}"  # Use environment variable
-     base_url: "https://prax.oceanum.science"
+     base_url: "https://prax.oceanum.io"
      org: "my-organization"
      project: "wave-modeling"
      stage: "dev"
@@ -69,7 +69,7 @@ Configure authentication for Oceanum Prax services:
 
    config = PraxConfig(
        token="your-token",  # Better to use environment variable
-       base_url="https://prax.oceanum.science",
+       base_url="https://prax.oceanum.io",
        org="my-organization",
        project="wave-modeling",
        stage="dev"
@@ -83,7 +83,7 @@ Configure DataMesh integration for output registration:
 .. code-block:: bash
 
    # DataMesh API endpoint
-   export DATAMESH_BASE_URL="https://datamesh.oceanum.science"
+   export DATAMESH_BASE_URL="https://datamesh.oceanum.io"
 
    # Authentication token (may be same as Prax)
    export DATAMESH_TOKEN="${PRAX_TOKEN}"
@@ -102,7 +102,7 @@ Configure the Prax pipeline backend for remote execution:
 
    prax:
      # Connection settings
-     base_url: "https://prax.oceanum.science"
+     base_url: "https://prax.oceanum.io"
      timeout: 3600  # 1 hour timeout
      retry_attempts: 3
      retry_delay: 5  # seconds
@@ -151,7 +151,7 @@ Configure output registration and data management:
 
    datamesh:
      # Connection settings
-     base_url: "https://datamesh.oceanum.science"
+     base_url: "https://datamesh.oceanum.io"
      register_outputs: true
 
      # Default metadata
@@ -190,7 +190,7 @@ Create a global configuration file at ``~/.rompy-oceanum/config.yaml``:
 
    # Prax configuration
    prax:
-     base_url: "https://prax.oceanum.science"
+     base_url: "https://prax.oceanum.io"
      org: "my-organization"
      project: "wave-modeling"
      stage: "dev"
@@ -204,7 +204,7 @@ Create a global configuration file at ``~/.rompy-oceanum/config.yaml``:
 
    # DataMesh configuration
    datamesh:
-     base_url: "https://datamesh.oceanum.science"
+     base_url: "https://datamesh.oceanum.io"
      register_outputs: true
      default_tags:
        - "wave-model"
@@ -272,14 +272,14 @@ Complete Environment Variable Reference
 
    # Prax authentication
    PRAX_TOKEN="your-prax-token"
-   PRAX_BASE_URL="https://prax.oceanum.science"
+   PRAX_BASE_URL="https://prax.oceanum.io"
    PRAX_ORG="your-organization"
    PRAX_PROJECT="your-project"
    PRAX_STAGE="dev"
 
    # DataMesh authentication
    DATAMESH_TOKEN="your-datamesh-token"
-   DATAMESH_BASE_URL="https://datamesh.oceanum.science"
+   DATAMESH_BASE_URL="https://datamesh.oceanum.io"
 
 **Behavior Control:**
 
@@ -325,7 +325,7 @@ Configure settings programmatically for automated workflows:
 
    # Create configuration objects
    prax_config = PraxConfig(
-       base_url="https://prax.oceanum.science",
+       base_url="https://prax.oceanum.io",
        org="my-organization",
        project="wave-modeling",
        stage="dev",
@@ -333,7 +333,7 @@ Configure settings programmatically for automated workflows:
    )
 
    datamesh_config = DataMeshConfig(
-       base_url="https://datamesh.oceanum.science",
+       base_url="https://datamesh.oceanum.io",
        register_outputs=True,
        default_tags=["wave-model", "automated"]
    )
@@ -473,7 +473,7 @@ Configure SSL verification and certificates:
 .. code-block:: yaml
 
    prax:
-     base_url: "https://prax.oceanum.science"
+     base_url: "https://prax.oceanum.io"
      verify_ssl: true
      ca_bundle: "/path/to/ca-bundle.crt"
      client_cert: "/path/to/client.crt"
@@ -494,7 +494,7 @@ rompy-oceanum validates all configuration using Pydantic models:
 
    try:
        config = PraxConfig(
-           base_url="https://prax.oceanum.science",
+           base_url="https://prax.oceanum.io",
            org="my-org",
            timeout="invalid"  # Should be int
        )
@@ -635,7 +635,7 @@ Development Environment
 
    # dev-config.yaml
    prax:
-     base_url: "https://prax-dev.oceanum.science"
+     base_url: "https://prax-dev.oceanum.io"
      org: "development"
      project: "wave-models-dev"
      stage: "dev"
@@ -655,7 +655,7 @@ Production Environment
 
    # prod-config.yaml
    prax:
-     base_url: "https://prax.oceanum.science"
+     base_url: "https://prax.oceanum.io"
      org: "production"
      project: "operational-forecasting"
      stage: "prod"
@@ -679,7 +679,7 @@ Testing Environment
 
    # test-config.yaml
    prax:
-     base_url: "https://prax-test.oceanum.science"
+     base_url: "https://prax-test.oceanum.io"
      org: "testing"
      project: "automated-tests"
      stage: "test"
