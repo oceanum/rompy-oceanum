@@ -14,13 +14,23 @@ class TestPraxClient:
     def test_init(self, mock_prax_token):
         """Test initialization of PraxClient."""
         # Default initialization with environment variable
-        client = PraxClient()
+        client = PraxClient(
+            base_url="https://prax.oceanum.io",
+            token="test-token",
+            org="test-org",
+            project="test-project"
+        )
         assert client.base_url == "https://prax.oceanum.io"
         assert client.token == "test-token"
 
     def test_get_headers(self, mock_prax_token):
         """Test header generation for API requests."""
-        client = PraxClient()
+        client = PraxClient(
+            base_url="https://prax.oceanum.io",
+            token="test-token",
+            org="test-org",
+            project="test-project"
+        )
         headers = client._get_headers()
         assert headers == {
             "accept": "application/json",
@@ -37,7 +47,12 @@ class TestPraxClient:
         mock_wrapper.submit_pipeline.return_value = "test-run-id"
         mock_wrapper_class.return_value = mock_wrapper
         
-        client = PraxClient()
+        client = PraxClient(
+            base_url="https://prax.oceanum.io",
+            token="test-token",
+            org="test-org",
+            project="test-project"
+        )
         result = client.submit_pipeline(
             pipeline_name="test-pipeline",
             user="test-user",
@@ -70,7 +85,12 @@ class TestPraxClient:
         mock_wrapper.get_run_status.return_value = {"status": "running"}
         mock_wrapper_class.return_value = mock_wrapper
         
-        client = PraxClient()
+        client = PraxClient(
+            base_url="https://prax.oceanum.io",
+            token="test-token",
+            org="test-org",
+            project="test-project"
+        )
         status = client.get_run_status(
             run_id="test-run-id",
             pipeline_name="test-pipeline",
@@ -96,7 +116,12 @@ class TestPraxClient:
         mock_wrapper.get_run_logs.return_value = ["log line 1", "log line 2"]
         mock_wrapper_class.return_value = mock_wrapper
         
-        client = PraxClient()
+        client = PraxClient(
+            base_url="https://prax.oceanum.io",
+            token="test-token",
+            org="test-org",
+            project="test-project"
+        )
         logs = client.get_run_logs(
             run_id="test-run-id",
             pipeline_name="test-pipeline",
@@ -115,7 +140,12 @@ class TestPraxClient:
 
     def test_submit_pipeline_template(self, mock_prax_token):
         """Test submitting a pipeline template to Prax."""
-        client = PraxClient()
+        client = PraxClient(
+            base_url="https://prax.oceanum.io",
+            token="test-token",
+            org="test-org",
+            project="test-project"
+        )
         
         # Mock template data
         template_data = {
