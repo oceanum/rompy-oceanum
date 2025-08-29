@@ -200,13 +200,10 @@ def run(
         )
 
         # Success: result should have last_run.id and last_run.name
-        if (
-            hasattr(result, "last_run")
-            and result.last_run is not None
-            and hasattr(result.last_run, "id")
-        ):
-            run_id = result.last_run.id
-            run_name = getattr(result.last_run, "name", run_id)
+        last_run = getattr(result, "last_run", None)
+        if last_run is not None and hasattr(last_run, "id"):
+            run_id = getattr(last_run, "id", None)
+            run_name = getattr(last_run, "name", run_id)
             click.echo("✅ Pipeline submitted successfully!")
             click.echo(f"🆔 Prax run ID: {run_id}")
             click.echo(
@@ -300,8 +297,11 @@ def run(
                                 click.echo(f"Final status: {status}")
                                 break
                         else:
-                            detail = getattr(run_status, "detail", run_status)
-                            click.echo(f"❌ Error fetching status: {detail}", err=True)
+                            detail = getattr(run_status, "detail", None)
+                            if detail:
+                                click.echo(f"❌ Error fetching status: {detail}", err=True)
+                            else:
+                                click.echo(f"❌ Error fetching status: Unknown error", err=True)
                             break
                         time.sleep(poll_interval)
                 except Exception as e:
@@ -316,12 +316,21 @@ def run(
             )
 
         else:
-            click.echo(
-                "❌ Pipeline submission failed: No run information returned (missing last_run).",
-                err=True,
-            )
-            if hasattr(result, "message") and result.message:
-                click.echo(f"❌ Error message: {result.message}", err=True)
+            # Handle error responses gracefully
+            error_detail = getattr(result, "detail", None)
+            if error_detail:
+                click.echo(
+                    f"❌ Pipeline submission failed: {error_detail}",
+                    err=True,
+                )
+            else:
+                click.echo(
+                    "❌ Pipeline submission failed: No run information returned (missing last_run).",
+                    err=True,
+                )
+            error_message = getattr(result, "message", None)
+            if error_message:
+                click.echo(f"❌ Error message: {error_message}", err=True)
             return
     except Exception as e:
         error_msg = str(e)
