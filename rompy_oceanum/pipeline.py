@@ -14,7 +14,7 @@ from typing import Any, Dict, Optional, Union
 import yaml
 
 from .client import PraxClient
-from .config import DataMeshConfig, PraxConfig, PraxPipelineConfig
+from .config import DataMeshConfig
 from .prax_client import PraxClientWrapper
 
 logger = logging.getLogger(__name__)
@@ -27,13 +27,23 @@ class PraxPipelineBackend:
     execution, providing monitoring and result retrieval capabilities.
     """
 
-    def __init__(self, config: Optional[Union[Dict[str, Any], PraxConfig]] = None):
+    def __init__(self, base_url: str, token: str, org: str, project: str, stage: str = "dev", user: Optional[str] = None):
         """Initialize the PraxPipelineBackend.
 
         Args:
-            config: Prax configuration (dict or PraxConfig instance)
+            base_url: Base URL for Prax API
+            token: Authentication token
+            org: Organization name
+            project: Project name
+            stage: Deployment stage (default: "dev")
+            user: User email (optional)
         """
-        self.config = config
+        self.base_url = base_url
+        self.token = token
+        self.org = org
+        self.project = project
+        self.stage = stage
+        self.user = user
 
     def submit(self, model_run, pipeline_name: str, **kwargs):
         """Submit a model run to a Prax pipeline.
@@ -89,7 +99,6 @@ class PraxPipelineBackend:
         self,
         model_run,
         pipeline_name: str,
-        prax_config: Optional[Union[Dict[str, Any], PraxConfig]] = None,
         datamesh_config: Optional[Union[Dict[str, Any], DataMeshConfig]] = None,
         template_path: Optional[str] = None,
         deploy_pipeline: bool = True,
@@ -101,6 +110,7 @@ class PraxPipelineBackend:
         ctx=None,
         **kwargs,
     ) -> Dict[str, Any]:
+
         """Execute the model pipeline on Prax.
 
         Args:
@@ -133,27 +143,16 @@ class PraxPipelineBackend:
         if not pipeline_name or not pipeline_name.strip():
             raise ValueError("pipeline_name cannot be empty")
 
-        # Initialize configuration
-        if prax_config is None:
-            try:
-                prax_config = PraxConfig.from_env()
-            except Exception as e:
-                raise ValueError(
-                    f"Failed to load Prax configuration from environment: {e}"
-                )
-        elif isinstance(prax_config, dict):
-            prax_config = PraxConfig.from_dict(prax_config)
-
         # Initialize DataMesh configuration if provided
         if datamesh_config is not None and isinstance(datamesh_config, dict):
-            datamesh_config = DataMeshConfig.from_dict(datamesh_config)
+            datamesh_config = DataMeshConfig(**datamesh_config)
 
         # Initialize parameters
         pipeline_parameters = parameters or {}
 
         logger.info(f"Starting Prax pipeline execution for run_id: {model_run.run_id}")
         logger.info(
-            f"Pipeline: {pipeline_name}, Org: {prax_config.org}, Project: {prax_config.project}"
+            f"Pipeline: {pipeline_name}, Org: {self.org}, Project: {self.project}"
         )
 
         pipeline_results = {
@@ -167,7 +166,14 @@ class PraxPipelineBackend:
 
         try:
             # Create Prax client
-            client = PraxClient(prax_config)
+            client = PraxClient(
+                base_url=self.base_url,
+                token=self.token,
+                org=self.org,
+                project=self.project,
+                stage=self.stage,
+                user=self.user
+            )
 
             # Stage 1: Deploy pipeline if needed
             if deploy_pipeline and template_path:
@@ -284,7 +290,9 @@ class PraxPipelineBackend:
                 logger.info(f"Downloading outputs to: {output_dir}")
 
                 try:
-                    downloaded_files = result.download_outputs(output_dir)
+                    # Ensure output_dir is a string
+                    output_dir_str = str(output_dir)
+                    downloaded_files = result.download_outputs(output_dir_str)
                     pipeline_results["downloaded_files"] = [
                         str(f) for f in downloaded_files
                     ]
@@ -307,7 +315,7 @@ class PraxPipelineBackend:
 
                 try:
                     datamesh_result = self._register_with_datamesh(
-                        model_run, result, datamesh_config, output_dir
+                        model_run, result.run_id, datamesh_config, output_dir
                     )
                     pipeline_results["datamesh_result"] = datamesh_result
                     pipeline_results["stages_completed"].append("datamesh")

@@ -11,7 +11,7 @@ from oceanum.cli.models import ContextObject
 from oceanum.cli.prax.client import PRAXClient
 from oceanum.cli.prax.models import ProjectSpec
 
-from ...config import PraxConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +51,9 @@ name_option = click.option(
 @click.option(
     "--wait", help="Wait for resource to be deployed", default=True, type=bool
 )
-@click.pass_obj
+@click.pass_context
 def create_resource(
-    obj: ContextObject,
+    ctx: click.Context,
     resource_type: str,
     spec_file: Optional[str],
     name: Optional[str],
@@ -86,8 +86,8 @@ def create_resource(
             if "name" not in spec_data:
                 spec_data["name"] = name
 
-            # Create PRAXClient with oceanum context for proper URL construction
-            client = PRAXClient(ctx=click.get_current_context(), token=None, service=None)
+            # Create PRAXClient with context
+            client = PRAXClient(ctx)
 
             # Convert dict to ProjectSpec and submit project spec
             spec = ProjectSpec(**spec_data)
@@ -111,7 +111,7 @@ def create_resource(
                     spec_data["name"] = name
 
                 # Create PRAXClient with oceanum context for proper URL construction
-                client = PRAXClient(ctx=click.get_current_context(), token=None, service=None)
+                client = PRAXClient(ctx)
 
                 # Convert dict to ProjectSpec
                 spec = ProjectSpec(**spec_data)
@@ -146,7 +146,7 @@ def create_resource(
                     spec_data = yaml.safe_load(f)
 
                 # Create PRAXClient with oceanum context for proper URL construction
-                client = PRAXClient(ctx=click.get_current_context(), token=None, service=None)
+                client = PRAXClient(ctx)
 
                 # Convert dict to ProjectSpec
                 spec = ProjectSpec(**spec_data)

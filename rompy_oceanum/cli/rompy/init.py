@@ -220,7 +220,8 @@ def _generate_config(
     }
 
     # Add output directory
-    config["output_dir"] = "/app"
+    config["output_dir"] = "/tmp/rompy"
+    config["run_id_subdir"] = False
 
     return config
 
@@ -346,7 +347,7 @@ def _get_swan_config(
                 "source": {
                     "model_type": "datamesh",
                     "datasource": "our-changing-coast-gebco_1_degree_for_testing",
-                    "token": None,
+                    # "token": os.getenv("DATAMESH_TOKEN"),
                 },
                 "fac": -1.0,
                 "buffer": 1.0,
@@ -361,7 +362,7 @@ def _get_swan_config(
                         "datasource": (
                             "era5_wind10m" if forcing == "era5" else "gfs_wind10m"
                         ),
-                        "token": None,
+                        # "token": os.getenv("DATAMESH_TOKEN"),
                     },
                     "buffer": 2.0,
                     "filter": {"sort": {"coords": ["latitude"]}},

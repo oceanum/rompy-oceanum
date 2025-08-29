@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Optional
 from oceanum.cli.prax import models
 from oceanum.cli.prax.client import PRAXClient
 
-from .config import PraxConfig
 
 logger = logging.getLogger(__name__)
 
@@ -128,49 +127,42 @@ class PraxResult:
 class PraxClientWrapper:
     """Wrapper around oceanum-prax client for rompy operations."""
 
-    def __init__(self, prax_config: PraxConfig):
+    def __init__(self, base_url: str, token: str, org: str, project: str, stage: str = "dev", user: Optional[str] = None):
         """Initialize the client wrapper.
 
         Args:
-            prax_config: Prax configuration
+            base_url: Base URL for Prax API
+            token: Authentication token
+            org: Organization name
+            project: Project name
+            stage: Deployment stage (default: "dev")
+            user: User email (optional)
         """
-        self.prax_config = prax_config
-        # We'll need to create a mock click context for the PRAXClient
-        # In practice, this would be provided by the CLI commands
+        self.base_url = base_url
+        self.token = token
+        self.org = org
+        self.project = project
+        self.stage = stage
+        self.user = user
         self._client = None
 
     def _get_client(self, ctx=None):
         """Get or create the PRAX client."""
         if self._client is None:
-            if ctx is not None:
-                # Use the provided click context
-                logger.debug("Using provided click context")
-                self._client = PRAXClient(ctx)
-            else:
-                # Create a minimal context object for the PRAXClient
-                # In a real implementation, this would come from click
-                logger.debug("Creating mock context")
-                class MockContext:
-                    def __init__(self, prax_config):
-                        class MockObj:
-                            def __init__(self, prax_config):
-                                # Use the same domain format as the oceanum CLI
-                                self.domain = "oceanum.io"
-
-                                class MockToken:
-                                    def __init__(self, token):
-                                        self.access_token = token
-
-                                self.token = (
-                                    MockToken(prax_config.token)
-                                    if prax_config.token
-                                    else None
-                                )
-
-                        self.obj = MockObj(prax_config)
-
-                mock_ctx = MockContext(self.prax_config)
-                self._client = PRAXClient(mock_ctx)
+            # Create a minimal context object for the PRAXClient
+            logger.debug("Creating mock context for PRAXClient")
+            class MockContext:
+                def __init__(self, base_url, token, org, project, stage, user):
+                    class MockObj:
+                        def __init__(self, token):
+                            self.domain = "oceanum.io"
+                            class MockToken:
+                                def __init__(self, token):
+                                    self.access_token = token
+                            self.token = MockToken(token) if token else None
+                    self.obj = MockObj(token)
+            mock_ctx = MockContext(self.base_url, self.token, self.org, self.project, self.stage, self.user)
+            self._client = PRAXClient(mock_ctx)
         return self._client
 
     def submit_pipeline(
@@ -195,9 +187,9 @@ class PraxClientWrapper:
         result = client.submit_pipeline(
             pipeline_name,
             parse_parameters(prax_parameters) if prax_parameters else None,
-            org=self.prax_config.org,
-            project=self.prax_config.project,
-            stage=self.prax_config.stage,
+            org=self.org,
+            project=self.project,
+            stage=self.stage,
         )
 
         # Log result at debug level to reduce verbosity
@@ -230,9 +222,9 @@ class PraxClientWrapper:
         client = self._get_client(ctx)
 
         result = client.list_pipelines(
-            org=self.prax_config.org,
-            project=self.prax_config.project,
-            stage=self.prax_config.stage,
+            org=self.org,
+            project=self.project,
+            stage=self.stage,
         )
 
         if isinstance(result, models.ErrorResponse):
@@ -253,7 +245,7 @@ class PraxClientWrapper:
         client = self._get_client(ctx)
 
         result = client.list_projects(
-            org=self.prax_config.org,
+            org=self.org,
             **filters
         )
 
@@ -276,9 +268,9 @@ class PraxClientWrapper:
         logger.debug(f"Getting run status for {run_name}")
         run = client.get_pipeline_run(
             run_name,
-            org=self.prax_config.org,
-            project=self.prax_config.project,
-            stage=self.prax_config.stage,
+            org=self.org,
+            project=self.project,
+            stage=self.stage,
         )
 
         if isinstance(run, models.ErrorResponse):
@@ -335,9 +327,9 @@ class PraxClientWrapper:
             run_name,
             lines=tail,
             follow=follow,
-            org=self.prax_config.org,
-            project=self.prax_config.project,
-            stage=self.prax_config.stage,
+            org=self.org,
+            project=self.project,
+            stage=self.stage,
         )
 
         if follow:

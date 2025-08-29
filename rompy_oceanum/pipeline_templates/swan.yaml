@@ -3,7 +3,7 @@ resources:
   tasks:
     - name: generate
       image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
-      command: rompy generate --config-from-env -v  --simple-logs
+      command: rompy generate --config-from-env -vv  --simple-logs
       outputs:
         artifacts:
           - name: workspace

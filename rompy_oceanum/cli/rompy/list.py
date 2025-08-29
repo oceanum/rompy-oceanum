@@ -8,8 +8,8 @@ import click
 import yaml
 from oceanum.cli.models import ContextObject
 
-from ...prax_client import PraxClientWrapper
-from ...config import PraxConfig
+from oceanum.cli.prax.client import PRAXClient
+
 
 logger = logging.getLogger(__name__)
 
@@ -40,36 +40,23 @@ stage_option = click.option(
 @org_option
 @user_option
 @stage_option
-@click.pass_obj
+@click.pass_context
 def list_resources(
-    obj: ContextObject,
+    ctx,
     resource_type: str,
     project: str,
     org: Optional[str],
     user: Optional[str],
     stage: str,
 ):
-    """List resources in Prax.
-    
+    """
+    List resources in Prax using Oceanum CLI context for authentication/config.
     RESOURCE_TYPE: Type of resources to list (projects or pipelines)
     """
     try:
         if resource_type == "projects":
-            # Get Prax configuration
-            prax_config_data = {
-                "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
-            }
-
-            # Use oceanum's token for authentication
-            if obj.token and obj.token.access_token:
-                prax_config_data["token"] = obj.token.access_token
-
-            prax_config = PraxConfig.from_env(**prax_config_data)
-            if not getattr(prax_config, 'base_url', None):
-                click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
-                sys.exit(1)
-            client = PraxClientWrapper(prax_config)
-            # List projects with "rompy" filter
+            # Use Oceanum CLI context for authentication/config
+            client = PRAXClient(ctx)
             projects = client.list_projects(search="rompy")
 
             if not projects:
@@ -78,37 +65,13 @@ def list_resources(
 
             click.echo("📋 Rompy Projects:")
             for project_item in projects:
-                # Handle both dict and object representations
-                if hasattr(project_item, 'name'):
-                    name = project_item.name
-                else:
-                    name = project_item.get("name", "Unknown")
-                    
-                if hasattr(project_item, 'status'):
-                    status = project_item.status
-                else:
-                    status = project_item.get("status", "Unknown")
-                    
+                name = getattr(project_item, 'name', 'Unknown')
+                status = getattr(project_item, 'status', 'Unknown')
                 click.echo(f"   📋 {name} - Status: {status}")
                 
         elif resource_type == "pipelines":
-            # Get Prax configuration
-            prax_config_data = {
-                "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
-                "project": project,
-                "stage": stage,
-            }
-
-            # Use oceanum's token for authentication
-            if obj.token and obj.token.access_token:
-                prax_config_data["token"] = obj.token.access_token
-
-            prax_config = PraxConfig.from_env(**prax_config_data)
-            if not getattr(prax_config, 'base_url', None):
-                click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
-                sys.exit(1)
-            client = PraxClientWrapper(prax_config)
-            # List pipelines
+            # Use Oceanum CLI context for authentication/config
+            client = PRAXClient(ctx)
             pipelines = client.list_pipelines()
 
             if not pipelines:
@@ -116,16 +79,9 @@ def list_resources(
                 return
 
             click.echo(f"📋 Pipelines in project '{project}':")
-            # Handle both list of dicts and list of objects
             for pipeline in pipelines:
-                # Extract information from the pipeline object
                 name = getattr(pipeline, 'name', 'Unknown')
-                
-                # Get last run status if available
-                last_run_status = "Unknown"
-                if hasattr(pipeline, 'last_run') and pipeline.last_run:
-                    last_run_status = getattr(pipeline.last_run, 'status', 'Unknown')
-                
+                last_run_status = getattr(getattr(pipeline, 'last_run', None), 'status', 'Unknown')
                 click.echo(f"   📋 {name} - Last Run Status: {last_run_status}")
 
     except Exception as e:

@@ -5,14 +5,14 @@ This package extends rompy with Prax pipeline backend integration using
 the rompy plugin architecture.
 """
 
-from .config import PraxConfig, DataMeshConfig, PraxPipelineConfig
+from .config import DataMeshConfig
 from .pipeline import PraxPipelineBackend
 from .postprocess import DataMeshPostprocessor
 from .client import PraxClient, PraxResult
 
 __all__ = [
-    "PraxConfig", "DataMeshConfig",
-    "PraxPipelineConfig", "PraxPipelineBackend", "DataMeshPostprocessor",
+    "DataMeshConfig",
+    "PraxPipelineBackend", "DataMeshPostprocessor",
     "PraxClient", "PraxResult"
 ]
 

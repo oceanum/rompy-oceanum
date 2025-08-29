@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
-from .config import PraxConfig
+
 from .prax_client import PraxClientWrapper
 
 logger = logging.getLogger(__name__)
@@ -165,34 +165,29 @@ class PraxClient:
 
     def __init__(
         self,
-        prax_config: Optional[PraxConfig] = None,
-        base_url: Optional[str] = None,
-        token: Optional[str] = None,
+        base_url: str,
+        token: str,
+        org: str,
+        project: str,
+        stage: str = "dev",
         user: Optional[str] = None,
     ):
         """Initialize the PraxClient.
 
         Args:
-            prax_config: Prax configuration. If None, will try to load from environment.
-            base_url: Base URL for Prax API (overrides prax_config)
-            token: Authentication token (overrides prax_config)
-            user: User email (overrides prax_config)
+            base_url: Base URL for Prax API
+            token: Authentication token
+            org: Organization name
+            project: Project name
+            stage: Deployment stage (default: "dev")
+            user: User email (optional)
         """
-        if prax_config is None:
-            try:
-                prax_config = PraxConfig.from_env()
-            except Exception as e:
-                raise ValueError(f"Failed to load Prax configuration: {e}")
-
-        self.prax_config = prax_config
-        self.base_url = base_url or prax_config.base_url
-        # Use the raw token without adding "Bearer" prefix here
-        # The _get_headers method will add it when needed
-        self.token = token or prax_config.token
-        self.org = prax_config.org
-        self.project = prax_config.project
-        self.stage = prax_config.stage
-        self.user = user or getattr(prax_config, "user", None)
+        self.base_url = base_url
+        self.token = token
+        self.org = org
+        self.project = project
+        self.stage = stage
+        self.user = user
 
     def _get_headers(self):
         """Get headers for API requests."""
@@ -236,54 +231,30 @@ class PraxClient:
         project = project or self.project
         stage = stage or self.stage
 
-        # Try to use our PraxClientWrapper which uses the oceanum-prax client
-        try:
-            from .prax_client import PraxClientWrapper
+        url = f"{self.base_url}/api/pipelines/{pipeline_name}/submit"
+        params = {
+            "user": user,
+            "org": org,
+            "project": project,
+            "stage": stage,
+        }
 
-            wrapper = PraxClientWrapper(self.prax_config)
+        response = self._make_request(
+            "POST", url, params=params, json={"parameters": parameters or {}}
+        )
 
-            # Submit pipeline using the wrapper
-            run_name = wrapper.submit_pipeline(
-                pipeline_name=pipeline_name, parameters=parameters or {}, ctx=ctx
-            )
-
-            return PraxResult(
-                run_id=run_name,  # For now, use run_name as run_id
-                run_name=run_name,
-                pipeline_name=pipeline_name,
-                org=org,
-                project=project,
-                stage=stage,
-                client=wrapper,
-            )
-        except Exception as e:
-            # Fallback to our custom implementation
-            logger.warning(f"Falling back to custom implementation: {e}")
-
-            url = f"{self.base_url}/api/pipelines/{pipeline_name}/submit"
-            params = {
-                "user": user,
-                "org": org,
-                "project": project,
-                "stage": stage,
-            }
-
-            response = self._make_request(
-                "POST", url, params=params, json={"parameters": parameters or {}}
-            )
-
-            return PraxResult(
-                run_id=response.get("run_id", "unknown"),
-                run_name=response.get(
-                    "run_id", "unknown"
-                ),  # For now, use run_id as run_name
-                pipeline_name=pipeline_name,
-                org=org,
-                project=project,
-                stage=stage,
-                status="submitted",
-                client=self,
-            )
+        run_id = response.get("run_id", "unknown") if response else "unknown"
+        run_name = response.get("run_id", "unknown") if response else "unknown"
+        return PraxResult(
+            run_id=run_id,
+            run_name=run_name,
+            pipeline_name=pipeline_name,
+            org=org,
+            project=project,
+            stage=stage,
+            status="submitted",
+            client=self,
+        )
 
     def get_run_status(
         self,
@@ -311,27 +282,13 @@ class PraxClient:
         project = project or self.project
         stage = stage or self.stage
 
-        # Try to use our PraxClientWrapper which uses the oceanum-prax client
-        try:
-            from .prax_client import PraxClientWrapper
-
-            wrapper = PraxClientWrapper(self.prax_config)
-
-            # Get run status using the wrapper (use run_id as run_name)
-            return wrapper.get_run_status(run_name=run_id, ctx=ctx)
-        except Exception as e:
-            # Fallback to our custom implementation
-            logger.warning(f"Falling back to custom implementation: {e}")
-
-            # Use the correct endpoint pattern: pipeline-runs/{run_id}
-            url = f"{self.base_url}/api/pipeline-runs/{run_id}"
-            params = {
-                "org": org,
-                "project": project,
-                "stage": stage,
-            }
-
-            return self._make_request("GET", url, params=params)
+        url = f"{self.base_url}/api/pipeline-runs/{run_id}"
+        params = {
+            "org": org,
+            "project": project,
+            "stage": stage,
+        }
+        return self._make_request("GET", url, params=params)
 
     def get_run_logs(
         self,
@@ -361,43 +318,19 @@ class PraxClient:
         project = project or self.project
         stage = stage or self.stage
 
-        # Try to use our PraxClientWrapper which uses the oceanum-prax client
-        try:
-            from .prax_client import PraxClientWrapper
+        if task_name:
+            url = f"{self.base_url}/api/pipeline-runs/{run_id}/tasks/{task_name}/logs"
+        else:
+            url = f"{self.base_url}/api/pipeline-runs/{run_id}/logs"
 
-            wrapper = PraxClientWrapper(self.prax_config)
-
-            # Get run logs using the wrapper (use run_id as run_name)
-            return wrapper.get_run_logs(run_name=run_id, ctx=ctx)
-        except Exception as e:
-            # Fallback to our custom implementation
-            logger.warning(f"Falling back to custom implementation: {e}")
-
-            # Use the correct endpoint pattern: pipeline-runs/{run_id}/logs
-            if task_name:
-                url = (
-                    f"{self.base_url}/api/pipeline-runs/{run_id}/tasks/{task_name}/logs"
-                )
-            else:
-                url = f"{self.base_url}/api/pipeline-runs/{run_id}/logs"
-
-            params = {
-                "org": org,
-                "project": project,
-                "stage": stage,
-            }
-
-            return self._make_request("GET", url, params=params)
-
-    def _get_headers(self):
-        """Get headers for API requests."""
-        if not self.token:
-            raise ValueError("No Prax token available")
-        return {
-            "Authorization": f"Bearer {self.token}",
-            "Content-Type": "application/json",
-            "accept": "application/json",
+        params = {
+            "org": org,
+            "project": project,
+            "stage": stage,
         }
+
+        return self._make_request("GET", url, params=params)
+
 
     def _make_request(self, method, url, params=None, **kwargs):
         """Make an API request with proper headers."""
@@ -475,26 +408,13 @@ class PraxClient:
         Returns:
             List of pipeline dictionaries
         """
-        # Try to use our PraxClientWrapper which uses the oceanum-prax client
-        try:
-            from .prax_client import PraxClientWrapper
-
-            wrapper = PraxClientWrapper(self.prax_config)
-
-            # List pipelines using the wrapper
-            return wrapper.list_pipelines(ctx=ctx)
-        except Exception as e:
-            # Fallback to our custom implementation
-            logger.warning(f"Falling back to custom implementation: {e}")
-
-            url = f"{self.base_url}/api/pipelines"
-            params = {
-                "org": self.org,
-                "project": self.project,
-                "stage": self.stage,
-            }
-
-            return self._make_request("GET", url, params=params)
+        url = f"{self.base_url}/api/pipelines"
+        params = {
+            "org": self.org,
+            "project": self.project,
+            "stage": self.stage,
+        }
+        return self._make_request("GET", url, params=params)
 
     def get_pipeline(self, pipeline_name: str):
         """Get details of a specific pipeline.
@@ -601,29 +521,17 @@ class PraxClient:
         Returns:
             List of projects
         """
-        # Try to use our PraxClientWrapper which uses the oceanum-prax client
-        try:
-            from .prax_client import PraxClientWrapper
-
-            wrapper = PraxClientWrapper(self.prax_config)
-
-            # List projects using the wrapper with search filter
-            filters = {}
-            if search:
-                filters["search"] = search
-            return wrapper.list_projects(ctx=ctx, **filters)
-        except Exception as e:
-            # Fallback to our custom implementation
-            logger.warning(f"Falling back to custom implementation: {e}")
-
-            url = f"{self.base_url}/api/projects"
-            params = {}
-            if search:
-                params["search"] = search
-            response = self._make_request("GET", url, params=params)
-            return (
-                response if isinstance(response, list) else response.get("projects", [])
-            )
+        url = f"{self.base_url}/api/projects"
+        params = {}
+        if search:
+            params["search"] = search
+        response = self._make_request("GET", url, params=params)
+        if response is None:
+            return []
+        if isinstance(response, list):
+            return response
+        projects = response.get("projects", []) if response else []
+        return projects
 
     def get_project(self, project_name: str):
         """Get details of a specific project.
@@ -691,6 +599,9 @@ class PraxClient:
         except Exception as e:
             logger.warning(f"Failed to get artifact list: {e}")
             return []
+
+        if not artifacts:
+            artifacts = []
 
         downloaded_files = []
 

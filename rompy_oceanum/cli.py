@@ -7,10 +7,10 @@ from importlib.metadata import entry_points
 from pathlib import Path
 
 import click
-import yaml
 import rompy
+import yaml
 
-from .config import PraxConfig, DataMeshConfig
+from .config import DataMeshConfig, PraxConfig
 
 logging.basicConfig(level=logging.INFO)
 
@@ -37,7 +37,21 @@ def cli():
 @click.option("--download/--no-download", default=False, help="Download outputs")
 @click.option("--output-dir", help="Output directory for downloads")
 @click.option("--zip/--no-zip", default=False, help="Create zip archive")
-def run(model, config, pipeline_name, org, project, stage, template, deploy, wait, timeout, download, output_dir, zip):
+def run(
+    model,
+    config,
+    pipeline_name,
+    org,
+    project,
+    stage,
+    template,
+    deploy,
+    wait,
+    timeout,
+    download,
+    output_dir,
+    zip,
+):
     """Run model using Prax pipeline backend.
 
     Usage: rompy-oceanum run <model> config.yml --pipeline-name my-pipeline
@@ -88,7 +102,9 @@ def run(model, config, pipeline_name, org, project, stage, template, deploy, wai
     # Execute pipeline
     click.echo(f"Executing pipeline: {pipeline_name}")
     click.echo(f"Model: {model}, Run ID: {model_run.run_id}")
-    click.echo(f"Org: {prax_config.org}, Project: {prax_config.project}, Stage: {prax_config.stage}")
+    click.echo(
+        f"Org: {prax_config.org}, Project: {prax_config.project}, Stage: {prax_config.stage}"
+    )
 
     result = model_run.pipeline(
         pipeline_backend="prax",
@@ -100,7 +116,7 @@ def run(model, config, pipeline_name, org, project, stage, template, deploy, wai
         wait_for_completion=wait,
         timeout=timeout,
         download_outputs=download,
-        output_dir=output_dir
+        output_dir=output_dir,
     )
 
     if result["success"]:
@@ -120,17 +136,24 @@ def run(model, config, pipeline_name, org, project, stage, template, deploy, wai
         if zip:
             # Create zip archive of outputs
             import zipfile
-            zip_path = Path(output_dir or f"outputs/{model_run.run_id}") / f"{model_run.run_id}.zip"
+
+            zip_path = (
+                Path(output_dir or f"outputs/{model_run.run_id}")
+                / f"{model_run.run_id}.zip"
+            )
             zip_path.parent.mkdir(parents=True, exist_ok=True)
 
-            with zipfile.ZipFile(zip_path, 'w') as zf:
+            with zipfile.ZipFile(zip_path, "w") as zf:
                 if result.get("downloaded_files"):
                     for file_path in result["downloaded_files"]:
                         zf.write(file_path, Path(file_path).name)
 
             click.echo(f"Created zip archive: {zip_path}")
     else:
-        click.echo(f"❌ Pipeline execution failed: {result.get('message', 'Unknown error')}", err=True)
+        click.echo(
+            f"❌ Pipeline execution failed: {result.get('message', 'Unknown error')}",
+            err=True,
+        )
         if result.get("error"):
             click.echo(f"Error details: {result['error']}", err=True)
         if result.get("stage"):
@@ -208,7 +231,9 @@ def download(run_id, output_dir, org, project, pattern):
     client = PraxClient(prax_config)
 
     try:
-        downloaded_files = client.download_run_artifacts(run_id, Path(output_dir), pattern)
+        downloaded_files = client.download_run_artifacts(
+            run_id, Path(output_dir), pattern
+        )
         click.echo(f"Downloaded {len(downloaded_files)} files to {output_dir}:")
         for file_path in downloaded_files:
             click.echo(f"  - {file_path}")
@@ -218,13 +243,24 @@ def download(run_id, output_dir, org, project, pattern):
 
 @cli.command()
 @click.argument("model", type=click.Choice(["swan", "schism", "ww3"]))
-@click.option("--backend-type", type=click.Choice(["local", "docker", "prax"]), default="docker", help="Backend type")
-@click.option("--output", "-o", help="Output file path (default: backend_config_{model}_{type}.yaml)")
+@click.option(
+    "--backend-type",
+    type=click.Choice(["local", "docker", "prax"]),
+    default="docker",
+    help="Backend type",
+)
+@click.option(
+    "--output",
+    "-o",
+    help="Output file path (default: backend_config_{model}_{type}.yaml)",
+)
 @click.option("--cpu", default=4, help="CPU cores for Docker backend")
 @click.option("--memory", default="2G", help="Memory limit for Docker backend")
 @click.option("--timeout", default=3600, help="Execution timeout in seconds")
 @click.option("--mpi-procs", default=2, help="Number of MPI processes")
-def generate_backend_config(model, backend_type, output, cpu, memory, timeout, mpi_procs):
+def generate_backend_config(
+    model, backend_type, output, cpu, memory, timeout, mpi_procs
+):
     """Generate backend configuration file for a specific model.
 
     Backend types:
@@ -243,15 +279,15 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
                     "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "swan"
-                }
+                    "ROMPY_MODEL": "swan",
+                },
             },
             "local": {
                 "command": f"mpirun -n {mpi_procs} swan.exe",
                 "env_vars": {
                     "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "swan"
-                }
+                    "ROMPY_MODEL": "swan",
+                },
             },
             "prax": {
                 "command": f"mpirun -n {mpi_procs} /usr/local/bin/swan.exe",
@@ -260,9 +296,9 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
                     "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "swan"
-                }
-            }
+                    "ROMPY_MODEL": "swan",
+                },
+            },
         },
         "schism": {
             "docker": {
@@ -272,15 +308,15 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
                     "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "schism"
-                }
+                    "ROMPY_MODEL": "schism",
+                },
             },
             "local": {
                 "command": f"mpirun -n {mpi_procs} pschism",
                 "env_vars": {
                     "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "schism"
-                }
+                    "ROMPY_MODEL": "schism",
+                },
             },
             "prax": {
                 "command": f"mpirun -n {mpi_procs} /usr/local/bin/pschism",
@@ -289,9 +325,9 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
                     "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "schism"
-                }
-            }
+                    "ROMPY_MODEL": "schism",
+                },
+            },
         },
         "ww3": {
             "docker": {
@@ -301,15 +337,12 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
                     "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "ww3"
-                }
+                    "ROMPY_MODEL": "ww3",
+                },
             },
             "local": {
                 "command": f"mpirun -n {mpi_procs} ww3_shel",
-                "env_vars": {
-                    "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "ww3"
-                }
+                "env_vars": {"OMP_NUM_THREADS": str(min(cpu, 4)), "ROMPY_MODEL": "ww3"},
             },
             "prax": {
                 "command": f"mpirun -n {mpi_procs} /usr/local/bin/ww3_shel",
@@ -318,60 +351,69 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
                     "OMPI_ALLOW_RUN_AS_ROOT": "1",
                     "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
                     "OMP_NUM_THREADS": str(min(cpu, 4)),
-                    "ROMPY_MODEL": "ww3"
-                }
-            }
-        }
+                    "ROMPY_MODEL": "ww3",
+                },
+            },
+        },
     }
 
     # Create backend configuration
     if backend_type == "prax":
-        config = {"type": "local", "timeout": timeout}  # Prax uses local backend inside container
+        config = {
+            "type": "local",
+            "timeout": timeout,
+        }  # Prax uses local backend inside container
     else:
         config = {"type": backend_type, "timeout": timeout}
 
     if backend_type == "docker":
         model_config = model_configs[model]["docker"]
-        config.update({
-            "image": model_config["image"],
-            "cpu": cpu,
-            "memory": memory,
-            "mpiexec": f"mpirun -n {mpi_procs}",
-            "executable": model_config["executable"],
-            "user": "root",
-            "env_vars": model_config["env_vars"],
-            "volumes": [],
-            "remove_container": True
-        })
+        config.update(
+            {
+                "image": model_config["image"],
+                "cpu": cpu,
+                "memory": memory,
+                "mpiexec": f"mpirun -n {mpi_procs}",
+                "executable": model_config["executable"],
+                "user": "root",
+                "env_vars": model_config["env_vars"],
+                "volumes": [],
+                "remove_container": True,
+            }
+        )
     elif backend_type == "prax":
         model_config = model_configs[model]["prax"]
-        config.update({
-            "command": model_config["command"],
-            "shell": True,
-            "capture_output": True,
-            "working_dir": model_config["working_dir"],
-            "env_vars": model_config["env_vars"]
-        })
+        config.update(
+            {
+                "command": model_config["command"],
+                "shell": True,
+                "capture_output": True,
+                "working_dir": model_config["working_dir"],
+                "env_vars": model_config["env_vars"],
+            }
+        )
     else:  # local
         model_config = model_configs[model]["local"]
-        config.update({
-            "command": model_config["command"],
-            "shell": True,
-            "capture_output": True,
-            "env_vars": model_config["env_vars"]
-        })
+        config.update(
+            {
+                "command": model_config["command"],
+                "shell": True,
+                "capture_output": True,
+                "env_vars": model_config["env_vars"],
+            }
+        )
 
     # Add postprocessor configuration with environment-specific tags
     env_tags = {
         "docker": [model, "oceanum", "rompy-generated", "local-testing"],
         "local": [model, "oceanum", "rompy-generated", "native-local"],
-        "prax": [model, "oceanum", "rompy-generated", "prax-pipeline"]
+        "prax": [model, "oceanum", "rompy-generated", "prax-pipeline"],
     }
 
     env_metadata = {
         "docker": {"execution_environment": "local", "purpose": "development"},
         "local": {"execution_environment": "native", "purpose": "local-development"},
-        "prax": {"execution_environment": "prax", "purpose": "pipeline"}
+        "prax": {"execution_environment": "prax", "purpose": "pipeline"},
     }
 
     full_config = {
@@ -386,10 +428,10 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
                     "backend_type": "local" if backend_type == "prax" else backend_type,
                     "generated_by": "rompy-oceanum",
                     "framework": "rompy",
-                    **env_metadata[backend_type]
-                }
-            }
-        }
+                    **env_metadata[backend_type],
+                },
+            },
+        },
     }
 
     # Determine output file path
@@ -400,17 +442,21 @@ def generate_backend_config(model, backend_type, output, cpu, memory, timeout, m
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         yaml.dump(full_config, f, default_flow_style=False, indent=2)
 
     click.echo(f"✅ Backend configuration generated: {output_path}")
     click.echo(f"Model: {model}, Backend: {backend_type}")
 
     if backend_type == "prax":
-        click.echo(f"Usage: rompy pipeline config.yaml --run-backend local --processor datamesh")
+        click.echo(
+            f"Usage: rompy pipeline config.yaml --run-backend local --processor datamesh"
+        )
         click.echo(f"Note: Prax backend uses local execution within container")
     else:
-        click.echo(f"Usage: rompy pipeline config.yaml --run-backend {backend_type} --processor datamesh")
+        click.echo(
+            f"Usage: rompy pipeline config.yaml --run-backend {backend_type} --processor datamesh"
+        )
 
     if backend_type == "docker":
         click.echo(f"Docker image: {model_configs[model]['docker']['image']}")

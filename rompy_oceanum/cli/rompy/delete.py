@@ -5,97 +5,49 @@ import logging
 from typing import Optional
 
 import click
-import yaml
-from oceanum.cli.models import ContextObject
-
 from oceanum.cli.prax.client import PRAXClient
-from ...config import PraxConfig
 
 logger = logging.getLogger(__name__)
 
-# Common options for delete commands
-project_option = click.option(
-    "--project",
-    default="rompy-oceanum",
-    help="Prax project name (default: rompy-oceanum)",
-)
-org_option = click.option(
-    "--org",
-    help="Prax organization name (overrides oceanum context)",
-)
-user_option = click.option(
-    "--user",
-    help="Prax user email (overrides oceanum context)",
-)
-stage_option = click.option(
-    "--stage",
-    default="dev",
-    help="Prax stage name (default: dev)",
-)
-
-
-@click.command(name="delete", help="Delete a resource from Prax")
+@click.command(name="delete", help="Delete a resource from Oceanum Prax")
 @click.argument("resource_type", type=click.Choice(["project", "pipeline"]))
 @click.argument("resource_name")
-@project_option
-@org_option
-@user_option
-@stage_option
+@click.option("--org", envvar="PRAX_ORG", help="Prax organization (overrides oceanum context)")
+@click.option("--user", envvar="PRAX_USER", help="Prax user email (overrides oceanum context)")
+@click.option("--project", envvar="PRAX_PROJECT", help="Prax project (overrides oceanum context)")
+@click.option("--stage", envvar="PRAX_STAGE", help="Prax stage (overrides oceanum context)")
+
 @click.confirmation_option(prompt="Are you sure you want to delete this resource?")
-@click.pass_obj
+@click.pass_context
 def delete_resource(
-    obj: ContextObject,
+    ctx,
     resource_type: str,
     resource_name: str,
-    project: str,
-    org: Optional[str],
-    user: Optional[str],
-    stage: str,
+    org,
+    user,
+    project,
+    stage,
 ):
-    """Delete a resource from Prax.
+    """Delete a resource from Oceanum Prax.
     
     RESOURCE_TYPE: Type of resource to delete (project or pipeline)
     RESOURCE_NAME: Name of the resource to delete
     """
     try:
+        client = PRAXClient(ctx)
         if resource_type == "project":
-            # Get Prax configuration
-            prax_config_data = {
-                "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
-            }
-
-            # Use oceanum's token for authentication
-            if obj.token and obj.token.access_token:
-                prax_config_data["token"] = obj.token.access_token
-
-            prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
-
-            # Delete project
-            client.delete_project(resource_name)
-
-            click.echo(f"✅ Project '{resource_name}' deleted successfully")
-            
+            result = client.delete_project(resource_name, org=org, user=user, project=project, stage=stage)
+            if isinstance(result, str):
+                click.echo(f"705 Project '{resource_name}' deleted successfully")
+            else:
+                click.echo(f"74c Failed to delete project: {getattr(result, 'detail', result)}", err=True)
+                sys.exit(1)
         elif resource_type == "pipeline":
-            # Get Prax configuration
-            prax_config_data = {
-                "org": org or (obj.domain.split(".")[0] if "." in obj.domain else obj.domain),
-                "project": project,
-                "stage": stage,
-            }
-
-            # Use oceanum's token for authentication
-            if obj.token and obj.token.access_token:
-                prax_config_data["token"] = obj.token.access_token
-
-            prax_config = PraxConfig.from_env(**prax_config_data)
-            client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
-
-            # Delete pipeline
-            client.delete_pipeline(resource_name)
-
-            click.echo(f"✅ Pipeline '{resource_name}' deleted successfully from project '{project}'")
-
+            click.echo("74c Pipeline deletion is not supported by the backend. Only project deletion is available.", err=True)
+            sys.exit(1)
+        elif resource_type == "pipeline":
+            click.echo("❌ Pipeline deletion is not supported by the backend. Only project deletion is available.", err=True)
+            sys.exit(1)
     except Exception as e:
         click.echo(f"❌ Failed to delete {resource_type}: {e}", err=True)
         sys.exit(1)

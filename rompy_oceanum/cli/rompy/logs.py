@@ -6,7 +6,7 @@ from datetime import datetime
 import click
 from oceanum.cli.models import ContextObject
 
-from ...config import PraxConfig
+
 from oceanum.cli.prax.client import PRAXClient
 
 
@@ -17,56 +17,66 @@ logger = logging.getLogger(__name__)
 @click.argument("run_id", required=True)
 @click.option(
     "--project",
-    envvar="PRAX_PROJECT",
-    help="Prax project (overrides oceanum context)"
+    help="Prax project name (overrides oceanum context)",
+)
+@click.option(
+    "--org",
+    help="Prax organization name (overrides oceanum context)",
+)
+@click.option(
+    "--user",
+    help="Prax user email (overrides oceanum context)",
+)
+@click.option(
+    "--stage",
+    default="dev",
+    help="Prax stage name (default: dev)",
 )
 @click.option(
     "--tail",
     default=100,
-    help="Number of log lines to retrieve"
+    help="Number of log lines to retrieve",
 )
 @click.option(
     "--follow",
     "-f",
     is_flag=True,
-    help="Follow log output (like tail -f)"
-)
-@click.option(
-    "--stage",
-    help="Filter logs by specific pipeline stage"
+    help="Follow log output (like tail -f)",
 )
 @click.option(
     "--level",
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
-    help="Filter logs by minimum level"
+    help="Filter logs by minimum level",
 )
 @click.option(
     "--since",
-    help="Show logs since timestamp (ISO format: 2023-01-01T12:00:00)"
+    help="Show logs since timestamp (ISO format: 2023-01-01T12:00:00)",
 )
 @click.option(
     "--timestamps/--no-timestamps",
     default=True,
-    help="Show timestamps in log output"
+    help="Show timestamps in log output",
 )
 @click.option(
     "--exclude",
     multiple=True,
-    help="Exclude log lines containing these patterns (can be used multiple times)"
+    help="Exclude log lines containing these patterns (can be used multiple times)",
 )
 @click.option(
     "--raw",
     is_flag=True,
-    help="Output raw log lines without formatting"
+    help="Output raw log lines without formatting",
 )
-@click.pass_obj
+@click.pass_context
 def logs(
-    obj: ContextObject,
+    ctx,
     run_id,
     project,
+    org,
+    user,
+    stage,
     tail,
     follow,
-    stage,
     level,
     since,
     timestamps,
@@ -87,30 +97,29 @@ def logs(
     For more advanced log viewing, use the 'oceanum prax logs' commands:
         oceanum prax logs pipeline-runs <run_id>
     """
-    # Create Prax configuration using oceanum context
-    prax_config_data = {
-        "org": obj.domain.split('.')[0] if '.' in obj.domain else obj.domain,
-    }
+    # Use official PRAXClient from oceanum.cli.prax.client
+    from oceanum.cli.prax.client import PRAXClient
 
-    # Override project if specified
-    if project:
-        prax_config_data["project"] = project
+    # Instantiate PRAXClient with Click context for authentication/config
+    client = PRAXClient(ctx)
 
-    # Use oceanum's token for authentication
-    if obj.token and obj.token.access_token:
-        prax_config_data["token"] = obj.token.access_token
-
-    try:
-        prax_config = PraxConfig.from_env(**prax_config_data)
-    except ValueError as e:
-        click.echo(f"❌ Configuration error: {e}", err=True)
+    # Validate required parameters (project, org, etc.)
+    if not project:
+        click.echo("❌ Project is missing. Please specify --project or set PRAX_PROJECT.", err=True)
         return
+    if not org:
+        # Try to get org from context if not provided
+        try:
+            org = getattr(ctx.obj, "org", None) or getattr(ctx.obj, "domain", None)
+        except Exception:
+            org = None
+        if not org:
+            click.echo("❌ Organization is missing. Please specify --org or set PRAX_ORG.", err=True)
+            return
 
-    if not getattr(prax_config, 'base_url', None):
-        click.echo("❌ Prax base_url is missing. Please set PRAX_BASE_URL in your environment or config.", err=True)
-        return
-    
-    client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
+    # Stage default
+    if not stage:
+        stage = "dev"
 
     def _format_log_line(log_entry):
         """Format a single log line for display."""
@@ -222,8 +231,22 @@ def logs(
     def _display_logs():
         """Retrieve and display logs."""
         try:
-            # Get logs from Prax client
-            logs_list = client.get_run_logs(run_id, tail=tail)
+            # Get logs from PRAXClient
+            log_iter = client.get_pipeline_run_logs(
+                run_id,
+                lines=tail,
+                follow=False,
+                org=org,
+                user=user,
+                project=project,
+                stage=stage,
+            )
+            logs_list = list(log_iter)
+
+            # Handle error response
+            if logs_list and hasattr(logs_list[0], 'detail'):
+                click.echo(f"❌ Error retrieving logs: {getattr(logs_list[0], 'detail', logs_list[0])}", err=True)
+                return False
 
             if not logs_list:
                 click.echo("📭 No logs found for this run.")
@@ -266,56 +289,33 @@ def logs(
 
     # Follow mode
     if follow:
-        import time
-        last_timestamp = None
-
-        click.echo(f"\n👀 Following logs (refresh every 5s). Press Ctrl+C to stop.")
-
+        click.echo(f"\n👀 Following logs (streaming). Press Ctrl+C to stop.")
         try:
-            while True:
-                time.sleep(5)
-
-                try:
-                    # Get new logs since last timestamp
-                    logs_list = client.get_run_logs(run_id, tail=tail)
-
-                    # Filter to only new logs
-                    if last_timestamp:
-                        new_logs = [
-                            log for log in logs_list
-                            if isinstance(log, dict) and _parse_timestamp(log.get('timestamp')) > last_timestamp
-                        ]
-                    else:
-                        new_logs = logs_list
-
-                    if new_logs:
-                        # Apply other filters
-                        filtered_logs = _filter_logs(new_logs)
-
-                        for log_entry in filtered_logs:
-                            click.echo(_format_log_line(log_entry))
-
-                        # Update last timestamp
-                        timestamps_in_logs = [
-                            _parse_timestamp(log.get('timestamp'))
-                            for log in new_logs
-                            if isinstance(log, dict) and log.get('timestamp')
-                        ]
-                        if timestamps_in_logs:
-                            last_timestamp = max(timestamps_in_logs)
-
-                    # Check if run is complete
-                    try:
-                        status_info = client.get_run_status(run_id)
-                        if status_info.get('status', '').lower() in ['completed', 'failed', 'cancelled']:
-                            click.echo("\n🏁 Run completed. Stopping log following.")
-                            break
-                    except Exception:
-                        pass
-
-                except Exception as e:
-                    click.echo(f"❌ Error following logs: {e}", err=True)
+            for log_line in client.get_pipeline_run_logs(
+                run_id,
+                lines=tail,
+                follow=True,
+                org=org,
+                user=user,
+                project=project,
+                stage=stage,
+            ):
+                # Handle error response
+                if hasattr(log_line, 'detail'):
+                    click.echo(f"❌ Error retrieving logs: {getattr(log_line, 'detail', log_line)}", err=True)
                     break
-
+                # Optionally parse and filter log lines if needed
+                click.echo(_format_log_line(log_line))
+                # Optionally, check run status and break if completed
+                status_info = client.get_pipeline_run(
+                    run_id,
+                    org=org,
+                    user=user,
+                    project=project,
+                    stage=stage,
+                )
+                if hasattr(status_info, 'status') and getattr(status_info, 'status', '').lower() in ['completed', 'failed', 'cancelled']:
+                    click.echo("\n🏁 Run completed. Stopping log following.")
+                    break
         except KeyboardInterrupt:
             click.echo("\n👋 Log following stopped.")

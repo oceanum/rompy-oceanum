@@ -7,7 +7,6 @@ from datetime import datetime
 import click
 from oceanum.cli.models import ContextObject
 
-from ...config import PraxConfig
 from oceanum.cli.prax.client import PRAXClient
 
 
@@ -16,33 +15,24 @@ logger = logging.getLogger(__name__)
 
 @click.command()
 @click.argument("run_id", required=True)
-@click.option(
-    "--project",
-    envvar="PRAX_PROJECT",
-    help="Prax project (overrides oceanum context)"
-)
-@click.option(
-    "--format",
-    "output_format",
-    type=click.Choice(["table", "json", "brief"]),
-    default="table",
-    help="Output format"
-)
-@click.option(
-    "--watch",
-    is_flag=True,
-    help="Watch status updates (refresh every 30 seconds)"
-)
-@click.option(
-    "--refresh-interval",
-    default=30,
-    help="Refresh interval in seconds when watching"
-)
-@click.pass_obj
+@click.option("--pipeline-name", required=True, help="Pipeline name")
+@click.option("--org", envvar="PRAX_ORG", help="Prax organization (overrides oceanum context)")
+@click.option("--user", envvar="PRAX_USER", help="Prax user email (overrides oceanum context)")
+@click.option("--project", envvar="PRAX_PROJECT", help="Prax project (overrides oceanum context)")
+@click.option("--stage", envvar="PRAX_STAGE", help="Prax stage (overrides oceanum context)")
+
+@click.option("--format", "output_format", type=click.Choice(["table", "json", "brief"]), default="table", help="Output format")
+@click.option("--watch", is_flag=True, help="Watch status updates (refresh every 30 seconds)")
+@click.option("--refresh-interval", default=30, help="Refresh interval in seconds when watching")
+@click.pass_context
 def status(
-    obj: ContextObject,
+    ctx,
     run_id,
+    pipeline_name,
+    org,
+    user,
     project,
+    stage,
     output_format,
     watch,
     refresh_interval
@@ -60,31 +50,17 @@ def status(
     For more detailed status information, use the 'oceanum prax describe' commands:
         oceanum prax describe pipeline-runs <run_id>
     """
-    # Create Prax configuration using oceanum context
-    prax_config_data = {
-        "org": obj.domain.split('.')[0] if '.' in obj.domain else obj.domain,
-    }
-
-    # Override project if specified
-    if project:
-        prax_config_data["project"] = project
-
-    # Use oceanum's token for authentication
-    if obj.token and obj.token.access_token:
-        prax_config_data["token"] = obj.token.access_token
-
+    # Instantiate Oceanum client
     try:
-        prax_config = PraxConfig.from_env(**prax_config_data)
-    except ValueError as e:
-        click.echo(f"❌ Configuration error: {e}", err=True)
+        client = PRAXClient(ctx)
+    except Exception as e:
+        click.echo(f"\u274c Configuration error: {e}", err=True)
         return
-
-    client = PRAXClient(token=prax_config.token, service=prax_config.base_url)
 
     def _display_status():
         """Display status information."""
         try:
-            status_info = client.get_run_status(run_id)
+            status_info = client.get_run_status(run_id, pipeline_name)
 
             if output_format == "json":
                 click.echo(json.dumps(status_info, indent=2))
@@ -177,7 +153,7 @@ def status(
 
                 # Check if run is complete
                 try:
-                    status_info = client.get_run_status(run_id)
+                    status_info = client.get_run_status(run_id, pipeline_name)
                     if status_info.get('status', '').lower() in ['completed', 'succeeded', 'failed', 'cancelled']:
                         click.echo("\n🏁 Run completed. Stopping watch mode.")
                         break
