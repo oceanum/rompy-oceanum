@@ -1,6 +1,7 @@
 """Init command for creating rompy configuration templates optimized for Oceanum Prax."""
 
 import logging
+import os
 from pathlib import Path
 from typing import Any, Dict
 
@@ -347,7 +348,8 @@ def _get_swan_config(
                 "source": {
                     "model_type": "datamesh",
                     "datasource": "our-changing-coast-gebco_1_degree_for_testing",
-                    # "token": os.getenv("DATAMESH_TOKEN"),
+                    "token": os.getenv("DATAMESH_TOKEN"),
+                    # "token": None,
                 },
                 "fac": -1.0,
                 "buffer": 1.0,
@@ -362,7 +364,8 @@ def _get_swan_config(
                         "datasource": (
                             "era5_wind10m" if forcing == "era5" else "gfs_wind10m"
                         ),
-                        # "token": os.getenv("DATAMESH_TOKEN"),
+                        "token": os.getenv("DATAMESH_TOKEN"),
+                        # "token": None,
                     },
                     "buffer": 2.0,
                     "filter": {"sort": {"coords": ["latitude"]}},

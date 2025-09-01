@@ -2,6 +2,7 @@
 
 import json
 import logging
+import sys
 import time
 from pathlib import Path
 
@@ -139,40 +140,41 @@ def run(
     config_data["run_id_subdir"] = False
 
     try:
-        # Always use generic ModelRun for validation
+        run_id = config_data.get("run_id", f"{model}_run_{int(time.time())}")
         model_run = rompy.model.ModelRun.model_validate(config_data)
         click.echo(f"✅ ModelRun created successfully: {model_run.run_id}")
 
     except Exception as e:
         click.echo(f"⚠️  Configuration validation failed: {e}")
-        click.echo("🔄 Creating compatible configuration for Prax submission...")
-
-        # Create a simplified ModelRun-like object for Prax submission
-        run_id = config_data.get("run_id", f"{model}_run_{int(time.time())}")
-
-        class PraxCompatibleRun:
-            def __init__(self, run_id, config_data, model_type):
-                self.run_id = run_id
-                self.config_data = config_data
-                self.model_type = model_type
-                self.output_dir = "./tmp/rompy"
-
-            def dump_inputs_dict(self):
-                """Return configuration suitable for Prax submission."""
-                # Clean up config for Prax submission
-                clean_config = dict(config_data)
-                # Remove metadata that might cause issues
-                clean_config.pop("_metadata", None)
-                # Ensure basic structure
-                if "config" not in clean_config:
-                    clean_config["config"] = {"model_type": self.model_type}
-                elif "model_type" not in clean_config["config"]:
-                    clean_config["config"]["model_type"] = self.model_type
-                clean_config["datamesh-token"] = DataMeshConfig.from_env().token
-                return clean_config
-
-        model_run = PraxCompatibleRun(run_id, config_data, model)
-        click.echo(f"✅ Created Prax-compatible run: {model_run.run_id}")
+        sys.exit(1)
+        # #click.echo("🔄 Creating compatible configuration for Prax submission...")
+        #
+        # # Create a simplified ModelRun-like object for Prax submission
+        # run_id = config_data.get("run_id", f"{model}_run_{int(time.time())}")
+        #
+        # class PraxCompatibleRun:
+        #     def __init__(self, run_id, config_data, model_type):
+        #         self.run_id = run_id
+        #         self.config_data = config_data
+        #         self.model_type = model_type
+        #         self.output_dir = "./tmp/rompy"
+        #
+        #     def dump_inputs_dict(self):
+        #         """Return configuration suitable for Prax submission."""
+        #         # Clean up config for Prax submission
+        #         clean_config = dict(config_data)
+        #         # Remove metadata that might cause issues
+        #         clean_config.pop("_metadata", None)
+        #         # Ensure basic structure
+        #         if "config" not in clean_config:
+        #             clean_config["config"] = {"model_type": self.model_type}
+        #         elif "model_type" not in clean_config["config"]:
+        #             clean_config["config"]["model_type"] = self.model_type
+        #         clean_config["datamesh-token"] = DataMeshConfig.from_env().token
+        #         return clean_config
+        #
+        # model_run = PraxCompatibleRun(run_id, config_data, model)
+        # click.echo(f"✅ Created Prax-compatible run: {model_run.run_id}")
 
     # If running locally, execute the model directly
     if local:
@@ -299,9 +301,13 @@ def run(
                         else:
                             detail = getattr(run_status, "detail", None)
                             if detail:
-                                click.echo(f"❌ Error fetching status: {detail}", err=True)
+                                click.echo(
+                                    f"❌ Error fetching status: {detail}", err=True
+                                )
                             else:
-                                click.echo(f"❌ Error fetching status: Unknown error", err=True)
+                                click.echo(
+                                    f"❌ Error fetching status: Unknown error", err=True
+                                )
                             break
                         time.sleep(poll_interval)
                 except Exception as e:
