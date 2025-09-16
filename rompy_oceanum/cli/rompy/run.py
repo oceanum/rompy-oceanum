@@ -318,7 +318,7 @@ def run(
                 f"📋 Grid data be available at: https://ui.datamesh.oceanum.io/datasource/rompy-{model_run.run_id}-grid"
             )
             click.echo(
-                f"📋 Spectra be available at:   https://ui.datamesh.oceanum.io/datasource/rompy-{model_run.run_id}-grid"
+                f"📋 Spectra be available at:   https://ui.datamesh.oceanum.io/datasource/rompy-{model_run.run_id}-spec"
             )
 
         else:
