@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rompy-oceanum"
-version = "0.1.6"
+version = "0.1.7"
 authors = [{ name = "rompy-oceanum contributors" }]
 description = "Oceanum Prax pipeline integration for rompy with Prax specification templates"
 readme = "README.md"
@@ -59,7 +59,7 @@ datamesh = "rompy_oceanum.datamesh:main"
 rompy-oceanum = "rompy_oceanum.cli:main"
 
 [tool.pytest.ini_options]
-minversion = "0.1.6"
+minversion = "0.1.7"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
