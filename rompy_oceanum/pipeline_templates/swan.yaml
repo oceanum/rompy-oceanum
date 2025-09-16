@@ -2,7 +2,7 @@ name: rompy-oceanum
 resources:
   tasks:
     - name: generate
-      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:0.1.6"
+      image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
       command: rompy generate --config-from-env -vv  --simple-logs
       outputs:
         artifacts:

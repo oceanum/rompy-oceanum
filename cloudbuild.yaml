@@ -3,9 +3,9 @@ steps:
   #   args: ['build', '-f', 'docker/swan.Dockerfile', '-t', 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-f', 'docker/rompy.Dockerfile', '-t', 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:0.1.6', '.']
+    args: ['build', '-f', 'docker/rompy.Dockerfile', '-t', 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v0.1.6', '.']
 
 images:
   # - us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan
-  - us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:0.1.6
+  - us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v0.1.6
 
