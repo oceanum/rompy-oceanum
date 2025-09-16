@@ -28,8 +28,16 @@ src = "cloudbuild.yaml"
 search = 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v{current_version}'
 
 [[file]]
+src = "cloudbuild.yaml"
+search = 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:v{current_version}'
+
+[[file]]
 src = "rompy_oceanum/pipeline_templates/swan.yaml"
 search = 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v{current_version}'
+
+[[file]]
+src = "rompy_oceanum/pipeline_templates/swan.yaml"
+search = 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:v{current_version}'
 
 # You can specify a list of commands to
 # run after the files have been patched
