@@ -13,3 +13,7 @@ search = '__version__ = "{current_version}"'
 [[file]]
 src = "cloudbuild.yaml"
 search = 'rompy:v"{current_version}"'
+
+[[file]]
+src = "rompy_oceanum/pipeline_templates/swan.yaml"
+search = 'rompy:v"{current_version}"'
