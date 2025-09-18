@@ -375,21 +375,34 @@ def _get_swan_config(
                 }
             ],
         },
+        # "boundary": {
+        #     "model_type": "boundspec",
+        #     "shapespec": {
+        #         "model_type": "shapespec",
+        #         "per_type": "peak",
+        #         "dspr_type": "degrees",
+        #         "shape": {"model_type": "tma", "gamma": 3.3, "d": 12.0},
+        #     },
+        #     "location": {"model_type": "side", "side": "west"},
+        #     "data": {
+        #         "model_type": "constantpar",
+        #         "hs": 2.0,
+        #         "per": 12.0,
+        #         "dir": 270.0,
+        #         "dd": 25.0,
+        #     },
+        # },
         "boundary": {
-            "model_type": "boundspec",
-            "shapespec": {
-                "model_type": "shapespec",
-                "per_type": "peak",
-                "dspr_type": "degrees",
-                "shape": {"model_type": "tma", "gamma": 3.3, "d": 12.0},
-            },
-            "location": {"model_type": "side", "side": "west"},
-            "data": {
-                "model_type": "constantpar",
-                "hs": 2.0,
-                "per": 12.0,
-                "dir": 270.0,
-                "dd": 25.0,
+            "model_type": "boundary_interface",
+            "kind": {
+                "model_type": "boundnest1",
+                "id": "ww3_glob",
+                "source": {
+                    "model_type": "datamesh",
+                    "datasource": "oceanum_wave_glob05_era5_v1_spec",
+                    "token": os.getenv("DATAMESH_TOKEN"),
+                },
+                "sel_method": "idw",
             },
         },
         "initial": {"kind": {"model_type": "default"}},
