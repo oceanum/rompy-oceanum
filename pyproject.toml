@@ -4,7 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rompy-oceanum"
-version = "0.1.7"
 authors = [{ name = "rompy-oceanum contributors" }]
 description = "Oceanum Prax pipeline integration for rompy with Prax specification templates"
 readme = "README.md"
@@ -25,11 +24,16 @@ dependencies = [
     "tenacity",
 ]
 
+dynamic = ["version"]
+
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
+
+[tool.setuptools.dynamic]
+version = {attr = "rompy_oceanum.__version__"}
 
 [tool.setuptools.package-data]
 "rompy_oceanum" = ["pipeline_templates/*.yaml"]
