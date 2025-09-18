@@ -1,13 +1,13 @@
 steps:
   # - name: 'gcr.io/cloud-builders/docker'
-  #   args: ['build', '-f', 'docker/swan.Dockerfile', '-t', 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:v0.1.8', '.']
+  #   args: ['build', '-f', 'docker/swan.Dockerfile', '-t', 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:v0.1.9', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
-    # args: ['build', '-f', 'docker/rompy.Dockerfile', '-t', 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v0.1.8', '.']
+    # args: ['build', '-f', 'docker/rompy.Dockerfile', '-t', 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v0.1.9', '.']
     args: ['build', '-f', 'docker/rompy.Dockerfile', '-t', 'us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy', '.']
 
 images:
-  # - us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:v0.1.8
-  # - us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v0.1.8
+  # - us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:v0.1.9
+  # - us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v0.1.9
   - us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy
 
