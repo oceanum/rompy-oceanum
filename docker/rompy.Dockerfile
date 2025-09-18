@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir appdirs oceanum rompy
 # # Install rompy-oceanum from the local source code
 # WORKDIR /app/rompy-oceanum
 # RUN pip install -e .
-RUN pip install rompy-oceanum==0.1.7
+RUN pip install rompy-oceanum==0.1.8
 
 
 WORKDIR /app
