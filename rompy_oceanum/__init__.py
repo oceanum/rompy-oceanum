@@ -18,4 +18,4 @@ __all__ = [
     "PraxResult",
 ]
 
-__version__ = "0.1.9"
+__version__ = "0.1.11"

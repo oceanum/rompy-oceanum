@@ -2,7 +2,7 @@ name: rompy-oceanum
 resources:
   tasks:
     - name: generate
-      # image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v0.1.9"
+      # image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:v0.1.11"
       image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/rompy:latest"
       command: rompy generate --config-from-env -vv  --simple-logs
       outputs:
@@ -19,7 +19,7 @@ resources:
           value: "INFO"
 
     - name: run
-      # image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:v0.1.9"
+      # image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:v0.1.11"
       image: "us-central1-docker.pkg.dev/oceanum-prod/oceanum-public/swan:latest"
       inputs:
         artifacts:
